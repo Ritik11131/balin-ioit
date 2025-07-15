@@ -1,3 +1,4 @@
+import { PasswordModule } from 'primeng/password';
 import { Component } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { TrackMapComponent } from './components/track-map/track-map.component';
@@ -5,17 +6,18 @@ import { listViewTabs } from '../../shared/constants/list-view';
 import { ListViewComponent } from './components/list-view/list-view.component';
 import { GeofenceComponent } from './components/list-view/geofence/geofence.component';
 import { PoiComponent } from './components/list-view/poi/poi.component';
+import { VehiclesComponent } from "./components/list-view/vehicles/vehicles.component";
 
 @Component({
     selector: 'app-home',
-    imports: [TabsModule, TrackMapComponent, ListViewComponent, GeofenceComponent, PoiComponent],
+    imports: [TabsModule, TrackMapComponent, ListViewComponent, GeofenceComponent, PoiComponent, VehiclesComponent],
     template: `
        <div class="w-full h-[calc(100vh-60px)]"> <!-- Subtract topbar height -->
   <div class="flex flex-col lg:flex-row h-full">
     
     <!-- Left Panel -->
     <div class="w-full lg:w-[340px] lg:flex-shrink-0 h-full">
-      <div class="bg-[#F9F9F9] shadow-sm border border-gray-200 p-4 h-full overflow-auto">
+      <div class="bg-[#F9F9F9] shadow-sm border border-gray-200 p-4 h-full">
         <p-tabs [value]="0" class="h-full">
           <p-tablist>
             @for (tab of tabs; track tab.value) {
@@ -27,7 +29,7 @@ import { PoiComponent } from './components/list-view/poi/poi.component';
               <p-tabpanel [value]="tab.value">
                 @switch (tab.key) {
                   @case ('vehicles') {
-                    <app-list-view />
+                    <app-vehicles />
                   }
                   @case ('geofence') {
                     <app-geofence />
@@ -61,7 +63,12 @@ import { PoiComponent } from './components/list-view/poi/poi.component';
         `
             :host ::ng-deep .p-tablist-tab-list,
             :host ::ng-deep .p-tabpanels {
-                background: none !important;
+                background: none;
+            }
+
+            
+            :host ::ng-deep .p-tabpanels {
+              padding: 0;
             }
         `
     ]
