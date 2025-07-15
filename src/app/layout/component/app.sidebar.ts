@@ -183,8 +183,9 @@ export class AppSidebar {
     setTimeout(() => {
       this.clickedItem = '';
     }, 300);
-
-    this.toggleSidebar();
+    if(this.isExpanded) {
+      this.toggleSidebar();
+    }
   }
 
   toggleSidebar() {

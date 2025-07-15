@@ -14,7 +14,7 @@ import { ButtonModule } from 'primeng/button';
     imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, AvatarModule, ButtonModule],
     template: `
         <!-- Topbar -->
-    <div class="fixed top-0 h-[84px] bg-white z-40 transition-all duration-300 ease-in-out"
+    <div class="fixed top-0 h-[60px] bg-white z-40 transition-all duration-300 ease-in-out"
          [ngClass]="isSidebarExpanded ? 'left-[280px]' : 'left-[88px]'"
          [ngStyle]="{ 'right': '0' }">
       
@@ -46,7 +46,7 @@ import { ButtonModule } from 'primeng/button';
         </div>
       </div>
 
-     
+      
     </div>
     `
 })

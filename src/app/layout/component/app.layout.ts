@@ -10,9 +10,9 @@ import { AppSidebar } from './app.sidebar';
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter],
-    template: `<div class="">
-        <div class="min-h-screen bg-gray-50">
+    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule],
+    template: `
+        <div class="min-h-screen">
             <!-- Sidebar -->
             <app-sidebar (sidebarToggle)="onSidebarToggle($event)"></app-sidebar>
 
@@ -20,18 +20,13 @@ import { AppSidebar } from './app.sidebar';
             <app-topbar [isSidebarExpanded]="isSidebarExpanded"></app-topbar>
 
             <!-- Main Content Area -->
-            <div class="transition-all duration-300 ease-in-out mt-[84px] p-6" [ngClass]="isSidebarExpanded ? 'ml-[280px]' : 'ml-[88px]'">
+            <div class="transition-all duration-300 ease-in-out fixed top-[60px]" [ngClass]="isSidebarExpanded ? 'ml-[280px]' : 'ml-[88px]'">
                 <div class="max-w-full">
                     <router-outlet></router-outlet>
                 </div>
             </div>
         </div>
-        <div class="layout-main-container">
-            <div class="layout-main"></div>
-            <app-footer></app-footer>
-        </div>
-        <div class="layout-mask animate-fadein"></div>
-    </div> `
+    `
 })
 export class AppLayout {
     overlayMenuOpenSubscription: Subscription;
