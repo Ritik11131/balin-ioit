@@ -9,6 +9,11 @@ import { RevenueStreamWidget } from './components/revenuestreamwidget';
     selector: 'app-dashboard',
     imports: [StatsWidget, RecentSalesWidget, BestSellingWidget, RevenueStreamWidget, NotificationsWidget],
     template: `
+    <div class="max-w-full">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-4">Welcome back 👋</h1>
+                    <p class="text-gray-600 mb-6">Here's your dashboard overview.</p>
+                 
+                </div>
         <div class="grid grid-cols-12 gap-8">
             <app-stats-widget class="contents" />
             <div class="col-span-12 xl:col-span-6">

@@ -3,26 +3,31 @@ import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AppTopbar } from './app.topbar';
-import { AppSidebar } from './app.sidebar';
 import { AppFooter } from './app.footer';
 import { LayoutService } from '../service/layout.service';
+import { AppSidebar } from './app.sidebar';
 
 @Component({
     selector: 'app-layout',
     standalone: true,
     imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter],
-    template: `<div class="layout-wrapper">
-        <app-topbar></app-topbar>
-        <app-sidebar></app-sidebar>
-        <div class="ml-[88px] mt-[84px] p-6">
-            <h1 class="text-2xl font-bold text-gray-900 mb-4">Welcome back 👋</h1>
-            <p class="text-gray-600">Here’s your dashboard overview.</p>
-            <router-outlet></router-outlet>
-            <!-- Add your main page content here -->
+    template: `<div class="">
+        <div class="min-h-screen bg-gray-50">
+            <!-- Sidebar -->
+            <app-sidebar (sidebarToggle)="onSidebarToggle($event)"></app-sidebar>
+
+            <!-- Topbar -->
+            <app-topbar [isSidebarExpanded]="isSidebarExpanded"></app-topbar>
+
+            <!-- Main Content Area -->
+            <div class="transition-all duration-300 ease-in-out mt-[84px] p-6" [ngClass]="isSidebarExpanded ? 'ml-[280px]' : 'ml-[88px]'">
+                <div class="max-w-full">
+                    <router-outlet></router-outlet>
+                </div>
+            </div>
         </div>
         <div class="layout-main-container">
-            <div class="layout-main">
-            </div>
+            <div class="layout-main"></div>
             <app-footer></app-footer>
         </div>
         <div class="layout-mask animate-fadein"></div>
@@ -59,6 +64,12 @@ export class AppLayout {
         this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
             this.hideMenu();
         });
+    }
+
+    isSidebarExpanded = false;
+
+    onSidebarToggle(isExpanded: boolean) {
+        this.isSidebarExpanded = isExpanded;
     }
 
     isOutsideClicked(event: MouseEvent) {
