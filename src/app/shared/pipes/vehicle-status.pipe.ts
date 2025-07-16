@@ -18,7 +18,7 @@ export class VehicleStatusPipe implements PipeTransform {
         return 'bg-green-500';
       case 'stop':
         return 'bg-red-500';
-      case 'idle':
+      case 'dormant':
         return 'bg-yellow-500';
       case 'offline':
         return 'bg-gray-500';

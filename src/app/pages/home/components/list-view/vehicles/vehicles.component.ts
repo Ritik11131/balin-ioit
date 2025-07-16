@@ -15,7 +15,7 @@ import { VehicleService } from '../../../../service/vehicle.service';
     imports: [IconFieldModule, InputIconModule, ButtonModule, InputTextModule, CommonModule, VehicleFilterComponent, VehicleListComponent],
     template: `
     <div class="p-2">
-      <app-vehicle-filter />
+      <app-vehicle-filter (filterSelected)="onFilterSelected($event)" />
     </div>
     <app-vehicle-list [isLoading]="isLoading" [fetchedVehicles]="fetchedVehicles" />
     `
@@ -23,6 +23,7 @@ import { VehicleService } from '../../../../service/vehicle.service';
 export class VehiclesComponent {
   filters = listViewFilters;
   fetchedVehicles:any[] = [];
+  filteredVehicles:any[] = []
   public isLoading = false;
 
   constructor(private vehicleService: VehicleService) {}
@@ -69,6 +70,13 @@ export class VehiclesComponent {
       status: position?.status?.status.toLowerCase(),
       apiObject: {device,parking,position,validity}
     }));
+  }
+
+  onFilterSelected(filter: any) {
+    console.log(filter);
+    this.filteredVehicles = [...this.fetchedVehicles].filter((vehicle) => vehicle.status === filter.status)  ;
+    console.log(this.filteredVehicles);
+      
   }
 
 

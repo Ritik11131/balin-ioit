@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -15,7 +15,7 @@ import { VehicleStatusPipe } from '../../../../../../shared/pipes/vehicle-status
               <!-- Row 1: Filter Buttons -->
               <div class="flex gap-4 items-center">
                   @for (filter of filters; track filter.key) {
-                      <button class="flex items-center justify-center gap-2 h-[30px] bg-[#FFFF] rounded-[4px] shadow-sm" [ngClass]="filter.width ?? 'w-[52px]'">
+                      <button class="flex items-center justify-center gap-2 h-[30px] bg-[#FFFF] rounded-[4px] shadow-sm" [ngClass]="filter.width ?? 'w-[52px]'" (click)="handleListMapFilter(filter)">
                           <span [ngClass]="filter | vehicleStatus" class="relative w-2.5 h-2.5 rounded-full">
                               <span [ngClass]="filter | vehicleStatus"  class="absolute top-0 left-0 w-full h-full rounded-full opacity-75 animate-ping"></span>
                           </span>
@@ -61,6 +61,15 @@ import { VehicleStatusPipe } from '../../../../../../shared/pipes/vehicle-status
 export class VehicleFilterComponent {
 
       filters = listViewFilters;
+
+        @Output() filterSelected = new EventEmitter<any>();
+      
+
+
+      handleListMapFilter(selectedFilter: any) {
+        this.filterSelected.emit(selectedFilter);
+        
+      }
   
 
 }
