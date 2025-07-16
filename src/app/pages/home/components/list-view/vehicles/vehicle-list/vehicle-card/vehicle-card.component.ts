@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-status.pipe';
 
 @Component({
@@ -76,4 +76,5 @@ export class VehicleCardComponent {
   onCardClick() {
     this.cardSelected.emit(this.vehicle);
   }
+
 }

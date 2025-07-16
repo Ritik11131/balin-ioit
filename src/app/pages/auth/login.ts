@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
+import { UiService } from '../../layout/service/ui.service';
+import { AuthService } from '../service/auth.service';
 
 @Component({
     selector: 'app-login',
@@ -54,7 +56,8 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
                                 </div>
                                 <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                             </div>
-                            <p-button label="Sign In" styleClass="w-full" routerLink="/"></p-button>
+                            <p-button label="Sign In" styleClass="w-full" (onClick)="signIn()"></p-button>
+
                         </div>
                     </div>
                 </div>
@@ -63,9 +66,28 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
     `
 })
 export class Login {
-    email: string = '';
-
-    password: string = '';
-
+    email: string = 'balinadmin';
+    password: string = 'Balin@123';
     checked: boolean = false;
+
+
+    constructor(
+        private uiService: UiService,
+        private authService: AuthService,
+        private router: Router
+    ) {}
+
+    async signIn(): Promise<any> {
+        this.uiService.toggleLoader(true);
+        try {
+            await this.authService.login(this.email, this.password);
+            this.router.navigate(['/dashboard']);
+            this.uiService.showToast('success', 'Success', 'Welcome');
+        } catch (error: any) {
+            console.error(error);
+            this.uiService.showToast('error', 'Error', 'Failed to logIN');
+        } finally {
+            this.uiService.toggleLoader(false);
+        }
+    }
 }

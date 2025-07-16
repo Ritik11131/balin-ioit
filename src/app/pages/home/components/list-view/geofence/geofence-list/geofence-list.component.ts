@@ -49,4 +49,10 @@ export class GeofenceListComponent {
     this.selectedGeofence = geofence;
   }
 
+  ngOnDestroy(): void {
+    // Cleanup logic if needed
+    this.selectedGeofence = null; // Clear the selected geofence reference
+    console.log('GeofenceListComponent destroyed and cleaned up');
+  }
+
 }

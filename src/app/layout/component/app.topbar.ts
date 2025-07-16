@@ -21,7 +21,7 @@ import { ButtonModule } from 'primeng/button';
       <!-- TOP: Title section (60px) -->
       <div class="h-[60px] flex items-center justify-between px-6 border-b border-[#F1F3F9]">
         <!-- Left: Page title -->
-        <div class="text-lg font-semibold text-gray-800">Dashboard</div>
+        <div class="text-lg font-semibold text-gray-800"></div>
 
         <!-- Right: Notifications and avatar -->
         <div class="flex items-center gap-4">

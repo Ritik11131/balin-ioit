@@ -1,8 +1,12 @@
+import { GeofenceComponent } from "../../pages/home/components/list-view/geofence/geofence.component";
+import { PoiComponent } from "../../pages/home/components/list-view/poi/poi.component";
+import { VehiclesComponent } from "../../pages/home/components/list-view/vehicles/vehicles.component";
+
 export const listViewTabs = [
-    { key: 'vehicles', title: 'Vehicles', value: 0, content: 'Tab 1 Content' },
-    { key: 'geofence', title: 'Geofence', value: 1, content: 'Tab 2 Content' },
-    { key: 'poi', title: 'POI', value: 2, content: 'Tab 3 Content' },
-];
+        { value: 0, title: 'Vehicles', key: 'vehicles', component: VehiclesComponent },
+        { value: 1, title: 'Geofence', key: 'geofence', component: GeofenceComponent },
+        { value: 2, title: 'POI', key: 'poi', component: PoiComponent }
+    ];
 
 export const listViewFilters = [
     { key: 'all', label: 'ALL', status: 'all', width: 'w-[82px]', showText: true },
