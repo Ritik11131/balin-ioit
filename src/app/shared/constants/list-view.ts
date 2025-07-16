@@ -10,7 +10,7 @@ export const listViewTabs = [
 
 export const listViewFilters = [
     { key: 'all', label: 'ALL', status: 'all', width: 'w-[82px]', showText: true },
-    { key: 'stopped', status: 'stopped' },
+    { key: 'stop', status: 'stop' },
     { key: 'idle', status: 'idle' },
     { key: 'offline', status: 'offline' },
     { key: 'running', status: 'running' }

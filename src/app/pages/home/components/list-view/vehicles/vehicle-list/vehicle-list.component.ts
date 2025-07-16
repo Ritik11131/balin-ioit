@@ -1,54 +1,42 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { VehicleSkeletonCardComponent } from "./vehicle-skeleton-card/vehicle-skeleton-card.component";
 
 @Component({
-    selector: 'app-vehicle-list',
-    imports: [VehicleCardComponent, VehicleSkeletonCardComponent],
-    template: `
+  selector: 'app-vehicle-list',
+  imports: [VehicleCardComponent, VehicleSkeletonCardComponent],
+  template: `
         <!-- Cards Wrapper Container -->
         <div class="max-h-[calc(100vh-180px)] overflow-y-scroll scrollbar-hide mt-4">
             <div class="flex flex-col gap-4 p-2">
-                @for (vehicle of vehicles; track vehicle; let i = $index) {
-                  <!-- <app-vehicle-skeleton-card /> -->
+              @if(isLoading) {
+                  <!-- Show Skeleton Cards when loading -->
+                  @for (i of [1,2,3,4,5,6,7,8,9,10]; track i; let j = $index) {
+                    <app-vehicle-skeleton-card />
+                  }
+              } @else {
+                @for (vehicle of fetchedVehicles; track vehicle?.id; let i = $index) {
                   <app-vehicle-card [vehicle]="vehicle" [isSelected]="selectedVehicle === vehicle" (cardSelected)="onVehicleSelected($event)" />
                 }
+              }
             </div>
         </div>
     `,
-    styles: ``
+  styles: ``
 })
 export class VehicleListComponent {
-    selectedVehicle: any = null;
-    vehicles = [
-        {
-            id: 1,
-            name: 'Vehicle XYZ-1234',
-            lastUpdated: '2 min ago',
-            location: '221B Baker Street, London',
-            status: 'running'
-        },
-        {
-            id: 2,
-            name: 'Vehicle ABC-5678',
-            lastUpdated: '5 min ago',
-            location: 'Times Square, NY',
-            status: 'idle'
-        },
-        {
-            id: 3,
-            name: 'Vehicle LMN-9101',
-            lastUpdated: '10 min ago',
-            location: 'Marina Bay, Singapore',
-            status: 'offline'
-        }
-    ];
+  @Input() fetchedVehicles: any[] = [];
+  @Input() isLoading: boolean = false;
 
-    onVehicleSelected(vehicle: any) {
-        this.selectedVehicle = vehicle;
-    }
+  selectedVehicle: any = null;
 
-     ngOnDestroy(): void {
+  onVehicleSelected(vehicle: any) {
+    this.selectedVehicle = vehicle;
+    console.log(vehicle);
+    
+  }
+
+  ngOnDestroy(): void {
     // Cleanup logic if needed
     this.selectedVehicle = null; // Clear the selected geofence reference
     console.log('VehicleListComponent destroyed and cleaned up');

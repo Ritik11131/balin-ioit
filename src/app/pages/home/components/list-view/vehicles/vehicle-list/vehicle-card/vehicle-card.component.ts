@@ -1,10 +1,11 @@
+import { TimeAgoPipe } from './../../../../../../../shared/pipes/time-ago.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-status.pipe';
 
 @Component({
   selector: 'app-vehicle-card',
-  imports: [CommonModule, VehicleStatusPipe],
+  imports: [CommonModule, VehicleStatusPipe,TimeAgoPipe],
   template: `
     <div [ngClass]="cardClasses"
          class="w-full h-[126px] bg-white rounded-lg shadow-sm p-4 flex flex-col justify-between cursor-pointer transition-all duration-300 ease-in-out hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] group"
@@ -41,7 +42,7 @@ import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-sta
         <img src="assets/icon_time.svg" 
              alt="Time" 
              class="w-3.5 h-3.5 transition-all duration-300 group-hover:scale-110" />
-        <span>{{ vehicle.lastUpdated }}</span>
+        <span>{{ vehicle.lastUpdated | timeAgo }}</span>
       </div>
 
       <!-- Address Info -->

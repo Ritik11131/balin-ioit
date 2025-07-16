@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
 import { listViewTabs } from '../../../../shared/constants/list-view';
@@ -35,9 +35,9 @@ import { listViewTabs } from '../../../../shared/constants/list-view';
     ]
 })
 export class ListViewComponent {
-    activeTabIndex = 0;
+  activeTabIndex = 0;
     
-    tabs = listViewTabs
+  tabs = listViewTabs
 
     getActiveComponent() {
         const activeTab = this.tabs.find(tab => tab.value === this.activeTabIndex);

@@ -25,4 +25,6 @@ import { ListViewComponent } from './components/list-view/list-view.component';
         </div>
     `
 })
-export class HomeComponent {}
+export class HomeComponent {
+    
+}
