@@ -77,23 +77,3 @@ export class VehicleCardComponent {
     this.cardSelected.emit(this.vehicle);
   }
 }
-
-// Parent component usage example:
-/*
-export class ParentComponent {
-  vehicles = [...]; // your vehicles array
-  selectedVehicle: any = null;
-
-  onVehicleSelected(vehicle: any) {
-    this.selectedVehicle = vehicle;
-  }
-}
-
-// In parent template:
-<app-vehicle-card 
-  *ngFor="let vehicle of vehicles"
-  [vehicle]="vehicle"
-  [isSelected]="selectedVehicle === vehicle"
-  (cardSelected)="onVehicleSelected($event)">
-</app-vehicle-card>
-*/

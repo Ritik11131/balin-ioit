@@ -13,9 +13,6 @@ import { VehicleCardComponent } from "./vehicle-card/vehicle-card.component";
     }
   </div>
 </div>
-
-
-
   `,
   styles: ``
 })

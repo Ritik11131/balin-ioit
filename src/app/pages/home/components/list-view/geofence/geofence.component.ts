@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
+import { GeofenceListComponent } from "./geofence-list/geofence-list.component";
+import { GeofenceFilterComponent } from "./geofence-filter/geofence-filter.component";
 
 @Component({
   selector: 'app-geofence',
-  imports: [],
+  imports: [GeofenceListComponent, GeofenceFilterComponent],
   template: `
-    <p>
-      geofence works!
-    </p>
+   <div class="p-2">
+    <app-geofence-filter />
+   </div>
+    <app-geofence-list />
   `,
   styles: ``
 })
