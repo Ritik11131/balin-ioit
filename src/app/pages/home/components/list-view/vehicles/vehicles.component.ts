@@ -12,10 +12,11 @@ import { VehicleListComponent } from "./vehicle-list/vehicle-list.component";
     selector: 'app-vehicles',
     imports: [IconFieldModule, InputIconModule, ButtonModule, InputTextModule, CommonModule, VehicleFilterComponent, VehicleListComponent],
     template: `
-       <app-vehicle-filter />
-       <app-vehicle-list />
-    `,
-    styles: ``
+    <div class="p-2">
+      <app-vehicle-filter />
+    </div>
+    <app-vehicle-list />
+    `
 })
 export class VehiclesComponent {
   filters = listViewFilters;

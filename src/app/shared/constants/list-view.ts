@@ -5,9 +5,9 @@ export const listViewTabs = [
 ];
 
 export const listViewFilters = [
-    { key: 'all', label: 'ALL', color: 'bg-blue-400', width: 'w-[82px]', showText: true },
-    { key: 'stopped', color: 'bg-red-500' },
-    { key: 'idle', color: 'bg-yellow-500' },
-    { key: 'offline', color: 'bg-gray-500' },
-    { key: 'running', color: 'bg-green-500' }
+    { key: 'all', label: 'ALL', status: 'all', width: 'w-[82px]', showText: true },
+    { key: 'stopped', status: 'stopped' },
+    { key: 'idle', status: 'idle' },
+    { key: 'offline', status: 'offline' },
+    { key: 'running', status: 'running' }
 ];
