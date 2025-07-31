@@ -8,7 +8,7 @@ import { listViewFilters } from '../../../../../shared/constants/list-view';
 import { VehicleFilterComponent } from "./vehicle-filter/vehicle-filter.component";
 import { VehicleListComponent } from "./vehicle-list/vehicle-list.component";
 import { VehicleService } from '../../../../service/vehicle.service';
-
+import { sortVehiclesByStatus } from '../../../../../shared/utils/helper_functions';
 
 @Component({
     selector: 'app-vehicles',
@@ -17,7 +17,7 @@ import { VehicleService } from '../../../../service/vehicle.service';
     <div class="p-2">
       <app-vehicle-filter (filterSelected)="onFilterSelected($event)" />
     </div>
-    <app-vehicle-list [isLoading]="isLoading" [fetchedVehicles]="fetchedVehicles" />
+    <app-vehicle-list [isLoading]="isLoading" [fetchedVehicles]="filteredVehicles" />
     `
 })
 export class VehiclesComponent {
@@ -45,7 +45,8 @@ export class VehiclesComponent {
           console.log(result);
           
             if (result.status === 'fulfilled') {
-              this.fetchedVehicles = this.constructVehicleData(result.value).slice(0,100);
+              this.fetchedVehicles = this.constructVehicleData(result.value);
+              this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles)
               console.log(`Call ${index + 1} succeeded:`, this.fetchedVehicles);
             } else {
                 console.error(`Call ${index + 1} failed:`, result.reason);
@@ -73,10 +74,13 @@ export class VehiclesComponent {
   }
 
   onFilterSelected(filter: any) {
-    console.log(filter);
-    this.filteredVehicles = [...this.fetchedVehicles].filter((vehicle) => vehicle.status === filter.status)  ;
+    this.isLoading = true;
+    console.time('filterExecutionTime');
+    const { key, status } = filter;
+    this.filteredVehicles =  key === 'all' ? sortVehiclesByStatus(this.fetchedVehicles) : this.fetchedVehicles.filter(vehicle => vehicle.status === status);
+    console.timeEnd('filterExecutionTime');
     console.log(this.filteredVehicles);
-      
+    this.isLoading = false;
   }
 
 

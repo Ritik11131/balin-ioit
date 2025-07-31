@@ -5,7 +5,7 @@ import { GeofenceCardComponent } from "./geofence-card/geofence-card.component";
   selector: 'app-geofence-list',
   imports: [GeofenceCardComponent],
   template: `
-   <div class="max-h-[calc(100vh-180px)] overflow-y-scroll scrollbar-hide mt-4">
+   <div class="max-h-[calc(100vh-280px)] overflow-y-scroll scrollbar-hide mt-4">
   <div class="flex flex-col gap-4 p-2">
     @for (geofence of geofences; track geofence; let i = $index) {
       <app-geofence-card [geofence]="geofence"  [isSelected]="selectedGeofence === geofence" (cardSelected)="onGeofenceSelected($event)" />

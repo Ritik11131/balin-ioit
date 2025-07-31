@@ -1,5 +1,6 @@
 :root {
     --primary-color: var(--p-primary-color);
+    --primary-bg-10: color-mix(in srgb, var(--primary-color) 10%, transparent);
     --primary-contrast-color: var(--p-primary-contrast-color);
     --text-color: var(--p-text-color);
     --text-color-secondary: var(--p-text-muted-color);
