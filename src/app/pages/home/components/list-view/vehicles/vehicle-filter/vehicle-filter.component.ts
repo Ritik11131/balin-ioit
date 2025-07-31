@@ -41,7 +41,7 @@ import { VehicleStatusLabelPipe } from './../../../../../../shared/pipes/vehicle
 
                 <p-iconfield>
                     <p-inputicon styleClass="pi pi-search" />
-                    <input type="text" pInputText placeholder="Search" />
+                    <input type="text" pInputText placeholder="Search" (input)="handleVehicleSearch($event)" />
                 </p-iconfield>
 
                 <!-- Action Buttons -->
@@ -69,9 +69,14 @@ export class VehicleFilterComponent {
     activeFilterKey = 'all'; // default selected filter
 
     @Output() filterSelected = new EventEmitter<any>();
+    @Output() searchTerm = new EventEmitter<any>();
 
     handleListMapFilter(selectedFilter: any) {
         this.activeFilterKey = selectedFilter.key;
         this.filterSelected.emit(selectedFilter);
+    }
+
+    handleVehicleSearch(event: any) {
+        this.searchTerm.emit({ key: 'search', value: event.target.value.toLowerCase() });
     }
 }

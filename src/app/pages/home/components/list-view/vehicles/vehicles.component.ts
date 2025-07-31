@@ -15,7 +15,7 @@ import { sortVehiclesByStatus } from '../../../../../shared/utils/helper_functio
     imports: [IconFieldModule, InputIconModule, ButtonModule, InputTextModule, CommonModule, VehicleFilterComponent, VehicleListComponent],
     template: `
     <div class="p-2">
-      <app-vehicle-filter (filterSelected)="onFilterSelected($event)" />
+      <app-vehicle-filter (filterSelected)="onFilterSelected($event)" (searchTerm)="onVehicleSearch($event)" />
     </div>
     <app-vehicle-list [isLoading]="isLoading" [fetchedVehicles]="filteredVehicles" />
     `
@@ -30,8 +30,6 @@ export class VehiclesComponent {
 
 
   ngOnInit(): void {
-        //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-        //Add 'implements OnInit' to the class.
         this.init();
     }
 
@@ -47,7 +45,7 @@ export class VehiclesComponent {
             if (result.status === 'fulfilled') {
               this.fetchedVehicles = this.constructVehicleData(result.value);
               this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles)
-              console.log(`Call ${index + 1} succeeded:`, this.fetchedVehicles);
+              console.log(`Call ${index + 1} succeeded:`, this.filteredVehicles);
             } else {
                 console.error(`Call ${index + 1} failed:`, result.reason);
                 // Optionally show error toast/snackbar
@@ -82,6 +80,20 @@ export class VehiclesComponent {
     console.log(this.filteredVehicles);
     this.isLoading = false;
   }
+
+  onVehicleSearch(event: any): void {
+  const searchTerm = (event?.value || '').toLowerCase().trim();
+  if (!searchTerm) {
+    // If the search term is empty, reset the list to all vehicles
+    this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles);
+    return;
+  }
+
+  this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles.filter(vehicle =>
+    (vehicle?.name || '').toLowerCase().includes(searchTerm))
+  );  
+}
+
 
 
 
