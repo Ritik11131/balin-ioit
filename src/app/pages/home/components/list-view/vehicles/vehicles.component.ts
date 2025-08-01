@@ -8,7 +8,7 @@ import { listViewFilters } from '../../../../../shared/constants/list-view';
 import { VehicleFilterComponent } from "./vehicle-filter/vehicle-filter.component";
 import { VehicleListComponent } from "./vehicle-list/vehicle-list.component";
 import { VehicleService } from '../../../../service/vehicle.service';
-import { sortVehiclesByStatus } from '../../../../../shared/utils/helper_functions';
+import { sortVehiclesByStatus, constructVehicleData } from '../../../../../shared/utils/helper_functions';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, take, takeUntil } from 'rxjs';
 import { selectVehicles, selectVehicleLoading, selectVehiclePolling, selectVehiclesLoaded  } from '../../../../../store/vehicle/vehicle.selectors';
@@ -59,7 +59,7 @@ ngOnDestroy(): void {
 private subscribeToStoreData(): void {
   this.vehicles$.pipe(takeUntil(this.destroy$)).subscribe((vehicles) => {
     if (vehicles && vehicles.length > 0) {
-      this.fetchedVehicles = this.constructVehicleData(vehicles);
+      this.fetchedVehicles = constructVehicleData(vehicles);
       this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles);
       // console.log('Vehicles after transformation:', this.filteredVehicles);
     }
@@ -70,18 +70,6 @@ private subscribeToStoreData(): void {
     this.isLoading = loading;
   });
 }
-
-
-  constructVehicleData(vehicles: any[]): any[] {
-    return vehicles.map(({ device, parking, position, validity }, index) => ({
-      id: device?.id,
-      name: device?.vehicleNo ,
-      lastUpdated: position?.deviceTime,
-      location: position?.address || 'Unknown Location',
-      status: position?.status?.status.toLowerCase(),
-      apiObject: {device,parking,position,validity}
-    }));
-  }
 
   onFilterSelected(filter: any) {
     this.isLoading = true;

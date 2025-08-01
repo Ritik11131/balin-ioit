@@ -19,9 +19,7 @@ import { loadVehicles } from '../../store/vehicle/vehicle.actions';
 
                 <!-- Right Panel -->
                 <div class="flex-1 min-w-0 h-full">
-                    <div class="h-full">
                         <app-track-map />
-                    </div>
                 </div>
             </div>
         </div>

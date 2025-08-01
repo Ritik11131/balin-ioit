@@ -12,3 +12,15 @@ export const sortVehiclesByStatus = (vehicles: any[]): any[] => {
     return aPriority - bPriority;
   });
 };
+
+
+export const constructVehicleData = (vehicles: any[]): any[] => {
+    return vehicles.map(({ device, parking, position, validity }, index) => ({
+      id: device?.id,
+      name: device?.vehicleNo ,
+      lastUpdated: position?.deviceTime,
+      location: position?.address || 'Unknown Location',
+      status: position?.status?.status.toLowerCase(),
+      apiObject: {device,parking,position,validity}
+    }));
+  }
