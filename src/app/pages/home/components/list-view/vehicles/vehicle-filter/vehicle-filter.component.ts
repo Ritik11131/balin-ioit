@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -46,12 +46,12 @@ import { VehicleStatusLabelPipe } from './../../../../../../shared/pipes/vehicle
 
                 <!-- Action Buttons -->
                 <div class="flex gap-2">
-                    <p-button icon="pi pi-heart" outlined>
+                    <p-button outlined (onClick)="handleRefreshVehicles()">
                         <ng-template #icon>
-                            <img src="images/home/icon_refresh.svg" alt="Refresh" class="w-[20px] h-[20px] transition-transform duration-500 hover:animate-spin" />
+                            <img [ngClass]="{ 'animate-spin': isLoading }" src="images/home/icon_refresh.svg" alt="Refresh" class="w-[20px] h-[20px] transition-transform duration-500" />
                         </ng-template>
                     </p-button>
-                    <p-button icon="pi pi-heart" outlined>
+                    <p-button outlined>
                         <ng-template #icon>
                             <img [src]="'images/home/icon_filter.svg'" [alt]="'Filter'" class="w-[20px] h-[20px]" />
                         </ng-template>
@@ -68,7 +68,10 @@ export class VehicleFilterComponent {
     filters = listViewFilters;
     activeFilterKey = 'all'; // default selected filter
 
+    @Input() isLoading: boolean = false;
+
     @Output() filterSelected = new EventEmitter<any>();
+    @Output() refreshVehicles = new EventEmitter<any>();
     @Output() searchTerm = new EventEmitter<any>();
 
     handleListMapFilter(selectedFilter: any) {
@@ -78,5 +81,9 @@ export class VehicleFilterComponent {
 
     handleVehicleSearch(event: any) {
         this.searchTerm.emit({ key: 'search', value: event.target.value.toLowerCase() });
+    }
+
+    handleRefreshVehicles() {
+        this.refreshVehicles.emit({key :'refresh', value: true});
     }
 }

@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -68,6 +68,18 @@ export class HttpService {
     }
     const url = `${this.apiUrl}/${endpoint}${id ? '/' + id : ''}`;
     return firstValueFrom(this.http.get<T>(url, { ...this.getHttpOptions(), params }));
+  }
+
+  // ✅ GET as Observable
+  get$<T>(endpoint: string, query?: any, id?: any): Observable<T> {
+    let params = new HttpParams();
+    if (query) {
+      Object.keys(query).forEach((key) => {
+        params = params.append(key, query[key]);
+      });
+    }
+    const url = `${this.apiUrl}/${endpoint}${id ? '/' + id : ''}`;
+    return this.http.get<T>(url, { ...this.getHttpOptions(), params });
   }
 
   /**

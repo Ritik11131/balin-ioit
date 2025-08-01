@@ -9,6 +9,7 @@ import { RippleModule } from 'primeng/ripple';
 import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { UiService } from '../../layout/service/ui.service';
 import { AuthService } from '../service/auth.service';
+import { Store } from '@ngrx/store';
 
 @Component({
     selector: 'app-login',
@@ -74,13 +75,15 @@ export class Login {
     constructor(
         private uiService: UiService,
         private authService: AuthService,
-        private router: Router
+        private router: Router,
+        private store: Store
     ) {}
 
     async signIn(): Promise<any> {
         this.uiService.toggleLoader(true);
         try {
             await this.authService.login(this.email, this.password);
+            this.store.dispatch({ type: '[Auth] Login Success' });
             this.router.navigate(['/dashboard']);
             this.uiService.showToast('success', 'Success', 'Welcome');
         } catch (error: any) {

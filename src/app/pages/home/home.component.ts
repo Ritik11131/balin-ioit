@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { TrackMapComponent } from './components/track-map/track-map.component';
 import { ListViewComponent } from './components/list-view/list-view.component';
+import { Store } from '@ngrx/store';
+import { loadVehicles } from '../../store/vehicle/vehicle.actions';
 
 @Component({
     selector: 'app-home',
@@ -25,6 +27,11 @@ import { ListViewComponent } from './components/list-view/list-view.component';
         </div>
     `
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
     
+    ngOnInit(): void {
+        //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
+        //Add 'implements OnInit' to the class.
+       
+    }
 }

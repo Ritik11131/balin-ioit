@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -9,56 +9,68 @@ import { VehicleFilterComponent } from "./vehicle-filter/vehicle-filter.componen
 import { VehicleListComponent } from "./vehicle-list/vehicle-list.component";
 import { VehicleService } from '../../../../service/vehicle.service';
 import { sortVehiclesByStatus } from '../../../../../shared/utils/helper_functions';
+import { Store } from '@ngrx/store';
+import { Observable, Subject, take, takeUntil } from 'rxjs';
+import { selectVehicles, selectVehicleLoading, selectVehiclePolling, selectVehiclesLoaded  } from '../../../../../store/vehicle/vehicle.selectors';
+import { loadVehicles, startVehiclePolling } from '../../../../../store/vehicle/vehicle.actions';
 
 @Component({
     selector: 'app-vehicles',
     imports: [IconFieldModule, InputIconModule, ButtonModule, InputTextModule, CommonModule, VehicleFilterComponent, VehicleListComponent],
     template: `
     <div class="p-2">
-      <app-vehicle-filter (filterSelected)="onFilterSelected($event)" (searchTerm)="onVehicleSearch($event)" />
+      <app-vehicle-filter [isLoading]="isLoading" (filterSelected)="onFilterSelected($event)" (searchTerm)="onVehicleSearch($event)" (refreshVehicles)="onVehicleRefresh($event)" />
     </div>
     <app-vehicle-list [isLoading]="isLoading" [fetchedVehicles]="filteredVehicles" />
     `
 })
 export class VehiclesComponent {
-  filters = listViewFilters;
-  fetchedVehicles:any[] = [];
-  filteredVehicles:any[] = []
-  public isLoading = false;
+filters = listViewFilters;
+fetchedVehicles: any[] = [];
+filteredVehicles: any[] = [];
 
-  constructor(private vehicleService: VehicleService) {}
+public isLoading = false;
 
+private store = inject(Store);
+private destroy$ = new Subject<void>();
 
-  ngOnInit(): void {
-        this.init();
+vehicles$: Observable<any[]> = this.store.select(selectVehicles);
+loading$: Observable<boolean> = this.store.select(selectVehicleLoading);
+polling$: Observable<boolean> = this.store.select(selectVehiclePolling);
+
+constructor() {}
+
+ngOnInit(): void {
+  this.store.select(selectVehiclesLoaded).pipe(take(1)).subscribe((loaded) => {
+    console.log(loaded,'dedd');
+    
+    if (!loaded) {
+      this.store.dispatch(loadVehicles());
     }
+  });
+  this.subscribeToStoreData();
+}
 
-    private async init(): Promise<void> {
-      this.isLoading = true;
-        const results = await Promise.allSettled([this.fetchVehicles()]);
-        console.log(results);
-        
+ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-        results.forEach((result, index) => {
-          console.log(result);
-          
-            if (result.status === 'fulfilled') {
-              this.fetchedVehicles = this.constructVehicleData(result.value);
-              this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles)
-              console.log(`Call ${index + 1} succeeded:`, this.filteredVehicles);
-            } else {
-                console.error(`Call ${index + 1} failed:`, result.reason);
-                // Optionally show error toast/snackbar
-            }
-        });
-
-      this.isLoading = false;
+private subscribeToStoreData(): void {
+  this.vehicles$.pipe(takeUntil(this.destroy$)).subscribe((vehicles) => {
+    if (vehicles && vehicles.length > 0) {
+      this.fetchedVehicles = this.constructVehicleData(vehicles);
+      this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles);
+      // console.log('Vehicles after transformation:', this.filteredVehicles);
     }
+  });
 
-    private async fetchVehicles(): Promise<any> {
-        const vehicles = await this.vehicleService.fetchVehicleList();
-        return vehicles;
-    }
+  this.loading$.pipe(takeUntil(this.destroy$)).subscribe((loading) => {
+    console.log('Loading state:', loading);
+    this.isLoading = loading;
+  });
+}
+
 
   constructVehicleData(vehicles: any[]): any[] {
     return vehicles.map(({ device, parking, position, validity }, index) => ({
@@ -93,6 +105,11 @@ export class VehiclesComponent {
     (vehicle?.name || '').toLowerCase().includes(searchTerm))
   );  
 }
+
+  onVehicleRefresh(event: any): void {
+    this.store.dispatch(loadVehicles());
+    console.log('Vehicles refreshed');
+  }
 
 
 
