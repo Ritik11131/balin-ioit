@@ -1,3 +1,4 @@
+// vehicle.actions.ts
 import { createAction, props } from '@ngrx/store';
 
 export const loadVehicles = createAction('[Vehicle] Load Vehicles');
@@ -12,5 +13,20 @@ export const loadVehiclesFailure = createAction(
   props<{ error: any }>()
 );
 
+export const filterVehicles = createAction(
+  '[Vehicle] Filter Vehicles',
+  props<{ key: string; status?: string }>()
+);
+
+export const searchVehicles = createAction(
+  '[Vehicle] Search Vehicles',
+  props<{ searchTerm: string }>()
+);
+
+export const clearVehicleFilters = createAction(
+  '[Vehicle] Clear Filters'
+);
+
 export const startVehiclePolling = createAction('[Vehicle] Start Polling');
+
 export const stopVehiclePolling = createAction('[Vehicle] Stop Polling');

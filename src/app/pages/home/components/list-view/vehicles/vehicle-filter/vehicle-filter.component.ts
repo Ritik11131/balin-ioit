@@ -68,7 +68,7 @@ export class VehicleFilterComponent {
     filters = listViewFilters;
     activeFilterKey = 'all'; // default selected filter
 
-    @Input() isLoading: boolean = false;
+    @Input() isLoading: any = false;
 
     @Output() filterSelected = new EventEmitter<any>();
     @Output() refreshVehicles = new EventEmitter<any>();

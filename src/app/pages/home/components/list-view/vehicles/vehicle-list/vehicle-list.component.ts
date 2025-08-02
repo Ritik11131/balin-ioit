@@ -30,8 +30,8 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     styles: ``
 })
 export class VehicleListComponent {
-    @Input() fetchedVehicles: any[] = [];
-    @Input() isLoading: boolean = false;
+    @Input() fetchedVehicles: any = [];
+    @Input() isLoading: any = false;
 
     selectedVehicle: any = null;
 

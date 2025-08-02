@@ -48,19 +48,4 @@ export class TrackMapComponent implements AfterViewInit {
   onMapReady(map: Map) {
     this.map = map;
   }
-
-  // private subscribeToStoreData(): void {
-  //   this.vehicles$.pipe(takeUntil(this.destroy$)).subscribe((vehicles) => {
-  //     if (vehicles && vehicles.length > 0) {
-  //       this.fetchedVehicles = constructVehicleData(vehicles);
-  //       this.filteredVehicles = sortVehiclesByStatus(this.fetchedVehicles);
-  //       // console.log('Vehicles after transformation:', this.filteredVehicles);
-  //     }
-  //   });
-  
-  //   this.loading$.pipe(takeUntil(this.destroy$)).subscribe((loading) => {
-  //     console.log('Loading state:', loading);
-  //     this.isLoading = loading;
-  //   });
-  // }
 }

@@ -1,44 +1,123 @@
+// vehicle.reducer.ts
 import { createReducer, on } from '@ngrx/store';
-import * as VehicleActions from './vehicle.actions';
+import {
+  loadVehicles,
+  loadVehiclesSuccess,
+  loadVehiclesFailure,
+  filterVehicles,
+  searchVehicles,
+  clearVehicleFilters,
+  startVehiclePolling,
+  stopVehiclePolling
+} from './vehicle.actions';
+import { constructVehicleData, sortVehiclesByStatus } from '../../shared/utils/helper_functions';
+import { initialVehicleState } from './vehicle.state';
 
-export interface VehicleState {
-  vehicles: any[];
-  loading: boolean;
-  loaded: boolean; // add this
-  error: any;
-  polling: boolean;
-}
-
-export const initialState: VehicleState = {
-  vehicles: [],
-  loading: false,
-  loaded: false, // initialize to false
-  error: null,
-  polling: false,
+// Helper function to apply filters and search
+const applyFiltersAndSearch = (
+  vehicles: any[], 
+  filter: { key: string; status?: string }, 
+  searchTerm: string
+): any[] => {
+  let result = [...vehicles];
+  
+  // Apply status filter first
+  if (filter.key !== 'all' && filter.status) {
+    result = result.filter(vehicle => vehicle.status === filter.status);
+  }
+  
+  // Apply search filter
+  if (searchTerm.trim()) {
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    result = result.filter(vehicle => 
+      (vehicle?.name || '').toLowerCase().includes(lowerSearchTerm)
+    );
+  }
+  
+  // Sort the final result
+  return sortVehiclesByStatus(result);
 };
 
 export const vehicleReducer = createReducer(
-  initialState,
-
-  on(VehicleActions.loadVehicles, (state) => ({
+  initialVehicleState,
+  
+  on(loadVehicles, (state) => ({
     ...state,
     loading: true,
     error: null
   })),
-
-  on(VehicleActions.loadVehiclesSuccess, (state, { vehicles }) => ({
+  
+  on(loadVehiclesSuccess, (state, { vehicles }) => {
+    const constructedVehicles = constructVehicleData(vehicles);
+    const filteredVehicles = applyFiltersAndSearch(
+      constructedVehicles, 
+      state.currentFilter, 
+      state.searchTerm
+    );
+    
+    return {
+      ...state,
+      vehicles: constructedVehicles,
+      filteredVehicles,
+      loading: false,
+      loaded: true,
+      error: null
+    };
+  }),
+  
+  on(loadVehiclesFailure, (state, { error }) => ({
     ...state,
-    vehicles,
-    loaded: true,
-    loading: false
+    loading: false,
+    error
   })),
-
-  on(VehicleActions.loadVehiclesFailure, (state, { error }) => ({
+  
+  on(filterVehicles, (state, { key, status }) => {
+    const newFilter = { key, status };
+    const filteredVehicles = applyFiltersAndSearch(
+      state.vehicles, 
+      newFilter, 
+      state.searchTerm
+    );
+    
+    return {
+      ...state,
+      currentFilter: newFilter,
+      filteredVehicles
+    };
+  }),
+  
+  on(searchVehicles, (state, { searchTerm }) => {
+    const filteredVehicles = applyFiltersAndSearch(
+      state.vehicles, 
+      state.currentFilter, 
+      searchTerm
+    );
+    
+    return {
+      ...state,
+      searchTerm,
+      filteredVehicles
+    };
+  }),
+  
+  on(clearVehicleFilters, (state) => {
+    const filteredVehicles = sortVehiclesByStatus(state.vehicles);
+    
+    return {
+      ...state,
+      currentFilter: { key: 'all' },
+      searchTerm: '',
+      filteredVehicles
+    };
+  }),
+  
+  on(startVehiclePolling, (state) => ({
     ...state,
-    error,
-    loading: false
+    polling: true
   })),
-
-on(VehicleActions.startVehiclePolling, (state) => ({ ...state, polling: true })),
-  on(VehicleActions.stopVehiclePolling, (state) => ({ ...state, polling: false }))
+  
+  on(stopVehiclePolling, (state) => ({
+    ...state,
+    polling: false
+  }))
 );
