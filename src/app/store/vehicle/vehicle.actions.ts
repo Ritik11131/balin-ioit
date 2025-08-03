@@ -27,6 +27,11 @@ export const clearVehicleFilters = createAction(
   '[Vehicle] Clear Filters'
 );
 
+export const selectVehicle = createAction(
+  '[Vehicle] Select Vehicle',
+  props<{ vehicle: any | null }>()
+);
+
 export const startVehiclePolling = createAction('[Vehicle] Start Polling');
 
 export const stopVehiclePolling = createAction('[Vehicle] Stop Polling');

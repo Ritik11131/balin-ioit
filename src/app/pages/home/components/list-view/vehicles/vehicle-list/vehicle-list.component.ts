@@ -1,11 +1,18 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input, ViewChild } from '@angular/core';
 import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { VehicleSkeletonCardComponent } from './vehicle-skeleton-card/vehicle-skeleton-card.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { Store } from '@ngrx/store';
+import { selectVehicle } from '../../../../../../store/vehicle/vehicle.actions';
+import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
+import { CommonModule } from '@angular/common';
+import { UiService } from '../../../../../../layout/service/ui.service';
+import { CdkDragPlaceholder } from "@angular/cdk/drag-drop";
+import { VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
 
 @Component({
     selector: 'app-vehicle-list',
-    imports: [VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule],
+    imports: [CommonModule, VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule, CdkDragPlaceholder, VehicleDetailsComponent],
     template: `
         <!-- Cards Wrapper Container -->
         <div class="max-h-[calc(100vh-280px)] overflow-y-scroll scrollbar-hide mt-4">
@@ -20,31 +27,42 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
                 } @else {
                     <cdk-virtual-scroll-viewport itemSize="124" class="scrollbar-hide" style="height: calc(100vh - 280px);">
                         <div *cdkVirtualFor="let vehicle of fetchedVehicles; let last = last; trackBy: trackByVehicleId" [class.mb-4]="!last" class="px-2">
-                            <app-vehicle-card [vehicle]="vehicle" [isSelected]="selectedVehicle === vehicle" (cardSelected)="onVehicleSelected($event)" />
+                            <app-vehicle-card [vehicle]="vehicle" [isSelected]="(selectedVehicle$ | async) === vehicle" (cardSelected)="onVehicleSelected($event)" />
                         </div>
                     </cdk-virtual-scroll-viewport>
                 }
             </div>
         </div>
+
+        <ng-template #vehicleDetailsTemplate>
+            <app-vehicle-details [vehicle]="selectedVehicle$ | async"/>
+        </ng-template>
+
     `,
     styles: ``
 })
 export class VehicleListComponent {
+
+    @ViewChild('vehicleDetailsTemplate') vehicleDetailsTemplate: any;
+
     @Input() fetchedVehicles: any = [];
     @Input() isLoading: any = false;
 
-    selectedVehicle: any = null;
+    private store = inject(Store);
+    private uiService = inject(UiService);
+    selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
     trackByVehicleId = (index: number, vehicle: any) => vehicle?.id ?? index;
 
     onVehicleSelected(vehicle: any) {
-        this.selectedVehicle = vehicle;
         console.log(vehicle);
+        this.store.dispatch(selectVehicle({ vehicle }));
+        this.uiService.openDrawer(this.vehicleDetailsTemplate, 'Approve Rtd');
+
     }
 
     ngOnDestroy(): void {
         // Cleanup logic if needed
-        this.selectedVehicle = null; // Clear the selected geofence reference
         console.log('VehicleListComponent destroyed and cleaned up');
     }
 }

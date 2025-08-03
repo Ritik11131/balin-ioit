@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { UiService } from './app/layout/service/ui.service';
 import { TitleService } from './app/pages/service/title.service';
 import { ToastModule } from 'primeng/toast';
 import { GenericLoaderComponent } from './app/shared/components/generic-loader/generic-loader.component';
 import { GenericDrawerComponent } from './app/shared/components/generic-drawer/generic-drawer.component';
+import { Store } from '@ngrx/store';
+import { loadUserConfiguration } from './app/store/user-configuration/actions';
 
 @Component({
     selector: 'app-root',
@@ -34,6 +36,7 @@ import { GenericDrawerComponent } from './app/shared/components/generic-drawer/g
     `
 })
 export class AppComponent {
+    private store = inject(Store);
     constructor(
         public uiService: UiService,
         private titleService: TitleService
@@ -41,5 +44,7 @@ export class AppComponent {
 
     ngOnInit(): void {
         this.titleService.init();
+        // Load user configuration when app starts
+        this.store.dispatch(loadUserConfiguration());
     }
 }

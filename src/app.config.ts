@@ -1,5 +1,5 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, isDevMode } from '@angular/core';
+import { ApplicationConfig, isDevMode, provideAppInitializer  } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeng/themes/aura';
@@ -12,6 +12,8 @@ import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { VehicleEffects } from './app/store/vehicle/vehicle.effects';
 import { vehicleReducer } from './app/store/vehicle/vehicle.reducer';
+import { userConfigurationReducer } from './app/store/user-configuration/reducer';
+import { UserConfigurationEffects } from './app/store/user-configuration/effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -30,12 +32,14 @@ export const appConfig: ApplicationConfig = {
     theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } }
   }),
   provideStore({
-    vehicle: vehicleReducer
+    vehicle: vehicleReducer,
+    userConfiguration: userConfigurationReducer
   }),
   provideEffects([
-    VehicleEffects
+    VehicleEffects,
+    UserConfigurationEffects
   ]),
-  provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() })
+  provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
 ]
 
 };

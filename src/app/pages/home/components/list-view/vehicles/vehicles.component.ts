@@ -15,12 +15,14 @@ import {
   selectVehiclePolling, 
   selectVehiclesLoaded,
   selectCurrentFilter,
-  selectSearchTerm 
+  selectSearchTerm, 
+  selectSelectedVehicle
 } from '../../../../../store/vehicle/vehicle.selectors';
 import { 
   filterVehicles, 
   loadVehicles, 
   searchVehicles, 
+  selectVehicle, 
   startVehiclePolling 
 } from '../../../../../store/vehicle/vehicle.actions';
 
@@ -52,18 +54,11 @@ export class VehiclesComponent {
   polling$: Observable<boolean> = this.store.select(selectVehiclePolling);
   currentFilter$: Observable<any> = this.store.select(selectCurrentFilter);
   searchTerm$: Observable<string> = this.store.select(selectSearchTerm);
+  selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
   constructor() {}
 
   ngOnInit(): void {
-    // Load vehicles only if not already loaded
-    this.store.select(selectVehiclesLoaded).pipe(take(1)).subscribe((loaded) => {
-      console.log('Vehicles loaded:', loaded);
-      if (!loaded) {
-        this.store.dispatch(loadVehicles());
-      }
-    });
-
     // Optional: Subscribe to store changes for debugging
     this.subscribeToStoreChanges();
   }
@@ -86,17 +81,23 @@ export class VehiclesComponent {
     this.currentFilter$.pipe(takeUntil(this.destroy$)).subscribe((filter) => {
       console.log('Current filter:', filter);
     });
+
+    this.selectedVehicle$.pipe(takeUntil(this.destroy$)).subscribe((vehicle) => {
+      console.log('Selected vehicle:', vehicle);
+    });
   }
 
   onFilterSelected(filter: any): void {
     console.log('Filter selected:', filter);
     this.store.dispatch(filterVehicles({ key: filter.key, status: filter.status }));
+    this.store.dispatch(selectVehicle({ vehicle: null }));
   }
 
   onVehicleSearch(event: any): void {
     const searchTerm = event?.value || '';
     console.log('Search term:', searchTerm);
     this.store.dispatch(searchVehicles({ searchTerm }));
+    this.store.dispatch(selectVehicle({ vehicle: null }));
   }
 
   onVehicleRefresh(event: any): void {

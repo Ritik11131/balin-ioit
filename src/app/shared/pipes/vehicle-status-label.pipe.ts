@@ -10,8 +10,8 @@ export class VehicleStatusLabelPipe implements PipeTransform {
       dormant: 'DORMANT',
       offline: 'OFFLINE',
       running: 'RUNNING',
-      all: 'ALL'
+      all: 'ALL',
     };
-    return map[status?.toLowerCase()] || '';
+    return map[status?.toLowerCase()] || 'NEVER';
   }
 }

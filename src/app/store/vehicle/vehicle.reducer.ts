@@ -8,7 +8,8 @@ import {
   searchVehicles,
   clearVehicleFilters,
   startVehiclePolling,
-  stopVehiclePolling
+  stopVehiclePolling,
+  selectVehicle
 } from './vehicle.actions';
 import { constructVehicleData, sortVehiclesByStatus } from '../../shared/utils/helper_functions';
 import { initialVehicleState } from './vehicle.state';
@@ -110,6 +111,11 @@ export const vehicleReducer = createReducer(
       filteredVehicles
     };
   }),
+
+   on(selectVehicle, (state, { vehicle }) => ({
+    ...state,
+    selectedVehicle: vehicle
+  })),
   
   on(startVehiclePolling, (state) => ({
     ...state,

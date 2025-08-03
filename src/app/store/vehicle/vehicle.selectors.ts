@@ -60,3 +60,9 @@ export const selectIsFiltered = createSelector(
   selectSearchTerm,
   (filter, searchTerm) => filter.key !== 'all' || searchTerm.trim() !== ''
 );
+
+
+export const selectSelectedVehicle = createSelector(
+  selectVehicleState,
+  (state) => state.selectedVehicle
+);

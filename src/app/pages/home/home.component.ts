@@ -4,6 +4,8 @@ import { TrackMapComponent } from './components/track-map/track-map.component';
 import { ListViewComponent } from './components/list-view/list-view.component';
 import { Store } from '@ngrx/store';
 import { loadVehicles } from '../../store/vehicle/vehicle.actions';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { selectVehiclesLoaded } from '../../store/vehicle/vehicle.selectors';
 
 @Component({
     selector: 'app-home',
@@ -26,10 +28,21 @@ import { loadVehicles } from '../../store/vehicle/vehicle.actions';
     `
 })
 export class HomeComponent implements OnInit {
+
+      private store = inject(Store);
+      private destroy$ = new Subject<void>();
+
+      vehiclesLoaded$: Observable<boolean> = this.store.select(selectVehiclesLoaded);
+    
     
     ngOnInit(): void {
         //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
         //Add 'implements OnInit' to the class.
+         this.vehiclesLoaded$.pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
+              if (!loaded) {
+                this.store.dispatch(loadVehicles());
+              }
+            });
        
     }
 }

@@ -7,6 +7,7 @@ export interface VehicleFilter {
 export interface VehicleState {
   vehicles: any[];
   filteredVehicles: any[];
+  selectedVehicle: any;
   loading: boolean;
   loaded: boolean;
   polling: boolean;
@@ -18,6 +19,7 @@ export interface VehicleState {
 export const initialVehicleState: VehicleState = {
   vehicles: [],
   filteredVehicles: [],
+  selectedVehicle: null,
   loading: false,
   loaded: false,
   polling: false,

@@ -8,7 +8,7 @@ import { Observable, throwError } from 'rxjs';
 })
 export class VehicleService {
 
-  private readonly apiTimeout = 10000; // 10 seconds
+  private readonly apiTimeout = 20000; // 10 seconds
   private readonly maxRetries = 3;
 
   constructor(private http:HttpService) { }

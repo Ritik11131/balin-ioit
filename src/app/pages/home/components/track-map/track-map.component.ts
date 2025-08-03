@@ -26,7 +26,8 @@ import {
   selectFilteredVehicles,
   selectVehiclesLoaded,
   selectCurrentFilter,
-  selectSearchTerm
+  selectSearchTerm,
+  selectSelectedVehicle
 } from '../../../../store/vehicle/vehicle.selectors';
 import { loadVehicles, searchVehicles } from '../../../../store/vehicle/vehicle.actions';
 import { Store } from '@ngrx/store';
@@ -450,6 +451,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
   vehiclesLoaded$: Observable<boolean> = this.store.select(selectVehiclesLoaded);
   currentFilter$: Observable<any> = this.store.select(selectCurrentFilter);
   searchTerm$: Observable<string> = this.store.select(selectSearchTerm);
+  selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
   options = {
     layers: [this.mapLayers.street],
@@ -459,13 +461,6 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
   };
 
   ngAfterViewInit(): void {
-    // Load vehicles if not already loaded
-    this.vehiclesLoaded$.pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
-      if (!loaded) {
-        this.store.dispatch(loadVehicles());
-      }
-    });
-
     // Subscribe to filtered vehicles to update map markers
     this.subscribeToVehicleUpdates();
   }
@@ -525,6 +520,13 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
         this.updateMapMarkers(vehicles);
       }
     });
+
+    this.selectedVehicle$.pipe(
+      takeUntil(this.destroy$)).subscribe((vehicle) => {
+        if(this.map && vehicle) {
+          this.updateMapMarkers([vehicle]);
+        }
+      })
   }
 
   private updateMapMarkers(vehicles: VehicleData[]): void {
@@ -673,11 +675,11 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
   private getStatusColorClass(status: string): string {
     const statusClasses: { [key: string]: string } = {
       'running': 'bg-green-100 text-green-800',
-      'idle': 'bg-yellow-100 text-yellow-800',
-      'stopped': 'bg-red-100 text-red-800',
+      'dormant': 'bg-yellow-100 text-yellow-800',
+      'stop': 'bg-red-100 text-red-800',
       'maintenance': 'bg-purple-100 text-purple-800',
       'offline': 'bg-gray-100 text-gray-800',
-      'default': 'bg-blue-100 text-blue-800'
+      'default': 'bg-gray-100 text-gray-500'
     };
     return statusClasses[status?.toLowerCase()] || statusClasses['default'];
   }
@@ -745,7 +747,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
         this.userLocationMarker.addTo(this.map);
         
         // Animate to user location
-        this.map.flyTo([lat, lng], 15, {
+        this.map.flyTo([lat, lng], 18, {
           animate: true,
           duration: 2
         });
