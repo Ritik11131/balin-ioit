@@ -39,17 +39,13 @@ import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-sta
 
       <!-- Time Info -->
       <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 transition-all duration-300 group-hover:text-gray-600">
-        <img src="assets/icon_time.svg" 
-             alt="Time" 
-             class="w-3.5 h-3.5 transition-all duration-300 group-hover:scale-110" />
+        <i class="pi pi-calendar-times w-3.5 h-3.5 transition-all duration-300 group-hover:scale-110" ></i>
         <span>{{ vehicle.lastUpdated | timeAgo }}</span>
       </div>
 
       <!-- Address Info -->
       <div class="flex items-center gap-2 mt-1 text-xs text-gray-500 transition-all duration-300 group-hover:text-gray-600">
-        <img src="assets/icon_pin.svg" 
-             alt="Location" 
-             class="w-3.5 h-3.5 transition-all duration-300 group-hover:scale-110" />
+        <i class="pi pi-map-marker w-3.5 h-3.5 transition-all duration-300 group-hover:scale-110" ></i>
         <span>{{ vehicle.location }}</span>
       </div>
 

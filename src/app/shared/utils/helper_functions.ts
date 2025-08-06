@@ -1,7 +1,7 @@
 const priorityMap: Record<string, number> = {
   running: 1,
-  stop: 2,
-  dormant: 3,
+  dormant: 2,
+  stop: 3,
   offline: 4
 };
 

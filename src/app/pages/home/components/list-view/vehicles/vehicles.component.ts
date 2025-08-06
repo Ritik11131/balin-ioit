@@ -107,6 +107,8 @@ export class VehiclesComponent {
 
   onVehicleRefresh(event: any): void {
     console.log('Refreshing vehicles...');
+    this.uiService.closeDrawer();
+    this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(loadVehicles());
   }
 }

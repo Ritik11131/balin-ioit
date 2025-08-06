@@ -524,12 +524,12 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
     this.selectedVehicle$.pipe(
       takeUntil(this.destroy$)).subscribe((vehicle) => {
         if(this.map && vehicle) {
-          this.updateMapMarkers([vehicle]);
+          this.updateMapMarkers([vehicle],true);
         }
       })
   }
 
-  private updateMapMarkers(vehicles: VehicleData[]): void {
+  private updateMapMarkers(vehicles: VehicleData[], isSingleSubscribed?:boolean): void {
     // Clear existing markers
     if (this.clusteringEnabled && this.clusterGroup) {
       this.clusterGroup.clearLayers();
@@ -569,7 +569,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
 
     // Fit map bounds to show all markers if there are vehicles
     if (validVehicles.length > 0) {
-      setTimeout(() => this.fitMapToMarkers(validVehicles), 100);
+      setTimeout(() => this.fitMapToMarkers(validVehicles, isSingleSubscribed), 100);
     }
   }
 
@@ -684,10 +684,10 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
     return statusClasses[status?.toLowerCase()] || statusClasses['default'];
   }
 
-  private fitMapToMarkers(vehicles: VehicleData[]): void {
+  private fitMapToMarkers(vehicles: VehicleData[], isSingleSubscribed?:boolean): void {
     if (vehicles.length === 1) {
       const pos = vehicles[0].apiObject.position;
-      this.map.setView([pos.latitude, pos.longitude], 12);
+      this.map.setView([pos.latitude, pos.longitude], !isSingleSubscribed ? 12 : 18);
     } else if (vehicles.length > 1) {
       const bounds = vehicles.map(v => [v.apiObject.position.latitude, v.apiObject.position.longitude] as [number, number]);
       this.map.fitBounds(bounds, { padding: [20, 20] });

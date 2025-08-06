@@ -136,14 +136,25 @@ export const vehicleReducer = createReducer(
     polling: true
   })),
   
-// For updateSelectedVehicle (with data transformation)
 on(updateSelectedVehicle, (state, { vehicle }) => {
   const constructedVehicleArray = constructVehicleData([vehicle]);
   const constructedVehicle = constructedVehicleArray?.[0] ?? vehicle;
 
+  const updatedVehicles = state.vehicles.map(v =>
+    v.id === constructedVehicle.id ? constructedVehicle : v
+  );
+
+  const filteredVehicles = applyFiltersAndSearch(
+    updatedVehicles,
+    state.currentFilter,
+    state.searchTerm
+  );
+
   return {
     ...state,
     selectedVehicle: constructedVehicle,
+    vehicles: updatedVehicles,
+    filteredVehicles
   };
 }),
   
