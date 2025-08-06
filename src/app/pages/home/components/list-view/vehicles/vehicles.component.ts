@@ -22,9 +22,10 @@ import {
   filterVehicles, 
   loadVehicles, 
   searchVehicles, 
-  selectVehicle, 
-  startVehiclePolling 
+  selectVehicle,
+  stopSingleVehiclePolling,
 } from '../../../../../store/vehicle/vehicle.actions';
+import { UiService } from '../../../../../layout/service/ui.service';
 
 @Component({
     selector: 'app-vehicles',
@@ -46,6 +47,7 @@ export class VehiclesComponent {
   filters = listViewFilters;
   
   private store = inject(Store);
+  private uiService = inject(UiService);
   private destroy$ = new Subject<void>();
 
   // Observable streams from store
@@ -66,6 +68,7 @@ export class VehiclesComponent {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.store.dispatch(stopSingleVehiclePolling());
   }
 
   private subscribeToStoreChanges(): void {
@@ -89,6 +92,8 @@ export class VehiclesComponent {
 
   onFilterSelected(filter: any): void {
     console.log('Filter selected:', filter);
+    this.uiService.closeDrawer();
+    this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(filterVehicles({ key: filter.key, status: filter.status }));
     this.store.dispatch(selectVehicle({ vehicle: null }));
   }

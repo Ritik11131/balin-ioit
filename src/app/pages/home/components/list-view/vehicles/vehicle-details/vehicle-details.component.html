@@ -1,14 +1,92 @@
-<div class="container mx-auto max-w-6xl">
+<div class="container mx-auto max-w-4xl px-4 py-6">
 
-    <!-- First Row: Name/Sub-name and Menu -->
-    <div class="flex justify-between items-center mb-6">
-        <div class="flex flex-col">
-            <h1 class="text-lg font-bold text-gray-800">Device Name</h1>
-            <p class="text-sm text-gray-600">Sub Device Name</p>
-        </div>
-        <div class="relative">
-            <!-- <p-button icon="pi pi-ellipsis-v" [outlined]="true" (click)="menu.toggle($event)" /> -->
-            <!-- <p-tieredmenu appendTo="body" #menu [model]="items" [popup]="true" /> -->
-        </div>
+  <!-- Vehicle Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center gap-3 group">
+      <span [ngClass]="vehicle | vehicleStatus"
+            class="relative w-2.5 h-2.5 rounded-full transition-all duration-300 group-hover:scale-110">
+        <span [ngClass]="vehicle | vehicleStatus"
+              class="absolute top-0 left-0 w-full h-full rounded-full opacity-75 animate-ping"></span>
+      </span>
+      <span class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">
+        {{ vehicle?.name || 'Loading...' }}
+      </span>
     </div>
+    <div>
+      <p-button icon="pi pi-ellipsis-v" [outlined]="true" (click)="menu.toggle($event)"></p-button>
+      <p-tieredMenu appendTo="body" #menu [model]="(menuItems$ | async) ?? []" [popup]="true"></p-tieredMenu>
+    </div>
+  </div>
+
+  <!-- Tabs Section -->
+  <p-tabs [(value)]="activeTabIndex">
+    <p-tablist>
+      <p-tab value="overview">Overview</p-tab>
+      <p-tab value="sensors">Sensors</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+
+      <!-- Overview Tab -->
+      <p-tabpanel value="overview">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+          <ng-container *ngIf="vehicle; else skeletonOverview">
+            <div class="card-box">
+              <div class="label">Last Update</div>
+              <div>{{ vehicle.lastUpdated | timeAgo }}</div>
+            </div>
+            <div class="card-box">
+              <div class="label">Address</div>
+              <div>{{ vehicle.address }}</div>
+            </div>
+            <div class="card-box">
+              <div class="label">Speed</div>
+              <div>{{ vehicle.speed }} km/h</div>
+            </div>
+            <div class="card-box">
+              <div class="label">Odometer</div>
+              <div>{{ vehicle.details?.odometer }} km</div>
+            </div>
+          </ng-container>
+        </div>
+      </p-tabpanel>
+
+      <!-- Sensors Tab -->
+      <p-tabpanel value="sensors">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+          <ng-container *ngIf="vehicle as d; else skeletonSensors">
+            <div class="card-box"><strong>Power:</strong> {{ d.ign ? 'On' : 'Off' }}</div>
+            <div class="card-box"><strong>External Battery:</strong> {{ d.extVolt }} V</div>
+            <div class="card-box"><strong>Internal Battery:</strong> {{ d.battPer }}%</div>
+            <div class="card-box"><strong>SOS:</strong> {{ d.sos ? 'Triggered' : 'Normal' }}</div>
+            <div class="card-box"><strong>GPS:</strong> {{ d.sat }} Satellites</div>
+            <div class="card-box"><strong>Speed:</strong> {{ d.speed }} km/h</div>
+            <div class="card-box"><strong>Odometer:</strong> {{ d.odometer }} km</div>
+            <div class="card-box"><strong>Parking:</strong> {{ d.motion ? 'No' : 'Yes' }}</div>
+            <div class="card-box"><strong>Wheel Status:</strong> {{ d.motion ? 'Rolling' : 'Stationary' }}</div>
+            <div class="card-box"><strong>Status:</strong> {{ d.status }}</div>
+            <div class="card-box"><strong>Immobilize:</strong> {{ d.blocked ? 'Yes' : 'No' }}</div>
+          </ng-container>
+        </div>
+      </p-tabpanel>
+
+    </p-tabpanels>
+  </p-tabs>
+
+  <!-- Skeleton Loaders -->
+  <ng-template #skeletonOverview>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <ng-container *ngFor="let i of [1, 2, 3, 4]">
+        <p-skeleton height="60px" borderRadius="8px"></p-skeleton>
+      </ng-container>
+    </div>
+  </ng-template>
+
+  <ng-template #skeletonSensors>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6]">
+        <p-skeleton height="60px" borderRadius="8px"></p-skeleton>
+      </ng-container>
+    </div>
+  </ng-template>
 </div>

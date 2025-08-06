@@ -8,7 +8,7 @@ export type ToastSeverity = 'success' | 'info' | 'warn' | 'error';
 })
 export class UiService {
   // Default values as constants
-  private readonly DEFAULT_DRAWER_HEADER = 'Drawer';
+  private readonly DEFAULT_DRAWER_HEADER = ' ';
   private readonly DEFAULT_DRAWER_STYLE_CLASS = '!w-full md:!w-96 lg:!w-[30rem]';
 
   // Private signals

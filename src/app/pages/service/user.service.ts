@@ -19,11 +19,10 @@ export class UserService {
         retry(this.maxRetries),
         map((response) => {
           // Handle different response structures
-          if (response && response.data) {
-            return response.data;
+          if (response && response.result) {
+            return response;
           }
-          // If response is directly the array
-          return Array.isArray(response) ? response : [];
+         
         }),
         catchError((error) => {
           console.error('Error fetching vehicles:', error);

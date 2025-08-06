@@ -15,7 +15,7 @@ private actions$ = inject(Actions);
   // Polling effect
   pollVehicles$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(VehicleActions.startVehiclePolling),
+      ofType(VehicleActions.startVehiclesPolling),
       switchMap(() =>
         timer(0, 10000).pipe( // 0ms first call, then every 10s
           mergeMap(() =>
@@ -28,11 +28,30 @@ private actions$ = inject(Actions);
               )
             )
           ),
-          takeUntil(this.actions$.pipe(ofType(VehicleActions.stopVehiclePolling)))
+          takeUntil(this.actions$.pipe(ofType(VehicleActions.stopVehiclesPolling)))
         )
       )
     )
   );
+
+  pollSelectedVehicle$ = createEffect(() =>
+  this.actions$.pipe(
+    ofType(VehicleActions.startSingleVehiclePolling),
+    switchMap(({ vehicleId }) =>
+      timer(0, 10000).pipe(
+        switchMap(() =>
+          this.vehicleService.fetchVehicleById(vehicleId).pipe(
+            map(vehicle => VehicleActions.updateSelectedVehicle({ vehicle })),
+            catchError(error =>
+              of(VehicleActions.loadVehiclesFailure({ error }))
+            )
+          )
+        ),
+        takeUntil(this.actions$.pipe(ofType(VehicleActions.stopSingleVehiclePolling)))
+      )
+    )
+  )
+);
 
   // Single-time manual load
   loadVehicles$ = createEffect(() =>

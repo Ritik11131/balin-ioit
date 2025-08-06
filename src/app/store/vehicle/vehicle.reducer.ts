@@ -7,9 +7,12 @@ import {
   filterVehicles,
   searchVehicles,
   clearVehicleFilters,
-  startVehiclePolling,
-  stopVehiclePolling,
-  selectVehicle
+  startVehiclesPolling,
+  stopVehiclesPolling,
+  selectVehicle,
+  startSingleVehiclePolling,
+  updateSelectedVehicle,
+  stopSingleVehiclePolling
 } from './vehicle.actions';
 import { constructVehicleData, sortVehiclesByStatus } from '../../shared/utils/helper_functions';
 import { initialVehicleState } from './vehicle.state';
@@ -117,13 +120,37 @@ export const vehicleReducer = createReducer(
     selectedVehicle: vehicle
   })),
   
-  on(startVehiclePolling, (state) => ({
+  on(startVehiclesPolling, (state) => ({
     ...state,
     polling: true
   })),
   
-  on(stopVehiclePolling, (state) => ({
+  on(stopVehiclesPolling, (state) => ({
     ...state,
     polling: false
+  })),
+
+  on(startSingleVehiclePolling, (state, { vehicleId }) => ({
+    ...state,
+    selectedVehicleId: vehicleId,
+    polling: true
+  })),
+  
+// For updateSelectedVehicle (with data transformation)
+on(updateSelectedVehicle, (state, { vehicle }) => {
+  const constructedVehicleArray = constructVehicleData([vehicle]);
+  const constructedVehicle = constructedVehicleArray?.[0] ?? vehicle;
+
+  return {
+    ...state,
+    selectedVehicle: constructedVehicle,
+  };
+}),
+  
+  on(stopSingleVehiclePolling, (state) => ({
+    ...state,
+    polling: false,
+    selectedVehicle: null,
+    selectedVehicleId: null
   }))
 );

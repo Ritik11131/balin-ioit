@@ -3,16 +3,16 @@ import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { VehicleSkeletonCardComponent } from './vehicle-skeleton-card/vehicle-skeleton-card.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
-import { selectVehicle } from '../../../../../../store/vehicle/vehicle.actions';
+import { selectVehicle, startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
 import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
 import { CommonModule } from '@angular/common';
 import { UiService } from '../../../../../../layout/service/ui.service';
 import { CdkDragPlaceholder } from "@angular/cdk/drag-drop";
-import { VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
+import { VehicleActionEvent, VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
 
 @Component({
     selector: 'app-vehicle-list',
-    imports: [CommonModule, VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule, CdkDragPlaceholder, VehicleDetailsComponent],
+    imports: [CommonModule, VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule, VehicleDetailsComponent],
     template: `
         <!-- Cards Wrapper Container -->
         <div class="max-h-[calc(100vh-280px)] overflow-y-scroll scrollbar-hide mt-4">
@@ -35,7 +35,7 @@ import { VehicleDetailsComponent } from "../vehicle-details/vehicle-details.comp
         </div>
 
         <ng-template #vehicleDetailsTemplate>
-            <app-vehicle-details [vehicle]="selectedVehicle$ | async"/>
+            <app-vehicle-details [vehicle]="selectedVehicle$ | async" (actionExecuted)="onActionExecuted($event)"/>
         </ng-template>
 
     `,
@@ -55,14 +55,69 @@ export class VehicleListComponent {
     trackByVehicleId = (index: number, vehicle: any) => vehicle?.id ?? index;
 
     onVehicleSelected(vehicle: any) {
-        console.log(vehicle);
-        this.store.dispatch(selectVehicle({ vehicle }));
-        this.uiService.openDrawer(this.vehicleDetailsTemplate, 'Approve Rtd');
+    console.log('Selected vehicle:', vehicle);
 
+    // Step 1: Stop previous polling (if any)
+    this.store.dispatch(stopSingleVehiclePolling());
+
+    // Step 2: Start polling this new vehicle
+    this.store.dispatch(startSingleVehiclePolling({ vehicleId: vehicle.id }));
+
+    // Step 4: Open side drawer
+    this.uiService.openDrawer(this.vehicleDetailsTemplate);
+  }
+
+    onActionExecuted(event: VehicleActionEvent) {
+    switch(event.actionKey) {
+      case 'immobilizer':
+        this.handleImmobilizer(event.actionType);
+        break;
+      case 'dashCam':
+        this.openDashCam();
+        break;
+      case 'trackingLink':
+        this.openLiveTracking();
+        break;
+      case 'elocking':
+        this.handleELocking(event.actionType);
+        break;
+      // Add more cases as needed
+      default:
+        console.log('Unhandled action:', event);
     }
+  }
+
+  private handleImmobilizer(actionType: string) {
+    if (actionType === 'enable') {
+      // Call API to enable immobilizer
+      console.log('Enabling immobilizer...');
+    } else if (actionType === 'disable') {
+      // Call API to disable immobilizer
+      console.log('Disabling immobilizer...');
+    }
+  }
+
+  private handleELocking(actionType: string) {
+    if (actionType === 'enable') {
+      console.log('Locking vehicle...');
+    } else if (actionType === 'disable') {
+      console.log('Unlocking vehicle...');
+    }
+  }
+
+  private openDashCam() {
+    console.log('Opening dash cam...');
+    // Navigate to dash cam or open modal
+  }
+
+  private openLiveTracking() {
+    console.log('Opening live tracking...');
+    // Navigate to tracking page
+  }
 
     ngOnDestroy(): void {
         // Cleanup logic if needed
         console.log('VehicleListComponent destroyed and cleaned up');
+        
     }
 }

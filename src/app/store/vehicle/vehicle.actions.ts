@@ -32,6 +32,19 @@ export const selectVehicle = createAction(
   props<{ vehicle: any | null }>()
 );
 
-export const startVehiclePolling = createAction('[Vehicle] Start Polling');
+export const startVehiclesPolling = createAction('[Vehicle] Start Polling');
 
-export const stopVehiclePolling = createAction('[Vehicle] Stop Polling');
+export const stopVehiclesPolling = createAction('[Vehicle] Stop Polling');
+
+
+export const startSingleVehiclePolling = createAction(
+  '[Vehicle] Start Single Vehicle Polling',
+  props<{ vehicleId: string }>()
+);
+
+export const stopSingleVehiclePolling = createAction('[Vehicle] Stop Single Vehicle Polling');
+
+export const updateSelectedVehicle = createAction(
+  '[Vehicle] Update Selected Vehicle',
+  props<{ vehicle: any }>()
+);
