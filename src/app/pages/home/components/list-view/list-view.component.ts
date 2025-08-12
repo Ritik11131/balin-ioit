@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { TabsModule } from 'primeng/tabs';
 import { listViewTabs } from '../../../../shared/constants/list-view';
@@ -7,7 +7,7 @@ import { listViewTabs } from '../../../../shared/constants/list-view';
     imports: [TabsModule, NgComponentOutlet],
     template: `
             <div class="bg-[#F9F9F9] shadow-sm border border-gray-200 p-4 h-full">
-    <p-tabs [(value)]="activeTabIndex" class="h-full">
+    <p-tabs [(value)]="activeTabIndex" class="h-full" (valueChange)="onTabChange($event)">
         <p-tablist>
             @for (tab of tabs; track tab.value) {
                 <p-tab [value]="tab.value">{{ tab.title }}</p-tab>
@@ -35,12 +35,18 @@ import { listViewTabs } from '../../../../shared/constants/list-view';
     ]
 })
 export class ListViewComponent {
-  activeTabIndex = 0;
-    
-  tabs = listViewTabs
+    activeTabIndex = 0;
+
+    tabs = listViewTabs;
+
+    @Output() tabChange = new EventEmitter<number>();
 
     getActiveComponent() {
         const activeTab = this.tabs.find(tab => tab.value === this.activeTabIndex);
         return activeTab?.component || null;
+    }
+
+    onTabChange(event: any) {
+        this.tabChange.emit(event);
     }
 }

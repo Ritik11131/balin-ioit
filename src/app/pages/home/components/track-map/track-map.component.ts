@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, inject } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, inject, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
@@ -31,6 +31,7 @@ import {
 } from '../../../../store/vehicle/vehicle.selectors';
 import { loadVehicles, searchVehicles } from '../../../../store/vehicle/vehicle.actions';
 import { Store } from '@ngrx/store';
+import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
 
 // Extend the Leaflet namespace to include MarkerClusterGroup
 declare global {
@@ -419,9 +420,12 @@ interface VehicleData {
     
     `]
 })
-export class TrackMapComponent implements AfterViewInit, OnDestroy {
+export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
+  @Input() activeTab: 'vehicles' | 'geofences' = 'vehicles';
+  
   private map!: L.Map;
-  private markersLayer!: LayerGroup;
+  private vehicleLayer!: LayerGroup;
+  private geofenceLayer!: L.FeatureGroup;
   private clusterGroup!: MarkerClusterGroup;
   userLocationMarker?: Marker;
   private store = inject(Store);
@@ -453,12 +457,32 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
   searchTerm$: Observable<string> = this.store.select(selectSearchTerm);
   selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
+  geofences$ = this.store.select(selectGeofences);
+  selectedGeofence$ = this.store.select(selectSelectedGeofence);
+
   options = {
     layers: [this.mapLayers.street],
     zoom: 7,
     center: latLng([46.879966, -121.726909]),
     zoomControl: false // Remove default zoom controls
   };
+
+  ngOnChanges(changes: SimpleChanges) {
+  if (changes['activeTab']) {
+    this.destroy$.next(); // clean previous subscriptions
+
+    if (this.activeTab === 'vehicles') {
+      console.log('vehi');
+      
+      this.subscribeToVehicleUpdates();
+    } else if (this.activeTab === 'geofences') {
+      console.log('aaya');
+      
+      this.subscribeToGeofenceUpdates();
+    }
+  }
+}
+
 
   ngAfterViewInit(): void {
     // Subscribe to filtered vehicles to update map markers
@@ -480,13 +504,14 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
     this.initializeClusterGroup();
     
     // Initialize regular markers layer
-    this.markersLayer = new LayerGroup();
+    this.vehicleLayer = new LayerGroup();
+    this.geofenceLayer = L.featureGroup();
 
     // Add the appropriate layer to map
     if (this.clusteringEnabled) {
       this.clusterGroup.addTo(this.map);
     } else {
-      this.markersLayer.addTo(this.map);
+      this.vehicleLayer.addTo(this.map);
     }
 
     // Set up map event handlers
@@ -523,18 +548,74 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
 
     this.selectedVehicle$.pipe(
       takeUntil(this.destroy$)).subscribe((vehicle) => {
-        if(this.map && vehicle) {
-          this.updateMapMarkers([vehicle],true);
+        if (this.map && vehicle) {
+          this.updateMapMarkers([vehicle], true);
         }
       })
   }
 
+  private subscribeToGeofenceUpdates(): void {
+    this.geofences$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((geofences) => {
+        if (this.map) {
+          console.log(geofences);
+          this.updateMapGeofences(geofences);
+        }
+      });
+
+    this.selectedGeofence$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((geofence) => {
+        if (this.map && geofence) {
+          console.log(geofence);
+        this.updateMapGeofences([geofence]);
+        }
+      });
+  }
+
+  private updateMapGeofences(geofences: any[]): void {
+    // 🧹 Clear vehicle markers when showing geofences
+    if (this.clusteringEnabled && this.clusterGroup) {
+      this.clusterGroup.clearLayers();
+    }
+    if (this.vehicleLayer) {
+      this.vehicleLayer.clearLayers();
+    }
+
+    // 🧹 Clear old geofences
+    if (this.geofenceLayer) {
+      this.geofenceLayer.clearLayers();
+    }
+
+    if(!geofences || geofences.length === 0) {
+      console.log('No geofences to display on map');
+      return;
+    }
+
+    geofences.forEach(g => {
+    const geofenceLayer = this.createGeofenceLayer(g);
+    geofenceLayer.addTo(this.geofenceLayer);
+  });
+
+  this.geofenceLayer.addTo(this.map);
+
+  if (this.geofenceLayer && this.geofenceLayer.getLayers().length > 0) {
+  this.map.fitBounds(this.geofenceLayer.getBounds(), { padding: [20, 20] });
+}
+
+  }
+
   private updateMapMarkers(vehicles: VehicleData[], isSingleSubscribed?:boolean): void {
+    // 🧹 Clear geofences when showing vehicles
+    if (this.geofenceLayer) {
+      this.geofenceLayer.clearLayers();
+    }
     // Clear existing markers
     if (this.clusteringEnabled && this.clusterGroup) {
       this.clusterGroup.clearLayers();
-    } else if (this.markersLayer) {
-      this.markersLayer.clearLayers();
+    } else if (this.vehicleLayer) {
+      this.vehicleLayer.clearLayers();
     }
 
     if (!vehicles || vehicles.length === 0) {
@@ -563,8 +644,8 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
     // Add markers to appropriate layer
     if (this.clusteringEnabled && this.clusterGroup) {
       this.clusterGroup.addLayers(markers);
-    } else if (this.markersLayer) {
-      markers.forEach(marker => this.markersLayer.addLayer(marker));
+    } else if (this.vehicleLayer) {
+      markers.forEach(marker => this.vehicleLayer.addLayer(marker));
     }
 
     // Fit map bounds to show all markers if there are vehicles
@@ -572,6 +653,53 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
       setTimeout(() => this.fitMapToMarkers(validVehicles, isSingleSubscribed), 100);
     }
   }
+
+
+  private createGeofenceLayer(geofence: any): L.Layer {
+  try {
+    const parsedGeometry = JSON.parse(geofence.geofenceGeometry);
+    const color = geofence.color || '#3388ff';
+
+    // Create a FeatureGroup so we can call getBounds()
+    const geofenceGroup = L.featureGroup();
+
+    if (parsedGeometry.type === 'FeatureCollection') {
+      parsedGeometry.features.forEach((feature: any) => {
+        const { geometry, properties } = feature;
+
+        if (geometry.type === 'Polygon') {
+          const coords = geometry.coordinates[0].map((coord: number[]) => [coord[1], coord[0]]);
+          const polygon = L.polygon(coords, {
+            color: color,
+            weight: 2,
+            fillOpacity: 0.3
+          });
+          geofenceGroup.addLayer(polygon);
+        } 
+        
+        else if (geometry.type === 'Point') {
+          const lat = geometry.coordinates[1];
+          const lng = geometry.coordinates[0];
+          const radius = properties?.radius || geofence.radius || 100;
+
+          const circle = L.circle([lat, lng], {
+            radius: radius,
+            color: color,
+            weight: 2,
+            fillOpacity: 0.3
+          });
+          geofenceGroup.addLayer(circle);
+        }
+      });
+    }
+
+    return geofenceGroup;
+  } catch (error) {
+    console.error('Error parsing geofence geometry:', error);
+    return L.featureGroup(); // Return empty layer if failed
+  }
+}
+
 
   private createVehicleMarker(vehicle: VehicleData): Marker | null {
     try {
@@ -797,11 +925,11 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy {
     this.clusteringEnabled = !this.clusteringEnabled;
     
     if (this.clusteringEnabled) {
-      this.map.removeLayer(this.markersLayer);
+      this.map.removeLayer(this.vehicleLayer);
       this.clusterGroup.addTo(this.map);
     } else {
       this.map.removeLayer(this.clusterGroup);
-      this.markersLayer.addTo(this.map);
+      this.vehicleLayer.addTo(this.map);
     }
 
     this.filteredVehicles$.pipe(takeUntil(this.destroy$)).subscribe(vehicles => {

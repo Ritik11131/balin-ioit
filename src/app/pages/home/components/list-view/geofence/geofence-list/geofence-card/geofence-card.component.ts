@@ -19,7 +19,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
             <!-- Right Content -->
             <div class="ml-4 flex flex-col overflow-hidden">
                 <div class="text-sm font-semibold text-gray-600 truncate">
-                    {{ geofence.name }}
+                    {{ geofence.geometryName }}
                 </div>
                 <div class="text-xs text-gray-500 truncate">{{ geofence.linkedDevices }} Linked Devices</div>
             </div>
@@ -43,7 +43,7 @@ export class GeofenceCardComponent {
         };
     }
 
-    onCardClick() {
+    onCardClick() {        
         this.cardSelected.emit(this.geofence);
     }
 }
