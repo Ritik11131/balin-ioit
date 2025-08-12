@@ -8,6 +8,7 @@ import { loadGeofences } from '../../store/geofence/geofence.actions';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { selectVehiclesLoaded } from '../../store/vehicle/vehicle.selectors';
 import { selectGeofenceLoaded } from '../../store/geofence/geofence.selectors';
+import { UiService } from '../../layout/service/ui.service';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +28,7 @@ import { selectGeofenceLoaded } from '../../store/geofence/geofence.selectors';
 })
 export class HomeComponent implements OnInit {
   private store = inject(Store);
+  private uiService = inject(UiService);
   private destroy$ = new Subject<void>();
 
   vehiclesLoaded$: Observable<boolean> = this.store.select(selectVehiclesLoaded);
@@ -42,6 +44,7 @@ export class HomeComponent implements OnInit {
 
   onListTabChange(index: number) {
     this.store.dispatch(stopSingleVehiclePolling());
+    this.uiService.closeDrawer();
     this.activeTab = index === 0 ? 'vehicles' : 'geofences';
     
     if (index === 0) {

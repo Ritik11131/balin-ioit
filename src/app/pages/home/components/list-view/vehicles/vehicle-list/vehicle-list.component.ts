@@ -3,11 +3,10 @@ import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { VehicleSkeletonCardComponent } from './vehicle-skeleton-card/vehicle-skeleton-card.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
-import { selectVehicle, startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
+import { startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
 import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
 import { CommonModule } from '@angular/common';
 import { UiService } from '../../../../../../layout/service/ui.service';
-import { CdkDragPlaceholder } from "@angular/cdk/drag-drop";
 import { VehicleActionEvent, VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
 
 @Component({

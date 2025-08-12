@@ -1,0 +1,48 @@
+<div class="container mx-auto max-w-4xl px-4 py-6">
+
+    <!-- Vehicle Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-3 group">
+            <span class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">
+                {{ geofence?.geometryName || 'Loading...' }}
+            </span>
+        </div>
+        <div>
+            <p-button icon="pi pi-ellipsis-v" [outlined]="true" (click)="menu.toggle($event)"></p-button>
+            <p-tieredMenu appendTo="body" #menu [model]="geofenceMenuItems" [popup]="true"></p-tieredMenu>
+        </div>
+    </div>
+
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4 text-gray-700">
+        <ng-container *ngIf="geofence; else skeletonView">
+            <div class="card-box">
+                <div class="label">Radius</div>
+                <div>{{ geofence.radius }} km</div>
+            </div>
+            <div class="card-box" [style.backgroundColor]="geofence.color" [style.color]="'white'">
+                <div class=" font-bold text-white">Color</div>
+                <div>{{ geofence.color }}</div>
+            </div>
+        </ng-container>
+    </div>
+    <div class="mt-4">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3">Linked Vehicles</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4 text-gray-700">
+            @for (linkedVehicles of geofenceLinkedVehicles; track $index) {
+                <div class="card-box">
+                    <div class="label">{{linkedVehicles?.name}}</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Skeleton Loaders -->
+    <ng-template #skeletonView>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ng-container *ngFor="let i of [1, 2, 3, 4]">
+                <p-skeleton height="60px" borderRadius="8px"></p-skeleton>
+            </ng-container>
+        </div>
+    </ng-template>
+</div>

@@ -31,4 +31,15 @@ export class GeofenceService {
         })
       );
     }
+
+
+    async fetchGeofenceLinkedVehicles(geofenceId: string): Promise<any> {
+      try {
+        const response = await this.http.get<any>('GeofenceLink/ByGeofenceId', {}, geofenceId);
+        return response?.data || [];
+      } catch (error) {
+        console.error('Error fetching linked vehicles for geofence:', error);
+        throw error;
+      }
+    }
 }
