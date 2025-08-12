@@ -42,7 +42,7 @@ export class HomeComponent implements OnInit {
               if (!loaded) {
                 this.store.dispatch(loadVehicles());
               }
-            });
+        });
        
     }
 

@@ -4,9 +4,19 @@
     border-radius: 0.5rem;
     background-color: #f9fafb;
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  }
+}
 
-  .label {
+.label {
     font-weight: 600;
     color: #4b5563;
-  }
+}
+
+
+:host ::ng-deep .p-tablist-tab-list,
+:host ::ng-deep .p-tabpanels {
+    background: none;
+}
+
+:host ::ng-deep .p-tabpanels {
+    padding: 0;
+}
