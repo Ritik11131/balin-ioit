@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpService } from './http.service'; // Adjust the path as necessary
+import { logout } from '../../store/core/action';
+import { Store } from '@ngrx/store';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private token: string | null = null;
+  private store = inject(Store);
 
   constructor(private httpService: HttpService) {}
 
@@ -28,6 +31,7 @@ export class AuthService {
   logout(): void {
     this.token = null;
     localStorage.removeItem('access_token'); // Clear token from local storage
+    this.store.dispatch(logout());
   }
 
   /**

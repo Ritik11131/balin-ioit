@@ -84,7 +84,6 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                 [showCurrentPageReport]="true"
                 [showGridlines]="true"
                 responsiveLayout="scroll"
-                [responsive]="true"
                 [tableStyle]="{ 'min-width': '75rem' }"
                 [globalFilterFields]="tableConfig.globalFilterFields"
             >

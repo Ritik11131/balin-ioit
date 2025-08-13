@@ -20,6 +20,7 @@ import { usersReducer } from './app/store/users/users.reducer';
 import { UsersEffects } from './app/store/users/users.effects';
 import { devicesReducer } from './app/store/devices/devices.reducer';
 import { DevicesEffects } from './app/store/devices/devices.effects';
+import { clearStateMetaReducer } from './app/store/core/clear-state-reducer';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -43,7 +44,10 @@ export const appConfig: ApplicationConfig = {
     userConfiguration: userConfigurationReducer,
     users: usersReducer,
     devices: devicesReducer
-  }),
+  },
+ {
+        metaReducers: [clearStateMetaReducer] // << Apply nuclear reset
+      }),
   provideEffects([
     VehicleEffects,
     UserConfigurationEffects,

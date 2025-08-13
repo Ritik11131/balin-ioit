@@ -71,7 +71,6 @@ editData = {
         if (event.key === 'create') {
           console.log(event);
           this.uiService.openDrawer(this.createUpdateUser)
-          
         }
   }
 
@@ -85,6 +84,7 @@ editData = {
 
   }
   onFormCancel() {
+    this.uiService.closeDrawer();
   }
 
 
