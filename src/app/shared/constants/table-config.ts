@@ -10,24 +10,31 @@ export const USER_TABLE_CONFIG = {
     ],
     showActionsColumn: {
         enabled: true, actions: [
-            {
-                label: 'File',
-                icon: 'pi pi-file',
+             {
+                label: 'Edit',
+                icon: 'pi pi-user-edit',
             },
             {
-                label: 'Edit',
-                icon: 'pi pi-file-edit',
+                label: 'Delete',
+                icon: 'pi pi-trash',
+            },
+            {
+                label: 'View Sub Users',
+                icon: 'pi pi-user-plus',
+            },
+            {
+                label: 'View Linked Devices',
+                icon: 'pi pi-link',
             },
             {
                 separator: true
             },
             {
-                label: 'Search',
-                icon: 'pi pi-search'
+                label: 'Login As Child',
+                icon: 'pi pi-sign-in'
             },
         ]
     },
-
     globalFilterFields: [],
     dataKey: 'id'
 };
@@ -47,18 +54,26 @@ export const DEVICE_TABLE_CONFIG = {
     showActionsColumn: {
         enabled: true, actions: [
             {
-                label: 'File',
+                label: 'Edit',
                 icon: 'pi pi-file',
             },
             {
-                label: 'Edit',
+                label: 'Delete',
+                icon: 'pi pi-file-edit',
+            },
+            {
+                label: 'View Sub Users',
+                icon: 'pi pi-file-edit',
+            },
+            {
+                label: 'Linked Devices',
                 icon: 'pi pi-file-edit',
             },
             {
                 separator: true
             },
             {
-                label: 'Search',
+                label: 'Login As Child',
                 icon: 'pi pi-search'
             },
         ]

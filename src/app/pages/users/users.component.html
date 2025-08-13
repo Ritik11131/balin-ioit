@@ -10,3 +10,13 @@
            />
         </div>
     </div>
+
+    <ng-template #createUpdateUser>
+    <app-generic-form-generator
+          [config]="createUserFormFields"
+          [initialData]="editData"
+          (formSubmit)="onUserFormSubmit($event)"
+          (formCancel)="onFormCancel()"
+          (formValueChanges)="onFormValueChange($event)"
+        ></app-generic-form-generator>
+    </ng-template>
