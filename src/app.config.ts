@@ -16,6 +16,8 @@ import { userConfigurationReducer } from './app/store/user-configuration/reducer
 import { UserConfigurationEffects } from './app/store/user-configuration/effects';
 import { GeofenceEffects } from './app/store/geofence/geofence.effects';
 import { geofenceReducer } from './app/store/geofence/geofence.reducer';
+import { usersReducer } from './app/store/users/users.reducer';
+import { UsersEffects } from './app/store/users/users.effects';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -36,12 +38,14 @@ export const appConfig: ApplicationConfig = {
   provideStore({
     vehicle: vehicleReducer,
     geofence: geofenceReducer,
-    userConfiguration: userConfigurationReducer
+    userConfiguration: userConfigurationReducer,
+    users: usersReducer
   }),
   provideEffects([
     VehicleEffects,
     UserConfigurationEffects,
-    GeofenceEffects
+    GeofenceEffects,
+    UsersEffects
   ]),
   provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
 ]

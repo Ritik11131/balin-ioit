@@ -56,8 +56,8 @@ export class GeofenceListComponent {
 
     async onGeofenceSelected(geofence: any): Promise<void> {
         this.store.dispatch(selectGeofence({ geofence }));
-        this.geofenceLinkedVehicles = await this.geofenceService.fetchGeofenceLinkedVehicles(geofence.id) ?? [];
         this.uiService.openDrawer(this.geofenceDetailsTemplate);
+        this.geofenceLinkedVehicles = await this.geofenceService.fetchGeofenceLinkedVehicles(geofence.id) ?? [];
     }
 
     trackByGeofenceId = (index: number, geofence: any) => geofence?.id ?? index;

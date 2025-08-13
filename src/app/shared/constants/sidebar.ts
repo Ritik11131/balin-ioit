@@ -15,13 +15,13 @@ export const sidebarItems = [
     name: 'Devices',
     key: 'devices',
     icon: 'pi pi-microchip',
-    route: '/devices'
+    route: '/pages/devices'
   },
   {
     name: 'Users',
     key: 'users',
     icon: 'pi pi-users',
-    route: '/users'
+    route: '/pages/users'
   }
 
   // Add more items as needed

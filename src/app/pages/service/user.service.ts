@@ -35,4 +35,25 @@ export class UserService {
         })
       );
     }
+
+    fetchUsers(): Observable<any[]> {      
+      return this.http.get$<any>('User').pipe(
+        map((response) => {
+          // Handle different response structures
+          if (response && response.result) {
+            return response?.data;
+          }
+         
+        }),
+        catchError((error) => {
+          console.error('Error fetching vehicles:', error);
+          // You could add more specific error handling here
+          return throwError(() => ({
+            message: 'Failed to fetch vehicles',
+            originalError: error,
+            timestamp: new Date()
+          }));
+        })
+      );
+    }
 }

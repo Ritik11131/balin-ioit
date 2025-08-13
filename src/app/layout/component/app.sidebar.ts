@@ -163,7 +163,7 @@ export class AppSidebar {
         console.log(url);
 
         // Find the navigation item that matches the current route
-        const matchedItem = this.sidebarNavigationItems.find((item) => url === `/${item.key}`);
+        const matchedItem = this.sidebarNavigationItems.find((item) => url === item.route);
         console.log(matchedItem);
 
         if (matchedItem) {

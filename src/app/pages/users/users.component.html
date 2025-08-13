@@ -1,0 +1,12 @@
+   <div class="p-8">
+       <div class="w-[calc(100vw-150px)]">
+           <app-generic-table
+           [selectedItems]="selectedRowItems"
+           [toolBarStartActions]="toolbarItems"
+           [tableConfig]="tableConfig"
+           [tableData]="(users$ | async)"
+           [isLoading]="isLoading$ | async"
+           (onToolBarStartAction)="handleToolBarActions($event)"
+           />
+        </div>
+    </div>
