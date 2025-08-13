@@ -11,7 +11,7 @@ export const USER_TABLE_CONFIG = {
     showActionsColumn: {
         enabled: true, actions: [
              {
-                label: 'Edit',
+                label: 'Update',
                 icon: 'pi pi-user-edit',
             },
             {

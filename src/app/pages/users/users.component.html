@@ -6,6 +6,7 @@
            [tableConfig]="tableConfig"
            [tableData]="(users$ | async)"
            [isLoading]="isLoading$ | async"
+           (onActionClick)="handleInTableActions($event)"
            (onToolBarStartAction)="handleToolBarActions($event)"
            />
         </div>
@@ -13,8 +14,8 @@
 
     <ng-template #createUpdateUser>
     <app-generic-form-generator
-          [config]="createUserFormFields"
-          [initialData]="editData"
+          [config]="formFields"
+          [initialData]="formFields.isEditMode ? editData : null"
           (formSubmit)="onUserFormSubmit($event)"
           (formCancel)="onFormCancel()"
           (formValueChanges)="onFormValueChange($event)"

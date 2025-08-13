@@ -12,6 +12,7 @@ export class UiService {
   private readonly DEFAULT_DRAWER_STYLE_CLASS = '!w-full md:!w-96 lg:!w-[30rem]';
 
   // Private signals
+  private isDrawerModalSignal = signal(false);
   private isDrawerOpenSignal = signal(false);
   private drawerContentSignal = signal<TemplateRef<any> | null>(null);
   private drawerHeaderSignal = signal<string>(this.DEFAULT_DRAWER_HEADER);
@@ -19,6 +20,7 @@ export class UiService {
   private isLoadingSignal = signal(false);
 
   // Public readonly signals
+  isDrawerModal = this.isDrawerModalSignal.asReadonly()
   isDrawerOpen = this.isDrawerOpenSignal.asReadonly();
   drawerContent = this.drawerContentSignal.asReadonly();
   drawerStyleClass = this.drawerStyleClassSignal.asReadonly();
@@ -44,10 +46,11 @@ export class UiService {
     this.messageService.add({ severity, summary, detail });
   }
 
-  openDrawer(content: TemplateRef<any>, header = this.DEFAULT_DRAWER_HEADER, styleClass?: string): void {
+  openDrawer(content: TemplateRef<any>, header = this.DEFAULT_DRAWER_HEADER, styleClass?: string, modal: boolean = false): void {
     this.drawerContentSignal.set(content);
     this.drawerHeaderSignal.set(header);
     this.isDrawerOpenSignal.set(true);
+    this.isDrawerModalSignal.set(modal);
     if (styleClass) {
       this.drawerStyleClassSignal.set(styleClass);
     } else {

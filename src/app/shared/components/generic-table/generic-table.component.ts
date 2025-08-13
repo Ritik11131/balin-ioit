@@ -142,7 +142,7 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                         @if (tableConfig.showActionsColumn?.enabled) {
                             <td>
                                 <div>
-                                    <p-button icon="pi pi-ellipsis-v" [outlined]="true" (click)="menu.toggle($event)"></p-button>
+                                    <p-button icon="pi pi-ellipsis-v" [outlined]="true" (click)="openMenu($event, rowData, menu)"></p-button>
                                     <p-tieredMenu appendTo="body" #menu [model]="tableConfig.showActionsColumn?.actions" [popup]="true"></p-tieredMenu>
                                 </div>
                             </td>
@@ -179,6 +179,8 @@ export class GenericTableComponent {
     @Output() onSelectionChange = new EventEmitter<any>(); // Event emitter for row select
     @Output() onTableDropdownFilter = new EventEmitter<any>();
     @Output() onTableFilterByStatus = new EventEmitter<any>(); // Event emitter for filter by status
+    @Output() onActionClick = new EventEmitter<{ label: string, row: any }>();
+
 
     selectedRouteStatusType: any = 'all';
 
@@ -188,6 +190,20 @@ export class GenericTableComponent {
             dt.filterGlobal(input.value, 'contains');
         }
     }
+
+    openMenu(event: Event, row: any, menu: any) {
+  if (this.tableConfig?.showActionsColumn?.actions) {
+    const updatedActions = this.tableConfig.showActionsColumn.actions.map((action: any) => {
+      if (action.separator) return action;
+      return {
+        ...action,
+        command: () => this.onActionClick.emit({ label: action.label, row })
+      };
+    });
+    this.tableConfig.showActionsColumn.actions = updatedActions;
+  }
+  menu.toggle(event);
+}
 
     clearFilter(table: Table) {
         table.clear();

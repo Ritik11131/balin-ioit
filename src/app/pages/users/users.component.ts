@@ -9,7 +9,7 @@ import { loadUsers } from '../../store/users/users.actions';
 import { CommonModule } from '@angular/common';
 import { UiService } from '../../layout/service/ui.service';
 import { GenericFormGeneratorComponent } from '../../shared/components/generic-form-generator/generic-form-generator.component';
-import { CREATE_USER_FORM_FIELDS } from '../../shared/constants/forms';
+import { CREATE_USER_FORM_FIELDS, UPDATE_USER_FORM_FIELDS } from '../../shared/constants/forms';
 
 @Component({
   selector: 'app-users',
@@ -25,33 +25,28 @@ export class UsersComponent implements OnInit, OnDestroy {
   
   toolbarItems = USER_TABLE_TOOLBAR;
   tableConfig = USER_TABLE_CONFIG;
-  createUserFormFields = CREATE_USER_FORM_FIELDS;
-  selectedRowItems: any[] = [];
+  formFields = CREATE_USER_FORM_FIELDS;
+
   users$: Observable<any[]> = this.store.select(selectUsers);
   isLoading$: Observable<boolean> = this.store.select(selectUsersLoading);
   usersLoaded$: Observable<boolean> = this.store.select(selectUsersLoaded);
-editData = {
-    "id": 2,
-    "fkParentId": 1,
-    "fkCustomerId": 0,
-    "loginId": "balinadmin",
-    "password": "Balin@123",
-    "userName": "Balin Admin",
-    "userType": 1,
-    "userCategory": null,
-    "kycstatus": null,
-    "mobileNo": "9811441215",
-    email: "support@galvanic-infotech.com",
-    "passChangeTime": null,
-    "timezone": "05:30",
-    "isActive": 1,
-    "address": "noida",
-    "attributes": null,
-    "creationTime": 1711299532,
-    "lastUpdateOn": 1750399326,
-    "tblSimInventories": [],
-    "simnos": []
-};
+
+  editData!: any
+  selectedRowItems: any[] = [];
+
+  private actionHandlers: Record<string, (row: any) => void> = {
+    'Update': (row) => this.editHandler(row),
+    'Delete': (row) => console.log('Deleting', row),
+    'View Sub Users': (row) => console.log('Sub Users', row),
+    'View Linked Devices': (row) => console.log('Linked Devices', row),
+    'Login As Child': (row) => console.log('Login as Child', row)
+  };
+
+  handleInTableActions(event: any) {
+    const { label, row } = event;
+    this.actionHandlers[label]?.(row);
+  }
+
 
   ngOnInit(): void {
        this.usersLoaded$.pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
@@ -69,8 +64,8 @@ editData = {
 
   async handleToolBarActions(event: any): Promise<void> {
         if (event.key === 'create') {
-          console.log(event);
-          this.uiService.openDrawer(this.createUpdateUser)
+          this.formFields = CREATE_USER_FORM_FIELDS;
+          this.uiService.openDrawer(this.createUpdateUser,' ','',true)
         }
   }
 
@@ -84,7 +79,15 @@ editData = {
 
   }
   onFormCancel() {
+    this.formFields = CREATE_USER_FORM_FIELDS;
     this.uiService.closeDrawer();
+  }
+
+  editHandler(row: any) {
+    this.formFields = UPDATE_USER_FORM_FIELDS;
+    this.editData = row;
+    this.uiService.openDrawer(this.createUpdateUser,' ','',true)
+
   }
 
 

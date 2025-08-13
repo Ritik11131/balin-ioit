@@ -45,9 +45,8 @@ export const appConfig: ApplicationConfig = {
     users: usersReducer,
     devices: devicesReducer
   },
- {
-        metaReducers: [clearStateMetaReducer] // << Apply nuclear reset
-      }),
+  { metaReducers: [clearStateMetaReducer] }
+  ),
   provideEffects([
     VehicleEffects,
     UserConfigurationEffects,

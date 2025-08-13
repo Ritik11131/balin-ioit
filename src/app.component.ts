@@ -18,7 +18,7 @@ import { loadUserConfiguration } from './app/store/user-configuration/actions';
             <app-generic-loader />
         }
 
-        <app-generic-drawer [isOpen]="uiService.isDrawerOpen()" [contentTemplate]="uiService.drawerContent()" [header]="uiService.drawerHeader()" [styleClass]="uiService.drawerStyleClass()" />
+        <app-generic-drawer [modal]="uiService.isDrawerModal()" [isOpen]="uiService.isDrawerOpen()" [contentTemplate]="uiService.drawerContent()" [header]="uiService.drawerHeader()" [styleClass]="uiService.drawerStyleClass()" />
 
         <p-toast
             [life]="2000"
