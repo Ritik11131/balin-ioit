@@ -7,11 +7,12 @@ import { GenericLoaderComponent } from './app/shared/components/generic-loader/g
 import { GenericDrawerComponent } from './app/shared/components/generic-drawer/generic-drawer.component';
 import { Store } from '@ngrx/store';
 import { loadUserConfiguration } from './app/store/user-configuration/actions';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterModule, ToastModule, GenericLoaderComponent, GenericDrawerComponent],
+    imports: [RouterModule,ConfirmDialogModule, ToastModule, GenericLoaderComponent, GenericDrawerComponent],
     template: `
         <router-outlet></router-outlet>
         @if (uiService.isLoading()) {
@@ -33,6 +34,8 @@ import { loadUserConfiguration } from './app/store/user-configuration/actions';
                 '320px': { width: '80%' }
             }"
         />
+
+        <p-confirmdialog />
     `
 })
 export class AppComponent {

@@ -24,10 +24,10 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       {
         key: 'mobileNo',
         label: 'Mobile No.',
-        type: 'number',
+        type: 'text',
         required: true,
-        inputId:'withoutgrouping',
-        useGrouping: false,
+        // inputId:'withoutgrouping',
+        // useGrouping: false,
         // min: 10,
         // max: 10,
         gridCol: 1
@@ -98,10 +98,10 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       {
         key: 'mobileNo',
         label: 'Mobile No.',
-        type: 'number',
+        type: 'text',
         required: true,
-        inputId:'withoutgrouping',
-        useGrouping: false,
+        // inputId:'withoutgrouping',
+        // useGrouping: false,
         // min: 10,
         // max: 10,
         gridCol: 1

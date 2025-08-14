@@ -41,29 +41,31 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                 <app-table-skeleton />
             </div>
         } @else {
-            <p-toolbar styleClass="mb-6">
-                <ng-template #start>
-                    @for (toolBarStartAction of toolBarStartActions; track toolBarStartAction.key) {
-                        <p-button
-                            [severity]="toolBarStartAction.severity"
-                            [label]="toolBarStartAction.label"
-                            class="mr-2"
-                            [disabled]="toolBarStartAction?.dependentOnRow ? !(selectedItems.length === 1) : false"
-                            [icon]="toolBarStartAction.icon"
-                            [outlined]="toolBarStartAction.outlined"
-                            (onClick)="onToolBarStartAction.emit(toolBarStartAction)"
-                        />
-                    }
-
-                    @for (toolBarSplitAction of toolBarSplitActions; track toolBarSplitAction.key) {
-                        <p-splitbutton outlined [label]="toolBarSplitAction?.label" [model]="toolBarSplitAction.items" [disabled]="selectedItems.length !== 1" />
-                    }
-                </ng-template>
-
-                <ng-template #end>
-                    <p-button label="Export" icon="pi pi-upload" severity="secondary" />
-                </ng-template>
-            </p-toolbar>
+            @if(toolBarStartActions.length) {
+                <p-toolbar styleClass="mb-6">
+                    <ng-template #start>
+                        @for (toolBarStartAction of toolBarStartActions; track toolBarStartAction.key) {
+                            <p-button
+                                [severity]="toolBarStartAction.severity"
+                                [label]="toolBarStartAction.label"
+                                class="mr-2"
+                                [disabled]="toolBarStartAction?.dependentOnRow ? !(selectedItems.length === 1) : false"
+                                [icon]="toolBarStartAction.icon"
+                                [outlined]="toolBarStartAction.outlined"
+                                (onClick)="onToolBarStartAction.emit(toolBarStartAction)"
+                            />
+                        }
+    
+                        @for (toolBarSplitAction of toolBarSplitActions; track toolBarSplitAction.key) {
+                            <p-splitbutton outlined [label]="toolBarSplitAction?.label" [model]="toolBarSplitAction.items" [disabled]="selectedItems.length !== 1" />
+                        }
+                    </ng-template>
+    
+                    <ng-template #end>
+                        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+                    </ng-template>
+                </p-toolbar>
+            }
 
             @if (tableFilterByStatusConfig.length) {
                 <p-selectbutton class="mb-6" [options]="tableFilterByStatusConfig" [(ngModel)]="selectedRouteStatusType" (onChange)="handleTableFilterByStatusChange($event)" [allowEmpty]="false" />
@@ -192,18 +194,18 @@ export class GenericTableComponent {
     }
 
     openMenu(event: Event, row: any, menu: any) {
-  if (this.tableConfig?.showActionsColumn?.actions) {
-    const updatedActions = this.tableConfig.showActionsColumn.actions.map((action: any) => {
-      if (action.separator) return action;
-      return {
-        ...action,
-        command: () => this.onActionClick.emit({ label: action.label, row })
-      };
-    });
-    this.tableConfig.showActionsColumn.actions = updatedActions;
-  }
-  menu.toggle(event);
-}
+        if (this.tableConfig?.showActionsColumn?.actions) {
+            const updatedActions = this.tableConfig.showActionsColumn.actions.map((action: any) => {
+                if (action.separator) return action;
+                return {
+                    ...action,
+                    command: () => this.onActionClick.emit({ label: action.label, row })
+                };
+            });
+            this.tableConfig.showActionsColumn.actions = updatedActions;
+        }
+        menu.toggle(event);
+    }
 
     clearFilter(table: Table) {
         table.clear();

@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { map, catchError, retry, timeout } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
+import { UiService } from '../../layout/service/ui.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DeviceService {
 
-  constructor(private http: HttpService) { }
+  constructor(private http: HttpService, private uiService: UiService) { }
 
   fetchDevices(): Observable<any[]> {
       return this.http.get$<any>('device').pipe(
@@ -31,4 +32,15 @@ export class DeviceService {
         })
       );
     }
+
+
+     async fetchUserLinkedDevices(id: any): Promise<any> {
+    try {
+      const response = await this.http.get('device/GetByUserId', {}, id);
+      return response;
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error' ,error?.error?.data);
+      throw error;
+    }
+  }
 }

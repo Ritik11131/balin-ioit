@@ -42,7 +42,7 @@ import { ButtonModule } from 'primeng/button';
             </button>
             <app-configurator />
           </div>
-          <p-avatar icon="pi pi-user" class="mr-2" size="large" />
+          <p-avatar icon="pi pi-user" class="mr-2" shape="circle" />
         </div>
       </div>
 

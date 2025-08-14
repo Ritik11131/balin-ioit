@@ -381,7 +381,7 @@ export class GenericFormGeneratorComponent implements OnInit, OnChanges {
 
   onSubmit() {
     if (this.dynamicForm.valid) {
-      this.formSubmit.emit(this.dynamicForm.value);
+      this.formSubmit.emit({isEditMode:this.config.isEditMode, formValue:this.dynamicForm.value});
     } else {
       // Mark all fields as touched to show validation errors
       Object.keys(this.dynamicForm.controls).forEach(key => {

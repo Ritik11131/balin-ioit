@@ -6,7 +6,7 @@ import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import { apiInterceptor } from './app/pages/service/interceptors/auth.interceptor';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
@@ -25,6 +25,7 @@ import { clearStateMetaReducer } from './app/store/core/clear-state-reducer';
 export const appConfig: ApplicationConfig = {
     providers: [
   MessageService,
+  ConfirmationService,
   provideRouter(
     appRoutes,
     withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),

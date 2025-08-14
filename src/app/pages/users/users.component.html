@@ -1,23 +1,76 @@
-   <div class="p-8">
-       <div class="w-[calc(100vw-150px)]">
-           <app-generic-table
-           [selectedItems]="selectedRowItems"
-           [toolBarStartActions]="toolbarItems"
-           [tableConfig]="tableConfig"
-           [tableData]="(users$ | async)"
-           [isLoading]="isLoading$ | async"
-           (onActionClick)="handleInTableActions($event)"
-           (onToolBarStartAction)="handleToolBarActions($event)"
-           />
-        </div>
+<div class="p-8">
+    <div class="w-[calc(100vw-150px)]">
+        <app-generic-table [selectedItems]="selectedRowItems" [toolBarStartActions]="toolbarItems"
+            [tableConfig]="tableConfig" [tableData]="(users$ | async)" [isLoading]="isLoading$ | async"
+            (onActionClick)="handleInTableActions($event)" (onToolBarStartAction)="handleToolBarActions($event)" />
     </div>
+</div>
 
-    <ng-template #createUpdateUser>
-    <app-generic-form-generator
-          [config]="formFields"
-          [initialData]="formFields.isEditMode ? editData : null"
-          (formSubmit)="onUserFormSubmit($event)"
-          (formCancel)="onFormCancel()"
-          (formValueChanges)="onFormValueChange($event)"
-        ></app-generic-form-generator>
-    </ng-template>
+<ng-template #createUpdateUser>
+    <app-generic-form-generator [config]="formFields" [initialData]="formFields.isEditMode ? editData : null"
+        (formSubmit)="onUserFormSubmit($event)" (formCancel)="onFormCancel()"
+        (formValueChanges)="onFormValueChange($event)"></app-generic-form-generator>
+</ng-template>
+
+
+<ng-template #viewMoreDetails>
+    <div class="w-full mx-auto">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4 md:mb-6">
+            <div class="flex items-center gap-3">
+                <p-avatar [label]="(user?.userName?.[0] || '?').toUpperCase()" shape="circle"
+                    styleClass="shadow"></p-avatar>
+                <div>
+                    <div class="text-lg md:text-xl font-semibold text-gray-800">
+                        {{ user?.userName || 'Entity' }}
+                    </div>
+                    <div class="text-xs md:text-sm text-gray-500">{{ user?.email || '—' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <p-divider></p-divider>
+        <!-- Tabs -->
+        <p-tabs [(value)]="activeTab" class="bg-white rounded-xl shadow-sm border border-gray-100">
+            <p-tablist>
+                @for (tab of tabsConfig; track tab.key) {
+                <p-tab [value]="tab.key"><i [class]="tab.icon + ' mr-2'"></i>{{ tab.label }}</p-tab>
+                }
+            </p-tablist>
+
+            <p-tabpanels>
+                @for (tab of tabsConfig; track tab.key) {
+                <p-tabpanel [value]="tab.key">
+                     @if (tab.type === 'table') {
+                        <app-generic-table [tableConfig]="tab.tableConfig" [tableData]="dataMap[tab.key] || []" [isLoading]="loadingMap[tab.key]"/>
+                    }
+
+                    <!-- Card Type -->
+                    @if (tab.type === 'cards') {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @for (card of tab.cardFields; track card.key) {
+                        <div class="p-4 rounded-xl border border-gray-100 bg-gray-50">
+                            <div class="text-xs uppercase text-gray-500 mb-1">{{ card.label }}</div>
+                            <div class="text-sm font-medium text-gray-800">
+                                @if (card.chip) {
+                                <p-chip [label]="user?.[card.key] || '—'"></p-chip>
+                                } @else if (card.date) {
+                                {{ user?.[card.key] | date:'medium' }}
+                                } @else if (card.boolean) {
+                                {{ user?.[card.key] ? 'Enabled' : 'Disabled' }}
+                                } @else {
+                                {{ user?.[card.key] || '—' }}
+                                }
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    }
+
+                </p-tabpanel>
+                }
+            </p-tabpanels>
+        </p-tabs>
+    </div>
+</ng-template>
