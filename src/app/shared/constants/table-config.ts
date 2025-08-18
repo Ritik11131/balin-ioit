@@ -19,8 +19,8 @@ export const USER_TABLE_CONFIG = {
                 icon: 'pi pi-trash',
             },
             {
-                label: 'View More Details',
-                icon: 'pi pi-user-plus',
+                label: 'More',
+                icon: 'pi pi-ellipsis-v',
             },
             {
                 separator: true
@@ -50,27 +50,12 @@ export const DEVICE_TABLE_CONFIG = {
     showActionsColumn: {
         enabled: true, actions: [
             {
-                label: 'Edit',
-                icon: 'pi pi-file',
+                label: 'Update',
+                icon: 'pi pi-user-edit',
             },
             {
-                label: 'Delete',
-                icon: 'pi pi-file-edit',
-            },
-            {
-                label: 'View Sub Users',
-                icon: 'pi pi-file-edit',
-            },
-            {
-                label: 'Linked Devices',
-                icon: 'pi pi-file-edit',
-            },
-            {
-                separator: true
-            },
-            {
-                label: 'Login As Child',
-                icon: 'pi pi-search'
+                label: 'More',
+                icon: 'pi pi-ellipsis-v',
             },
         ]
     },

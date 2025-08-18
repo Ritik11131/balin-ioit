@@ -21,6 +21,8 @@ import { UsersEffects } from './app/store/users/users.effects';
 import { devicesReducer } from './app/store/devices/devices.reducer';
 import { DevicesEffects } from './app/store/devices/devices.effects';
 import { clearStateMetaReducer } from './app/store/core/clear-state-reducer';
+import { VehicleTypeEffects } from './app/store/vehicle-type/effects';
+import { vehicleTypeReducer } from './app/store/vehicle-type/reducer';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -44,7 +46,8 @@ export const appConfig: ApplicationConfig = {
     geofence: geofenceReducer,
     userConfiguration: userConfigurationReducer,
     users: usersReducer,
-    devices: devicesReducer
+    devices: devicesReducer,
+    vehicleType: vehicleTypeReducer,
   },
   { metaReducers: [clearStateMetaReducer] }
   ),
@@ -53,7 +56,8 @@ export const appConfig: ApplicationConfig = {
     UserConfigurationEffects,
     GeofenceEffects,
     UsersEffects,
-    DevicesEffects
+    DevicesEffects,
+    VehicleTypeEffects,
   ]),
   provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
 ]

@@ -55,6 +55,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-generic-form-generator',
@@ -70,6 +71,7 @@ import { SelectModule } from 'primeng/select';
     CheckboxModule,
     RadioButtonModule,
     CalendarModule,
+    DatePickerModule,
     AutoCompleteModule,
     ButtonModule,
     CardModule,
@@ -89,11 +91,11 @@ import { SelectModule } from 'primeng/select';
       class="grid gap-4"
       [ngClass]="{
         'grid-cols-1': config.columns === 1,
-        'grid-cols-1 md:grid-cols-2': config.columns === 2,
-        'grid-cols-1 md:grid-cols-2 lg:grid-cols-3': config.columns === 3,
-        'grid-cols-1 md:grid-cols-2 lg:grid-cols-4': config.columns === 4,
-        'grid-cols-1 md:grid-cols-2 lg:grid-cols-6': config.columns === 6,
-        'grid-cols-1 md:grid-cols-12': config.columns === 12
+        'grid-cols-2': config.columns === 2,
+        'grid-cols-3': config.columns === 3,
+        'grid-cols-4': config.columns === 4,
+        'grid-cols-6': config.columns === 6,
+        'grid-cols-12': config.columns === 12
       }"
     >
 
@@ -184,6 +186,13 @@ import { SelectModule } from 'primeng/select';
                   styleClass="w-full"
                 ></p-select>
               </ng-template>
+            }
+
+            @case ('date') {
+               <ng-container *ngTemplateOutlet="fieldWrapper; context: { field: field, input: dateInput }"></ng-container>
+                <ng-template #dateInput>
+                  <p-datepicker styleClass="w-full" [id]="field.key" [formControlName]="field.key" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false" />
+                </ng-template>
             }
 
           }

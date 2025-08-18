@@ -3,6 +3,7 @@ import { HttpService } from './http.service';
 import { map, catchError, retry, timeout } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import { UiService } from '../../layout/service/ui.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,9 +11,97 @@ import { UiService } from '../../layout/service/ui.service';
 export class UserService {
 
   private readonly apiTimeout = 10000; // 10 seconds
-    private readonly maxRetries = 3;
+  private readonly maxRetries = 3;
+  userTypes: { label: string; value: number }[] = [];
+  readonly DEFAULT_USER_TYPES = [
+    { label: 'Admin', value: 1 },
+    { label: 'User', value: 2 },
+  ];
   
-    constructor(private http:HttpService, private uiService: UiService) { }
+    constructor(private http:HttpService, private uiService: UiService, private authService: AuthService) { }
+
+
+    /**
+   * Centralized mapping of orgName → role definitions
+   */
+  private readonly USER_TYPE_CONFIG: Record<
+    string,
+    { admin: { label: string; value: number }[]; nonAdmin: { label: string; value: number }[] }
+  > = {
+    Torq: {
+      admin: [
+        { label: 'Admin', value: 1 },
+        { label: 'User', value: 2 },
+      ],
+      nonAdmin: [{ label: 'User', value: 2 }],
+    },
+    STC: {
+      admin: [
+        { label: 'End User', value: 2 },
+        { label: 'Financer', value: 1 },
+      ],
+      nonAdmin: [{ label: 'End User', value: 2 }],
+    },
+    'Thukral Electric Bikes Pvt. ltd.': {
+      admin: [
+        { label: 'End User', value: 2 },
+        { label: 'Financer', value: 1 },
+      ],
+      nonAdmin: [{ label: 'End User', value: 2 }],
+    },
+    default: {
+      admin: [
+        { label: 'Customer', value: 2 },
+        { label: 'Dealer', value: 1 },
+      ],
+      nonAdmin: [{ label: 'Customer', value: 2 }],
+    },
+  };
+
+  /**
+   * Initializes userTypes for current user/org
+   */
+  initializeUserTypes(config: any): void {
+    try {
+      const hasCreateDealerPermission =
+        config?.configJson?.webConfig?.permissions?.createDealer || false;
+      const isAdminUser =
+        this.authService?.userType === 'Admin' ||
+        this.authService?.userType === 'Super Admin';
+      const orgName = config?.title || 'default';
+
+      const roleConfig = this.USER_TYPE_CONFIG[orgName] || this.USER_TYPE_CONFIG['default'];
+
+      this.userTypes = hasCreateDealerPermission && isAdminUser
+        ? roleConfig.admin
+        : roleConfig.nonAdmin;
+    } catch {
+      this.userTypes = this.DEFAULT_USER_TYPES;
+    }
+  }
+
+  /**
+   * Returns a label for a given userType
+   */
+  getUserTypeLabel(type: number | string): string {
+    const numericType = Number(type);
+
+    if (!this.userTypes?.length) {
+      this.userTypes = this.DEFAULT_USER_TYPES;
+    }
+
+    const user = this.userTypes.find((v) => v.value === numericType);
+    if (user) return user.label;
+
+    const fallback = this.DEFAULT_USER_TYPES.find((v) => v.value === numericType);
+    if (fallback) return fallback.label;
+
+    if (numericType === 1) return 'Admin';
+    if (numericType === 2) return 'User';
+
+    return 'Unknown';
+  }
+
   
     fetchUserConfiguration(): Observable<any[]> {      
       return this.http.get$<any>('UserConfiguration').pipe(

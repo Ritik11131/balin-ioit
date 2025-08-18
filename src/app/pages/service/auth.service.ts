@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { HttpService } from './http.service'; // Adjust the path as necessary
 import { logout } from '../../store/core/action';
 import { Store } from '@ngrx/store';
+import { jwtDecode } from "jwt-decode";
+
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,16 @@ export class AuthService {
   private token: string | null = null;
   private store = inject(Store);
 
-  constructor(private httpService: HttpService) {}
+  public decodedToken: string | null = null;
+  public userName: string = '';
+  public userType:string = '';
+
+  constructor(private httpService: HttpService) {
+      if(this.getToken()) {
+      this.decodeToken();
+      this.setUserDetails(this.decodedToken);
+    }
+  }
 
   /**
    * Log in the user and store the token.
@@ -55,7 +66,29 @@ export class AuthService {
    * Get the token from local storage.
    * @returns The token if it exists, null otherwise.
    */
-  public getToken(): string | null {
+  public getToken(): any {
     return this.token || localStorage.getItem('access_token');
+  }
+
+  decodeToken(): void {
+    try {
+      this.decodedToken = jwtDecode(this.getToken());
+      console.log(this.decodedToken,'tokennnn');
+      
+    } catch (error) {
+      this.decodedToken = null;
+    }
+  }
+
+  private setUserDetails(decodedToken: any): void {
+    if (!decodedToken) return;
+
+    this.userName = decodedToken.unique_name || "";
+    this.userType =
+      decodedToken.role === "0"
+        ? "Super Admin"
+        : decodedToken.role === "2"
+        ? "Customer"
+        : "Admin";
   }
 }

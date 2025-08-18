@@ -7,6 +7,14 @@
            [tableData]="(devices$ | async)"
            [isLoading]="isLoading$ | async"
            (onToolBarStartAction)="handleToolBarActions($event)"
+           (onActionClick)="handleInTableActions($event)"
            />
         </div>
     </div>
+
+
+    <ng-template #createUpdateDevice>
+    <app-generic-form-generator [config]="formFields" [initialData]="formFields.isEditMode ? editData : null"
+        (formSubmit)="onUserFormSubmit($event)" (formCancel)="onFormCancel()"
+        (formValueChanges)="onFormValueChange($event)"></app-generic-form-generator>
+</ng-template>

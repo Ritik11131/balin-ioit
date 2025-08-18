@@ -69,7 +69,7 @@ dataMap: Record<string, any[]> = {
   private actionHandlers: Record<string, (row: any) => void> = {
     'Update': (row) => this.editHandler(row),
     'Delete': (row) => this.deleteHandler(row),
-    'View More Details': (row) => this.viewMoreDetailsHandler(row),
+    'More': (row) => this.viewMoreDetailsHandler(row),
     'Login As Child': (row) => console.log('Login as Child', row)
   };
 
