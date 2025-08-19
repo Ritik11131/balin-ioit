@@ -32,7 +32,7 @@
 
         <p-divider></p-divider>
         <!-- Tabs -->
-        <p-tabs [(value)]="activeTab" class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <p-tabs [(value)]="activeTab">
             <p-tablist>
                 @for (tab of tabsConfig; track tab.key) {
                 <p-tab [value]="tab.key"><i [class]="tab.icon + ' mr-2'"></i>{{ tab.label }}</p-tab>

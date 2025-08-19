@@ -11,6 +11,7 @@ export interface FormField {
   options?: { label: string; value: any }[];
   validators?: ValidationRule[];
   gridCol?: number; // 1-12 for specific column span
+  dataSource?: 'users' | 'deviceTypes' | 'vehicleTypes' | 'plans'; // NEW
   disabled?: any;
   rows?: number; // for textarea
   min?: number;

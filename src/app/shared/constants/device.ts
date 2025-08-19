@@ -36,7 +36,7 @@ export const DEVICE_DETAILS_TABS = [
         type: 'forms',
         formGroups: [
             {
-                formTitle: 'Create Device',
+                formTitle: 'Recharge Date',
                 columns: 2,
                 isEditMode: false,
                 fields: [
@@ -61,7 +61,8 @@ export const DEVICE_DETAILS_TABS = [
                         type: 'select',
                         placeholder: 'Select a user',
                         required: true,
-                        options: []
+                        options: [],
+                        dataSource: 'users' 
                     },
                 ]
             }

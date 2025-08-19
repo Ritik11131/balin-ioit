@@ -20,20 +20,20 @@
         <!-- Header -->
         <div class="flex items-center justify-between mb-4 md:mb-6">
             <div class="flex items-center gap-3">
-                <p-avatar [label]="(device?.userName?.[0] || '?').toUpperCase()" shape="circle"
+                <p-avatar [label]="('?').toUpperCase()" shape="circle"
                     styleClass="shadow"></p-avatar>
                 <div>
                     <div class="text-lg md:text-xl font-semibold text-gray-800">
-                        {{ device?.userName || 'Entity' }}
+                        {{ device?.vehicleNo || 'Entity' }}
                     </div>
-                    <div class="text-xs md:text-sm text-gray-500">{{ device?.email || '—' }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">{{ device?.deviceImei || '—' }}</div>
                 </div>
             </div>
         </div>
 
         <p-divider></p-divider>
         <!-- Tabs -->
-        <p-tabs [(value)]="activeTab" class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <p-tabs [(value)]="activeTab">
             <p-tablist>
                 @for (tab of tabsConfig; track tab.key) {
                 <p-tab [value]="tab.key"><i [class]="tab.icon + ' mr-2'"></i>{{ tab.label }}</p-tab>

@@ -22,6 +22,8 @@ import { TabsModule } from 'primeng/tabs';
 import { DEVICE_DETAILS_TABS } from '../../shared/constants/device';
 import { AvatarModule } from 'primeng/avatar';
 import { ChipModule } from 'primeng/chip';
+import { selectUsers } from '../../store/users/users.selectors';
+import { FormEnricherService } from '../service/form-enricher.service';
 
 
 @Component({
@@ -36,7 +38,8 @@ export class DevicesComponent implements OnDestroy, OnInit {
     private store = inject(Store);
     private uiService = inject(UiService);
     private userService = inject(UserService);
-    private deviceService = inject(DeviceService)
+    private deviceService = inject(DeviceService);
+    private formConfigEnricher = inject(FormEnricherService)
     private destroy$ = new Subject<void>();
 
     devices$: Observable<any[]> = this.store.select(selectAllDevices);
@@ -72,28 +75,6 @@ export class DevicesComponent implements OnDestroy, OnInit {
         });
     }
 
-    fillDropdownValues() {
-        // Device Types
-        this.store.select(selectDeviceTypes).subscribe(deviceTypes => {
-            if (deviceTypes) {
-                const deviceField = this.formFields.fields.find(f => f.key === 'fkDeviceType');
-                if (deviceField) {
-                    deviceField.options = deviceTypes.map(d => ({ label: d.name, value: d.id }));
-                }
-            }
-        });
-
-        // Vehicle Types
-        this.store.select(selectVehicleTypes).subscribe(vehicleTypes => {
-            if (vehicleTypes) {
-                const vehicleField = this.formFields.fields.find(f => f.key === 'fkVehicleType');
-                if (vehicleField) {
-                    vehicleField.options = vehicleTypes.map(v => ({ label: v.name, value: v.id }));
-                }
-            }
-        });
-    }
-
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
@@ -101,8 +82,10 @@ export class DevicesComponent implements OnDestroy, OnInit {
 
     async handleToolBarActions(event: any): Promise<void> {
         if (event.key === 'create') {
-            this.formFields = CREATE_DEVICE_FORM_FIELDS;
-            this.fillDropdownValues();
+            // this.formFields = CREATE_DEVICE_FORM_FIELDS;
+            this.formConfigEnricher.enrichForms([CREATE_DEVICE_FORM_FIELDS]).subscribe(res => {
+                this.formFields = res[0];
+            });
             this.uiService.openDrawer(this.createUpdateDevice, ' ', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
         }
     }
@@ -113,14 +96,17 @@ export class DevicesComponent implements OnDestroy, OnInit {
     };
 
     
-  async viewMoreDetailsHandler(row: any): Promise<void> {
-    console.log(row);
-    this.device = row;
-    this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
-    await Promise.all([
-      this.loadLinkedUsers(row.id)
-    ]);
-  }
+    async viewMoreDetailsHandler(row: any): Promise<void> {
+        console.log(row);
+        this.device = row;
+        this.formConfigEnricher.enrichForms(DEVICE_DETAILS_TABS).subscribe(res => {
+            this.tabsConfig = res;
+        });
+        this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
+        await Promise.all([
+            this.loadLinkedUsers(row.id)
+        ]);
+    }
 
   private async loadLinkedUsers(deviceId: number) {
     try {
@@ -139,8 +125,10 @@ export class DevicesComponent implements OnDestroy, OnInit {
     }
 
     async editHandler(row: any): Promise<void> {
-        this.formFields = UPDATE_DEVICE_FORM_FIELDS;
-        this.fillDropdownValues();
+        // this.formFields = UPDATE_DEVICE_FORM_FIELDS;
+        this.formConfigEnricher.enrichForms([UPDATE_DEVICE_FORM_FIELDS]).subscribe(res => {
+            this.formFields = res[0];
+        });
         this.uiService.openDrawer(this.createUpdateDevice, ' ', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
         await Promise.all([
             this.loadDeviceObject(row?.id)

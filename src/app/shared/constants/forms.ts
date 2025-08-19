@@ -56,8 +56,8 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       gridCol: 2,
       required: true,
       options: [
-        { label: 'Technology', value: 1 },
-        { label: 'Sports', value: 2 },
+        { label: 'Admin', value: 1 },
+        { label: 'Customer', value: 2 },
       ]
     },
     {
@@ -191,7 +191,8 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       placeholder: 'Select device type',
       gridCol: 2,
       required: true,
-      options: [] // dynamic from API
+      options: [], // dynamic from API
+       dataSource: 'deviceTypes'
     },
     {
       key: 'fkVehicleType',
@@ -200,7 +201,8 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       required: true,
       placeholder: 'Select vehicle type',
       gridCol: 2,
-      options: [] // dynamic from API
+      options: [], // dynamic from API
+      dataSource: 'vehicleTypes'
     },
     {
       key: 'simPhoneNumber',
@@ -304,7 +306,8 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'select',
       placeholder: 'Select plan',
       gridCol: 2,
-      options: []
+      options: [],
+      dataSource: 'plans'
     }
   ]
 };
@@ -353,7 +356,8 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       placeholder: 'Select device type',
       gridCol: 2,
       required: true,
-      options: [] // dynamic from API
+      options: [],
+      dataSource: 'deviceTypes' 
     },
     {
       key: 'fkVehicleType',
@@ -362,7 +366,8 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       required: true,
       placeholder: 'Select vehicle type',
       gridCol: 2,
-      options: [] // dynamic from API
+      options: [], // dynamic from API
+      dataSource: 'vehicleTypes'
     },
     {
       key: 'simPhoneNumber',
@@ -466,7 +471,8 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'select',
       placeholder: 'Select plan',
       gridCol: 2,
-      options: []
+      options: [],
+      dataSource: 'plans'
     }
   ]
 };
