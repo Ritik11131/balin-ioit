@@ -157,6 +157,16 @@ export class UserService {
     }
   }
 
+  async getUserListByDeviceId(id: any): Promise<any> {
+    try {
+      const response = await this.http.get('DeviceMapping/GetUserListByDeviceId', {}, id);
+      return response;
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error', error?.error?.data);
+      throw error;
+    }
+  }
+
   async updateUser(id: any,data: any): Promise<any> {
     try {
       const response = await this.http.put('User', id, data);

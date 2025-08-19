@@ -12,12 +12,21 @@ import { loadDevices } from '../../store/devices/devices.actions';
 import { UiService } from '../../layout/service/ui.service';
 import { UserService } from '../service/user.service';
 import { DeviceService } from '../service/device.service';
-import { CREATE_DEVICE_FORM_FIELDS } from '../../shared/constants/forms';
+import { CREATE_DEVICE_FORM_FIELDS, UPDATE_DEVICE_FORM_FIELDS } from '../../shared/constants/forms';
 import { GenericFormGeneratorComponent } from "../../shared/components/generic-form-generator/generic-form-generator.component";
+import { selectDeviceTypes } from '../../store/device-type/selectors';
+import { selectVehicleTypes } from '../../store/vehicle-type/selectors';
+import moment from 'moment';
+import { DividerModule } from 'primeng/divider';
+import { TabsModule } from 'primeng/tabs';
+import { DEVICE_DETAILS_TABS } from '../../shared/constants/device';
+import { AvatarModule } from 'primeng/avatar';
+import { ChipModule } from 'primeng/chip';
+
 
 @Component({
     selector: 'app-devices',
-    imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent],
+    imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent, DividerModule,TabsModule,AvatarModule,ChipModule],
     templateUrl: './devices.component.html',
     styleUrl: './devices.component.scss'
 })
@@ -37,15 +46,51 @@ export class DevicesComponent implements OnDestroy, OnInit {
     formFields = CREATE_DEVICE_FORM_FIELDS;
     toolbarItems = DEVICE_TABLE_TOOLBAR;
     tableConfig = DEVICE_TABLE_CONFIG;
+    tabsConfig: any = DEVICE_DETAILS_TABS;
 
     selectedRowItems: any[] = [];
     editData!: any
+    device!:any;
+    activeTab = 'details';
+    // Maps for generic handling
+    loadingMap: Record<string, boolean> = {
+        details: false,
+        linkedUsers: true,
+        config: false
+    };
+
+    dataMap: Record<string, any[]> = {
+        linkedUsers: []
+    };
+
 
 
     ngOnInit(): void {
         // Default load vehicles tab
         this.devicesLoaded$.pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
             if (!loaded) this.store.dispatch(loadDevices());
+        });
+    }
+
+    fillDropdownValues() {
+        // Device Types
+        this.store.select(selectDeviceTypes).subscribe(deviceTypes => {
+            if (deviceTypes) {
+                const deviceField = this.formFields.fields.find(f => f.key === 'fkDeviceType');
+                if (deviceField) {
+                    deviceField.options = deviceTypes.map(d => ({ label: d.name, value: d.id }));
+                }
+            }
+        });
+
+        // Vehicle Types
+        this.store.select(selectVehicleTypes).subscribe(vehicleTypes => {
+            if (vehicleTypes) {
+                const vehicleField = this.formFields.fields.find(f => f.key === 'fkVehicleType');
+                if (vehicleField) {
+                    vehicleField.options = vehicleTypes.map(v => ({ label: v.name, value: v.id }));
+                }
+            }
         });
     }
 
@@ -57,13 +102,36 @@ export class DevicesComponent implements OnDestroy, OnInit {
     async handleToolBarActions(event: any): Promise<void> {
         if (event.key === 'create') {
             this.formFields = CREATE_DEVICE_FORM_FIELDS;
+            this.fillDropdownValues();
             this.uiService.openDrawer(this.createUpdateDevice, ' ', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
         }
     }
 
     private actionHandlers: Record<string, (row: any) => void> = {
         'Update': (row) => this.editHandler(row),
+        'More': (row) => this.viewMoreDetailsHandler(row),
     };
+
+    
+  async viewMoreDetailsHandler(row: any): Promise<void> {
+    console.log(row);
+    this.device = row;
+    this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
+    await Promise.all([
+      this.loadLinkedUsers(row.id)
+    ]);
+  }
+
+  private async loadLinkedUsers(deviceId: number) {
+    try {
+      const res = await this.userService.getUserListByDeviceId(deviceId);
+      this.dataMap['linkedUsers'] = res?.data || [];
+    } catch {
+      this.dataMap['linkedUsers'] = [];
+    } finally {
+      this.loadingMap['linkedUsers'] = false;
+    }
+  }
 
     handleInTableActions(event: any) {
         const { label, row } = event;
@@ -71,48 +139,74 @@ export class DevicesComponent implements OnDestroy, OnInit {
     }
 
     async editHandler(row: any): Promise<void> {
-        // this.formFields = UPDATE_USER_FORM_FIELDS;
-        // this.uiService.openDrawer(this.createUpdateUser,' ','',true)
-        // await Promise.all([
-        //   this.loadUserObject(row?.id)
-        // ])
+        this.formFields = UPDATE_DEVICE_FORM_FIELDS;
+        this.fillDropdownValues();
+        this.uiService.openDrawer(this.createUpdateDevice, ' ', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
+        await Promise.all([
+            this.loadDeviceObject(row?.id)
+        ])
     }
 
-    async onUserFormSubmit(event: any): Promise<void> {
+    private async loadDeviceObject(userId: number) {
+        try {
+            const res = await this.deviceService.getDeviceDetailsById(userId);
+            this.editData = res?.data?.[0]
+                ? {
+                    ...res.data[0],
+                    installationOn: new Date(res.data[0].installationOn)
+                }
+                : null;
+
+        } catch (error) {
+            this.editData = null;
+        }
+    }
+
+    async onDeviceFormSubmit(event: any): Promise<void> {
         console.log('User form submitted:', event);
         const { isEditMode, formValue } = event;
         if (isEditMode) {
-            const mergedObj = { ...this.editData, ...formValue }
+            const mergedObj = { ...this.editData, ...formValue, attribute: JSON.stringify(formValue.attribute),
+                installationOn: moment(formValue?.installationOn)?.format("YYYY-MM-DD")  }
             console.log(mergedObj);
             await this.updateDevice(mergedObj?.id, mergedObj);
         } else {
             console.log('create');
-            const mergedObj = { ...formValue }
+            const mergedObj = {
+                ...formValue,
+                attributes: JSON.stringify({}),
+                installationOn: moment(formValue?.installationOn)?.format("YYYY-MM-DD")
+            };
             await this.createDevice(mergedObj);
         }
     }
 
+    async onConfigurationFormSubmit(event: any): Promise<void> {
+        console.log(event);
+        
+    }
 
-    private async updateDevice(id:any, data:any): Promise<void> {
+
+    private async updateDevice(id: any, data: any): Promise<void> {
         const res = await this.deviceService.updateDevice(id, data);
         this.uiService.closeDrawer();
-        this.uiService.showToast('success','Success', res?.data);
+        this.uiService.showToast('success', 'Success', res?.data);
         this.store.dispatch(loadDevices());
-      }
-    
-      private async createDevice(data: any): Promise<void> {
+    }
+
+    private async createDevice(data: any): Promise<void> {
         const res = await this.deviceService.createDevice(data);
         this.uiService.closeDrawer();
-        this.uiService.showToast('success','Success', res?.data);
+        this.uiService.showToast('success', 'Success', res?.data);
         this.store.dispatch(loadDevices());
-      }
-    
-      onFormValueChange($event: any) {
+    }
+
+    onFormValueChange($event: any) {
         console.log($event);
-    
-      }
-      onFormCancel() {
+
+    }
+    onFormCancel() {
         this.formFields = CREATE_DEVICE_FORM_FIELDS;
         this.uiService.closeDrawer();
-      }
+    }
 }

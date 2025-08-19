@@ -23,6 +23,8 @@ import { DevicesEffects } from './app/store/devices/devices.effects';
 import { clearStateMetaReducer } from './app/store/core/clear-state-reducer';
 import { VehicleTypeEffects } from './app/store/vehicle-type/effects';
 import { vehicleTypeReducer } from './app/store/vehicle-type/reducer';
+import { DeviceTypeEffects } from './app/store/device-type/effects';
+import { deviceTypeReducer } from './app/store/device-type/reducer';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -48,6 +50,7 @@ export const appConfig: ApplicationConfig = {
     users: usersReducer,
     devices: devicesReducer,
     vehicleType: vehicleTypeReducer,
+    deviceType: deviceTypeReducer
   },
   { metaReducers: [clearStateMetaReducer] }
   ),
@@ -58,6 +61,8 @@ export const appConfig: ApplicationConfig = {
     UsersEffects,
     DevicesEffects,
     VehicleTypeEffects,
+    DeviceTypeEffects,
+
   ]),
   provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
 ]

@@ -8,6 +8,8 @@ import { GenericDrawerComponent } from './app/shared/components/generic-drawer/g
 import { Store } from '@ngrx/store';
 import { loadUserConfiguration } from './app/store/user-configuration/actions';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { loadDeviceTypes } from './app/store/device-type/actions';
+import { loadVehicleTypes } from './app/store/vehicle-type/actions';
 
 @Component({
     selector: 'app-root',
@@ -49,5 +51,7 @@ export class AppComponent {
         this.titleService.init();
         // Load user configuration when app starts
         this.store.dispatch(loadUserConfiguration());
+        this.store.dispatch(loadDeviceTypes());
+        this.store.dispatch(loadVehicleTypes());
     }
 }

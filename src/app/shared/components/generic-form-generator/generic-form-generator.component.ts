@@ -81,7 +81,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 <div class="w-full">
    <!-- Form Title -->
   @if (config.formTitle) {
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-6">
       {{ config.formTitle }}
     </h2>
   }
@@ -180,7 +180,9 @@ import { DatePickerModule } from 'primeng/datepicker';
                 <p-select
                   [id]="field.key"
                   [formControlName]="field.key"
+                  [placeholder]="field.placeholder || ''"
                   [options]="field.options || []"
+                  [filter]="true"
                   optionLabel="label"
                   optionValue="value"
                   styleClass="w-full"

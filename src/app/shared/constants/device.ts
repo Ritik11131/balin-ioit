@@ -5,29 +5,27 @@ export const DEVICE_DETAILS_TABS = [
         key: 'details',
         type: 'cards', // cards | table
         cardFields: [
-            { label: 'User Name', key: 'userName' },
-            { label: 'Login ID', key: 'loginId' },
-            { label: 'Email', key: 'email' },
-            { label: 'Mobile No.', key: 'mobileNo' },
-            { label: 'Role', key: 'role', chip: true },
-            { label: 'Created', key: 'createdAt', date: true },
+            { label: 'Vehicle No', key: 'vehicleNo' },
+            { label: 'IMEI', key: 'deviceImei' },
+            { label: 'Device ID', key: 'deviceId' },
+            { label: 'Ph. No', key: 'simPhoneNumber' },
+            { label: 'Installation On', key: 'installationOn', date: true },
         ]
     },
     {
         label: 'Linked Users',
         icon: 'pi pi-users',
-        key: 'subUsers',
+        key: 'linkedUsers',
         type: 'table',
         tableConfig: {
-            title: 'Sub Users',
+            title: 'Linked Users',
             columns: [
                 { field: 'userName', header: 'User Name', minWidth: '10rem' },
                 { field: 'loginId', header: 'Login ID', minWidth: '10rem' },
                 { field: 'email', header: 'Email', minWidth: '10rem' },
                 { field: 'mobileNo', header: 'Mobile No.', minWidth: '10rem' },
-                { field: 'deviceCount', header: 'Device Count', minWidth: '4rem' },
             ],
-            globalFilterFields: ['userName','mobileNo'],
+            globalFilterFields: ['userName', 'mobileNo'],
             dataKey: 'id'
         }
     },
@@ -35,12 +33,40 @@ export const DEVICE_DETAILS_TABS = [
         label: 'Configuration',
         icon: 'pi pi-cog',
         key: 'config',
-        type: 'cards',
-        cardFields: [
-            { label: 'Time Zone', key: 'timeZone' },
-            { label: 'Alert Level', key: 'alertLevel', chip: true },
-            { label: 'Notifications', key: 'notificationsEnabled', boolean: true },
-            { label: 'Language', key: 'language' }
+        type: 'forms',
+        formGroups: [
+            {
+                formTitle: 'Create Device',
+                columns: 2,
+                isEditMode: false,
+                fields: [
+                    {
+                        key: 'installationOn',
+                        label: 'Installation Date',
+                        type: 'date',
+                        required: true,
+                        placeholder: 'Select installation date',
+                        gridCol: 2
+                    },
+                ]
+            },
+            {
+                formTitle: 'User Linking',
+                columns: 2,
+                isEditMode: false,
+                fields: [
+                    {
+                        key: 'linkUser',
+                        label: 'Link User',
+                        type: 'select',
+                        placeholder: 'Select a user',
+                        required: true,
+                        options: []
+                    },
+                ]
+            }
         ]
     }
+
+
 ];
