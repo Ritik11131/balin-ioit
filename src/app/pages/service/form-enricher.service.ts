@@ -4,6 +4,7 @@ import { combineLatest, map, Observable } from 'rxjs';
 import { selectDeviceTypes } from '../../store/device-type/selectors';
 import { selectVehicleTypes } from '../../store/vehicle-type/selectors';
 import { selectUsers } from '../../store/users/users.selectors';
+import { selectVehicles } from '../../store/vehicle/vehicle.selectors';
 
 @Injectable({
   providedIn: 'root'
@@ -17,12 +18,14 @@ export class FormEnricherService {
       this.store.select(selectDeviceTypes),
       this.store.select(selectVehicleTypes),
       this.store.select(selectUsers),
+      this.store.select(selectVehicles)
     ]).pipe(
-      map(([deviceTypes, vehicleTypes, users]) => {
+      map(([deviceTypes, vehicleTypes, users, vehicles]) => {
         const sourceMap: Record<string, any[]> = {
           deviceTypes,
           vehicleTypes,
           users,
+          vehicles
         };
 
         console.log(sourceMap,'map');

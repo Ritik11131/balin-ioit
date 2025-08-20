@@ -1,3 +1,5 @@
+import 'leaflet-trackplayer';
+
 import { Component, AfterViewInit, OnDestroy, inject, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,9 +31,10 @@ import {
   selectSearchTerm,
   selectSelectedVehicle
 } from '../../../../store/vehicle/vehicle.selectors';
-import { loadVehicles, searchVehicles } from '../../../../store/vehicle/vehicle.actions';
+import { loadVehicles, searchVehicles, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
 import { Store } from '@ngrx/store';
 import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
+import { PathReplayService } from '../../../service/path-replay.service';
 
 // Extend the Leaflet namespace to include MarkerClusterGroup
 declare global {
@@ -120,6 +123,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   private clusterGroup!: MarkerClusterGroup;
   userLocationMarker?: Marker;
   private store = inject(Store);
+  private pathReplayService = inject(PathReplayService);
   private destroy$ = new Subject<void>();
 
   public clusteringEnabled = true;
@@ -162,13 +166,9 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   if (changes['activeTab']) {
     this.destroy$.next(); // clean previous subscriptions
 
-    if (this.activeTab === 'vehicles') {
-      console.log('vehi');
-      
+    if (this.activeTab === 'vehicles') {      
       this.subscribeToVehicleUpdates();
-    } else if (this.activeTab === 'geofences') {
-      console.log('aaya');
-      
+    } else if (this.activeTab === 'geofences') {      
       this.subscribeToGeofenceUpdates();
     }
   }
@@ -242,7 +242,40 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
         if (this.map && vehicle) {
           this.updateMapMarkers([vehicle], true);
         }
-      })
+    })
+
+   this.pathReplayService.replayActive$
+  .pipe(takeUntil(this.destroy$))
+  .subscribe(active => {
+    if (active?.value) {
+      this.store.dispatch(stopSingleVehiclePolling());
+      this.clearLayers();
+      console.log("Replay mode is enabled in Track Component 🚀");
+
+      // ✅ Only call _init if formObj is available
+      if (active.formObj) {
+        this.pathReplayService?._initPathReplayFunc(active.formObj, this.map);
+      }
+
+    } else {
+      console.log("Replay mode disabled in Track Component ❌");
+    }
+  });
+
+  }
+
+  private clearLayers() {
+     if (this.clusteringEnabled && this.clusterGroup) {
+            this.clusterGroup.clearLayers();
+          }
+          if (this.vehicleLayer) {
+            this.vehicleLayer.clearLayers();
+          }
+
+          // 🧹 Clear old geofences
+          if (this.geofenceLayer) {
+            this.geofenceLayer.clearLayers();
+          }
   }
 
   private subscribeToGeofenceUpdates(): void {

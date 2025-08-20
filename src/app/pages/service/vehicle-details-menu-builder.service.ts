@@ -117,16 +117,16 @@ export class VehicleDetailsMenuBuilderService {
       icon: 'pi pi-camera',
       actionType: 'command'
     },
+    historyReplay: {
+      label: 'History Replay',
+      icon: 'pi pi-replay',
+      actionType: 'command'
+    },
 
     // Navigation actions
     trackingLink: {
       label: 'Live Tracking',
       icon: 'pi pi-map-marker',
-      actionType: 'navigation'
-    },
-    historyReplay: {
-      label: 'History Replay',
-      icon: 'pi pi-replay',
       actionType: 'navigation'
     },
     navigateToGoogle: {

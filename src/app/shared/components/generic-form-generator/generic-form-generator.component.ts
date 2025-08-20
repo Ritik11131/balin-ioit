@@ -11,7 +11,7 @@ export interface FormField {
   options?: { label: string; value: any }[];
   validators?: ValidationRule[];
   gridCol?: number; // 1-12 for specific column span
-  dataSource?: 'users' | 'deviceTypes' | 'vehicleTypes' | 'plans'; // NEW
+  dataSource?: 'users' | 'deviceTypes' | 'vehicleTypes' | 'plans' | 'vehicles'; // NEW
   disabled?: any;
   rows?: number; // for textarea
   min?: number;
@@ -184,6 +184,8 @@ import { DatePickerModule } from 'primeng/datepicker';
                   [placeholder]="field.placeholder || ''"
                   [options]="field.options || []"
                   [filter]="true"
+                  [virtualScroll]="true"
+                  [virtualScrollItemSize]="38"
                   optionLabel="label"
                   optionValue="value"
                   styleClass="w-full"

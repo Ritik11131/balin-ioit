@@ -8,6 +8,7 @@ import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.s
 import { CommonModule } from '@angular/common';
 import { UiService } from '../../../../../../layout/service/ui.service';
 import { VehicleActionEvent, VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
+import { PathReplayService } from '../../../../../service/path-replay.service';
 
 @Component({
     selector: 'app-vehicle-list',
@@ -49,6 +50,7 @@ export class VehicleListComponent {
 
     private store = inject(Store);
     private uiService = inject(UiService);
+    private pathReplayService = inject(PathReplayService);
     selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
     trackByVehicleId = (index: number, vehicle: any) => vehicle?.id ?? index;
@@ -79,6 +81,9 @@ export class VehicleListComponent {
         break;
       case 'elocking':
         this.handleELocking(event.actionType);
+        break;
+      case 'historyReplay':
+        this.handlePathReplay(event);
         break;
       // Add more cases as needed
       default:
@@ -112,6 +117,12 @@ export class VehicleListComponent {
   private openLiveTracking() {
     console.log('Opening live tracking...');
     // Navigate to tracking page
+  }
+
+  private handlePathReplay(event: any) {
+    console.log(event);
+    this.uiService.closeDrawer();
+    this.pathReplayService.startPathReplay({value: true, formObj: null});
   }
 
     ngOnDestroy(): void {
