@@ -5,11 +5,8 @@ import { TitleService } from './app/pages/service/title.service';
 import { ToastModule } from 'primeng/toast';
 import { GenericLoaderComponent } from './app/shared/components/generic-loader/generic-loader.component';
 import { GenericDrawerComponent } from './app/shared/components/generic-drawer/generic-drawer.component';
-import { Store } from '@ngrx/store';
-import { loadUserConfiguration } from './app/store/user-configuration/actions';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { loadDeviceTypes } from './app/store/device-type/actions';
-import { loadVehicleTypes } from './app/store/vehicle-type/actions';
+import { StoreService } from './app/pages/service/store.service';
 
 @Component({
     selector: 'app-root',
@@ -41,7 +38,7 @@ import { loadVehicleTypes } from './app/store/vehicle-type/actions';
     `
 })
 export class AppComponent {
-    private store = inject(Store);
+    private storeService = inject(StoreService);
     constructor(
         public uiService: UiService,
         private titleService: TitleService
@@ -50,8 +47,6 @@ export class AppComponent {
     ngOnInit(): void {
         this.titleService.init();
         // Load user configuration when app starts
-        this.store.dispatch(loadUserConfiguration());
-        this.store.dispatch(loadDeviceTypes());
-        this.store.dispatch(loadVehicleTypes());
+        this.storeService.startAutoRefresh();
     }
 }

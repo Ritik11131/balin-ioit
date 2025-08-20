@@ -1,4 +1,4 @@
-<div class="container mx-auto max-w-4xl px-4 py-6">
+<div class="container mx-auto max-w-4xl">
 
   <!-- Vehicle Header -->
   <div class="flex justify-between items-center mb-6">
@@ -28,64 +28,123 @@
     <p-tabpanels>
 
       <!-- Overview Tab -->
-      <p-tabpanel value="overview">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4 text-gray-700">
-          <ng-container *ngIf="vehicle; else skeletonOverview">
-            <div class="card-box">
-              <div class="label">Last Update</div>
-              <div>{{ vehicle.lastUpdated | timeAgo }}</div>
-            </div>
-            <div class="card-box">
-              <div class="label">Address</div>
-              <div>{{ vehicle.address }}</div>
-            </div>
-            <div class="card-box">
-              <div class="label">Speed</div>
-              <div>{{ vehicle.speed }} km/h</div>
-            </div>
-            <div class="card-box">
-              <div class="label">Odometer</div>
-              <div>{{ vehicle.details?.odometer }} km</div>
-            </div>
-          </ng-container>
-        </div>
-      </p-tabpanel>
+    <p-tabpanel value="overview">
+  <div class="text-sm mt-4">
+    <ng-container *ngIf="vehicle; else skeletonOverview">
+
+      <!-- Updated -->
+      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+        <span class="font-medium text-gray-500">Updated</span>
+        <span class="text-gray-800 font-semibold">{{ vehicle.lastUpdated | timeAgo }}</span>
+      </div>
+
+      <!-- Address -->
+      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+        <span class="font-medium text-gray-500">Address</span>
+        <span class="text-gray-800 font-semibold">{{ vehicle.address || '—' }}</span>
+      </div>
+
+       <!-- Speed -->
+      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+        <span class="font-medium text-gray-500">Speed</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">{{ vehicle?.apiObject?.position?.speed || 0 }}</span> km/h
+        </span>
+      </div>
+
+      <!-- Odometer -->
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+    </ng-container>
+  </div>
+</p-tabpanel>
+
+
 
       <!-- Sensors Tab -->
-      <p-tabpanel value="sensors">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4 text-gray-700">
-          <ng-container *ngIf="vehicle as d; else skeletonSensors">
-            <div class="card-box"><strong>Power:</strong> {{ d.ign ? 'On' : 'Off' }}</div>
-            <div class="card-box"><strong>External Battery:</strong> {{ d.extVolt }} V</div>
-            <div class="card-box"><strong>Internal Battery:</strong> {{ d.battPer }}%</div>
-            <div class="card-box"><strong>SOS:</strong> {{ d.sos ? 'Triggered' : 'Normal' }}</div>
-            <div class="card-box"><strong>GPS:</strong> {{ d.sat }} Satellites</div>
-            <div class="card-box"><strong>Speed:</strong> {{ d.speed }} km/h</div>
-            <div class="card-box"><strong>Odometer:</strong> {{ d.odometer }} km</div>
-            <div class="card-box"><strong>Parking:</strong> {{ d.motion ? 'No' : 'Yes' }}</div>
-            <div class="card-box"><strong>Wheel Status:</strong> {{ d.motion ? 'Rolling' : 'Stationary' }}</div>
-            <div class="card-box"><strong>Status:</strong> {{ d.status }}</div>
-            <div class="card-box"><strong>Immobilize:</strong> {{ d.blocked ? 'Yes' : 'No' }}</div>
-          </ng-container>
-        </div>
-      </p-tabpanel>
+     <p-tabpanel value="sensors">
+  <div class="text-sm mt-4">
+    <ng-container *ngIf="vehicle as d; else skeletonSensors">
+
+      <!-- Row -->
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">Power</span>
+        <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.ign ? 'On' : 'Off' }}</span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">External Battery</span>
+        <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.extVolt }} <span class="font-normal">V</span></span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">Internal Battery</span>
+        <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.battPer }}<span class="font-normal">%</span></span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">SOS</span>
+        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.sos ? 'Triggered' : 'Normal' }}</span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">GPS</span>
+        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.sat }} <span class="font-normal">Satellites</span></span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">Speed</span>
+        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.speed }} <span class="font-normal">km/h</span></span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.odometer }} <span class="font-normal">km</span></span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">Parking</span>
+        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.motion ? 'No' : 'Yes' }}</span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+        <span class="font-medium text-gray-500">Wheel Status</span>
+        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.motion ? 'Rolling' : 'Stationary' }}</span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Immobilize</span>
+        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.blocked ? 'Yes' : 'No' }}</span>
+      </div>
+
+    </ng-container>
+  </div>
+</p-tabpanel>
+
 
     </p-tabpanels>
   </p-tabs>
 
   <!-- Skeleton Loaders -->
   <ng-template #skeletonOverview>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 gap-4">
       <ng-container *ngFor="let i of [1, 2, 3, 4]">
-        <p-skeleton height="60px" borderRadius="8px"></p-skeleton>
+        <p-skeleton height="40px" borderRadius="8px"></p-skeleton>
       </ng-container>
     </div>
   </ng-template>
 
   <ng-template #skeletonSensors>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 gap-4">
       <ng-container *ngFor="let i of [1, 2, 3, 4, 5, 6]">
-        <p-skeleton height="60px" borderRadius="8px"></p-skeleton>
+        <p-skeleton height="40px" borderRadius="8px"></p-skeleton>
       </ng-container>
     </div>
   </ng-template>
