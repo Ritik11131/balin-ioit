@@ -122,7 +122,7 @@ export class VehicleListComponent {
   private handlePathReplay(event: any) {
     console.log(event);
     this.uiService.closeDrawer();
-    this.pathReplayService.startPathReplay({value: true, formObj: null});
+    this.pathReplayService.startPathReplay(null);
   }
 
     ngOnDestroy(): void {

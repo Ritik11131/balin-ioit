@@ -242,25 +242,30 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
         if (this.map && vehicle) {
           this.updateMapMarkers([vehicle], true);
         }
-    })
+      })
 
-   this.pathReplayService.replayActive$
-  .pipe(takeUntil(this.destroy$))
-  .subscribe(active => {
-    if (active?.value) {
-      this.store.dispatch(stopSingleVehiclePolling());
-      this.clearLayers();
-      console.log("Replay mode is enabled in Track Component 🚀");
+    this.pathReplayService.replayActive$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(active => {
+        console.log(active, 'active');
 
-      // ✅ Only call _init if formObj is available
-      if (active.formObj) {
-        this.pathReplayService?._initPathReplayFunc(active.formObj, this.map);
-      }
+        if (!active?.value) {
+          console.log('Disabled');
+          return
+        };
 
-    } else {
-      console.log("Replay mode disabled in Track Component ❌");
-    }
-  });
+        if (active?.value && !active.formObj) {
+          this.store.dispatch(stopSingleVehiclePolling());
+          this.clearLayers();
+          console.log("Replay mode is enabled in Track Component 🚀");
+        }
+
+        if (active?.value && active.formObj) {
+          this.pathReplayService._initPathReplayFunc(active.formObj, this.map);
+        }
+
+      });
+
 
   }
 

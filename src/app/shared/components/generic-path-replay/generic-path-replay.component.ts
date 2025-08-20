@@ -18,7 +18,7 @@ export class GenericPathReplayComponent {
 
   onFormSubmit(e: any) {
     console.log(e);
-    this.pathReplayService.startPathReplay({value: true, formObj: e});
+    this.pathReplayService.startPathReplay(e);
   }
 
 }
