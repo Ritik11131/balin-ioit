@@ -163,21 +163,31 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   };
 
   ngOnChanges(changes: SimpleChanges) {
-  if (changes['activeTab']) {
-    this.destroy$.next(); // clean previous subscriptions
+  if (!changes['activeTab']) return;
 
-    if (this.activeTab === 'vehicles') {      
-      this.subscribeToVehicleUpdates();
-    } else if (this.activeTab === 'geofences') {      
+  // Clean previous subscriptions
+  this.destroy$.next();
+
+  switch (this.activeTab) {
+    case 'vehicles':
+      // Delay to ensure map is initialized
+      setTimeout(() => this.subscribeToVehicleUpdates(), 100);
+      break;
+
+    case 'geofences':
       this.subscribeToGeofenceUpdates();
-    }
+      break;
+
+    default:
+      break;
   }
 }
 
 
+
   ngAfterViewInit(): void {
     // Subscribe to filtered vehicles to update map markers
-    this.subscribeToVehicleUpdates();
+    // this.subscribeToVehicleUpdates();
   }
 
   ngOnDestroy(): void {
@@ -229,6 +239,8 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private subscribeToVehicleUpdates(): void {
+     if (!this.map || !this.filteredVehicles$ || !this.selectedVehicle$ || !this.pathReplayService) return;
+
     this.filteredVehicles$.pipe(
       takeUntil(this.destroy$)
     ).subscribe((vehicles) => {
