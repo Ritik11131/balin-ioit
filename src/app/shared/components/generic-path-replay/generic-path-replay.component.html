@@ -76,6 +76,9 @@
                     <button
                         class="play-btn w-12 h-12 rounded-full bg-[var(--primary-color)] text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-md"
                         (click)="onTogglePlayPause()"
+                        [ngClass]="{ 
+                            'bg-yellow-500': (pathReplayService.playbackControlObject?.status || 'PlayBack') === 'Paused'
+                            }"
                         [title]="pathReplayService.playbackControlObject?.status === 'Started' || pathReplayService.playbackControlObject?.status === 'Moving' ? 'Pause' : 'Play'"
                     >
                         <i [class]="pathReplayService.playbackControlObject?.status === 'Started' || pathReplayService.playbackControlObject?.status === 'Moving' ? 'pi pi-pause' : 'pi pi-play'" class="text-lg"></i>

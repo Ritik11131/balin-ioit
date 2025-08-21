@@ -72,8 +72,14 @@ export class PathReplayService {
       this.trackPlayer = null;
     }
 
+    const primaryColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--primary-color')
+      .trim();
+    console.log(primaryColor, 'primary');
+
     this.trackPlayer = new (L as any).TrackPlayer(trackPathData, {
       speed: 500,
+      weight: 4,
       markerIcon: L.icon({
         iconUrl: 'images/home/car.png',
         iconSize: [27, 54],
@@ -81,15 +87,29 @@ export class PathReplayService {
         shadowUrl:
           'data:image/svg+xml;base64,' +
           btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="90" viewBox="0 0 32 60">
-          <ellipse cx="16" cy="50" rx="12" ry="8" fill="rgba(0,0,0,0.3)"/>
-        </svg>
-      `),
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="90" viewBox="0 0 32 60">
+            <ellipse cx="16" cy="50" rx="12" ry="8" fill="rgba(0,0,0,0.3)"/>
+          </svg>
+        `),
         shadowSize: [32, 60],
         shadowAnchor: [16, 30]
       }),
-      passedLineColor: '#00C851', // Modern green
-      notPassedLineColor: '#2196F3' // Professional blue
+      passedLineColor: primaryColor,
+      notPassedLineColor: '#2196F3',
+      polylineDecoratorOptions: {
+        patterns: [
+          {
+            offset: 30,
+            repeat: 60,
+            symbol: (L as any).Symbol.arrowHead({
+              pixelSize: 8,
+              headAngle: 75,
+              polygon: false,
+              pathOptions: { stroke: true, weight: 3, color: primaryColor },
+            }),
+          },
+        ],
+      },
     });
 
     this.trackPlayer.addTo(map); // <-- map is explicitly passed
@@ -97,6 +117,7 @@ export class PathReplayService {
     this.initializetrackListeners(trackPathData);
     this.playbackControlObject = this.initializePlayBackControlObject(map);
   }
+
 
   initializePlayBackControlObject(map: any) {
     return {
@@ -148,7 +169,7 @@ export class PathReplayService {
       this.playbackControlObject.updateProgress(event?.value / 100);
     } else if (control === 'close') {
       this.playbackControlObject.remove();
-      this._replayClosed.next(); 
+      this._replayClosed.next();
     } else if (control === 'reset') {
       this.playbackControlObject.reset();
     }
@@ -175,37 +196,37 @@ export class PathReplayService {
   }
 
   resetPathReplayService() {
-  // Stop and remove track player if exists
-  if (this.trackPlayer) {
-    this.trackPlayer.remove();
-    this.trackPlayer = null;
+    // Stop and remove track player if exists
+    if (this.trackPlayer) {
+      this.trackPlayer.remove();
+      this.trackPlayer = null;
+    }
+
+    // Reset replay state
+    this._replayActive.next({ value: false });
+    this._historyData.next([]);   // clear history data
+    this._replayClosed.next();    // notify listeners
+
+    // Reset playback controls
+    this.playbackControlObject = {
+      speed: 500,
+      progress: 0,
+      status: 'Idle',
+      start: () => { },
+      pause: () => { },
+      remove: () => { },
+      updateSpeed: () => { },
+      updateProgress: () => { },
+      reset: () => { }
+    };
+
+    // Reset vehicle history info
+    this.vehicleHistoryInfo = {
+      speed: 0,
+      timestamp: '00:00:00'
+    };
+
+    console.log('♻️ Path Replay fully reset');
   }
-
-  // Reset replay state
-  this._replayActive.next({ value: false });
-  this._historyData.next([]);   // clear history data
-  this._replayClosed.next();    // notify listeners
-
-  // Reset playback controls
-  this.playbackControlObject = {
-    speed: 500,
-    progress: 0,
-    status: 'Idle',
-    start: () => {},
-    pause: () => {},
-    remove: () => {},
-    updateSpeed: () => {},
-    updateProgress: () => {},
-    reset: () => {}
-  };
-
-  // Reset vehicle history info
-  this.vehicleHistoryInfo = {
-    speed: 0,
-    timestamp: '00:00:00'
-  };
-
-  console.log('♻️ Path Replay fully reset');
-}
 
 }
