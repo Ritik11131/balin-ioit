@@ -21,7 +21,7 @@ import {
   control
 } from 'leaflet';
 import 'leaflet.markercluster';
-import { Observable, Subject, takeUntil, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Observable, Subject, takeUntil, combineLatest, debounceTime, distinctUntilChanged, withLatestFrom } from 'rxjs';
 import { 
   selectVehicleLoading, 
   selectVehiclePolling, 
@@ -264,6 +264,20 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
           this.pathReplayService._initPathReplayFunc(active.formObj, this.map);
         }
 
+      });
+
+
+    this.pathReplayService.replayClosed$
+      .pipe(
+        withLatestFrom(this.filteredVehicles$), // get latest vehicles from store
+        takeUntil(this.destroy$)
+      )
+      .subscribe(([_, vehicles]) => {
+        console.log(vehicles, 'okkkkk');
+
+        if (this.map) {
+          this.updateMapMarkers(vehicles); // redraw markers
+        }
       });
 
 

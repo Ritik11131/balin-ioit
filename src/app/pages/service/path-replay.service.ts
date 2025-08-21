@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, Subject } from 'rxjs';
 import { CREATE_USER_FORM_FIELDS } from '../../shared/constants/forms';
 import { PATH_REPLAY_FORM_FIELDS } from '../../shared/constants/path-replay';
 import { FormEnricherService } from './form-enricher.service';
@@ -13,6 +13,13 @@ import { pathReplayConvertedValidJson } from '../../shared/utils/helper_function
 export class PathReplayService {
   private _replayActive = new BehaviorSubject<{ value: boolean; formObj?: any }>({ value: false });
   replayActive$ = this._replayActive.asObservable();
+
+  private _historyData = new BehaviorSubject<any[]>([]);
+  historyData$ = this._historyData.asObservable();
+  hasHistory$ = this.historyData$.pipe(map(d => d.length > 0));
+
+  private _replayClosed = new Subject<void>();
+  replayClosed$ = this._replayClosed.asObservable();
   private formConfigEnricher = inject(FormEnricherService);
   private http = inject(HttpService);
   private uiService = inject(UiService);
@@ -44,12 +51,15 @@ export class PathReplayService {
   }
 
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
+    this.uiService.toggleLoader(true);
     const response = await this.fetchHistory({
       DeviceId: '316',
       FromTime: '2025-08-20T00:00:00+05:30',
       ToTime: '2025-08-20T23:59:59+05:30'
     });
+    this.uiService.toggleLoader(false);
     const uniqueTrackPath = pathReplayConvertedValidJson(response?.data);
+    this._historyData.next(uniqueTrackPath);
     map.fitBounds(uniqueTrackPath);
 
     this.initilizeTrackPlayer(uniqueTrackPath, map);
@@ -102,8 +112,8 @@ export class PathReplayService {
         this.trackPlayer.pause();
       },
       remove: () => {
-        this.trackPlayer.remove();
         this.stopPathReplay();
+        this.resetPathReplayService();
       },
       updateSpeed: (updatedSpeed: any) => {
         this.playbackControlObject.speed = updatedSpeed;
@@ -118,7 +128,6 @@ export class PathReplayService {
         this.playbackControlObject.speed = 500;
         this.trackPlayer.setSpeed(500);
         this.trackPlayer.setProgress(0);
-        this.resetPathReplay();
       },
       status: 'PlayBack'
     };
@@ -139,6 +148,7 @@ export class PathReplayService {
       this.playbackControlObject.updateProgress(event?.value / 100);
     } else if (control === 'close') {
       this.playbackControlObject.remove();
+      this._replayClosed.next(); 
     } else if (control === 'reset') {
       this.playbackControlObject.reset();
     }
@@ -164,7 +174,7 @@ export class PathReplayService {
     });
   }
 
-  resetPathReplay() {
+  resetPathReplayService() {
   // Stop and remove track player if exists
   if (this.trackPlayer) {
     this.trackPlayer.remove();
@@ -173,6 +183,8 @@ export class PathReplayService {
 
   // Reset replay state
   this._replayActive.next({ value: false });
+  this._historyData.next([]);   // clear history data
+  this._replayClosed.next();    // notify listeners
 
   // Reset playback controls
   this.playbackControlObject = {

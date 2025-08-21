@@ -47,10 +47,7 @@ export class HomeComponent implements OnInit {
   activeTab: 'vehicles' | 'geofences' = 'vehicles';
 
   ngOnInit(): void {
-    // Default load vehicles tab
-    this.vehiclesLoaded$.pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
-      if (!loaded) this.store.dispatch(loadVehicles());
-    });
+
   }
 
   onListTabChange(index: number) {
