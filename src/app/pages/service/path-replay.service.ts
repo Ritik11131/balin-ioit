@@ -5,7 +5,7 @@ import { PATH_REPLAY_FORM_FIELDS } from '../../shared/constants/path-replay';
 import { FormEnricherService } from './form-enricher.service';
 import { HttpService } from './http.service';
 import { UiService } from '../../layout/service/ui.service';
-import { pathReplayConvertedValidJson } from '../../shared/utils/helper_functions';
+import { buildHistoryRequests, pathReplayConvertedValidJson } from '../../shared/utils/helper_functions';
 
 @Injectable({
   providedIn: 'root'
@@ -41,30 +41,52 @@ export class PathReplayService {
   }
 
   async fetchHistory(payload: any): Promise<any> {
+    this.uiService.toggleLoader(true);
     try {
       const response = await this.http.post('history', payload);
       return response;
     } catch (error: any) {
       this.uiService.showToast('error', 'Error', error?.error?.data);
       throw error;
+    } finally {
+    this.uiService.toggleLoader(false);
     }
   }
 
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
-    this.uiService.toggleLoader(true);
-    const response = await this.fetchHistory({
-      DeviceId: '316',
-      FromTime: '2025-08-20T00:00:00+05:30',
-      ToTime: '2025-08-20T23:59:59+05:30'
-    });
-    this.uiService.toggleLoader(false);
-    const uniqueTrackPath = pathReplayConvertedValidJson(response?.data);
-    this._historyData.next(uniqueTrackPath);
-    map.fitBounds(uniqueTrackPath);
+    const { formValue } = historyPayload;
 
-    this.initilizeTrackPlayer(uniqueTrackPath, map);
-    console.log('📡 Path Replay API Response:', response);
+    const requests = buildHistoryRequests(
+      formValue?.vehicle,
+      formValue?.date[0],
+      formValue?.date[1]
+    );
+
+    // Run requests in parallel
+    const responses = await Promise.all(
+      requests.map(r =>
+        this.fetchHistory({
+          DeviceId: r.deviceId,
+          FromTime: r.fromTime,
+          ToTime: r.toTime
+        })
+      )
+    );
+
+    // Merge all response data
+    const allData = responses.flatMap(res => res?.data || []);
+    const uniqueTrackPath = pathReplayConvertedValidJson(allData);
+    console.log(uniqueTrackPath);
+    
+
+    this._historyData.next(uniqueTrackPath);
+    if (uniqueTrackPath && uniqueTrackPath.length > 0) {
+      map.fitBounds(uniqueTrackPath);
+      this.initilizeTrackPlayer(uniqueTrackPath, map);
+    }
+    console.log('📡 Path Replay API Responses:', responses);
   }
+
 
   public initilizeTrackPlayer(trackPathData: any[], map: any) {
     if (this.trackPlayer) {

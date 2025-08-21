@@ -6,6 +6,7 @@ export interface FormField {
   required?: boolean;
   placeholder?: string;
   value?: any;
+  selectionMode?: "single" | "multiple" | "range" | undefined;
   inputId?:string;
   useGrouping?:any;
   options?: { label: string; value: any }[];
@@ -196,7 +197,7 @@ import { DatePickerModule } from 'primeng/datepicker';
             @case ('date') {
                <ng-container *ngTemplateOutlet="fieldWrapper; context: { field: field, input: dateInput }"></ng-container>
                 <ng-template #dateInput>
-                  <p-datepicker styleClass="w-full" [id]="field.key" [formControlName]="field.key" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false" />
+                  <p-datepicker styleClass="w-full" [id]="field.key" [formControlName]="field.key" [showIcon]="true" [selectionMode]="field?.selectionMode" [readonlyInput]="true" inputId="buttondisplay" [showOnFocus]="false" />
                 </ng-template>
             }
 

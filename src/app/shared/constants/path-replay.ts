@@ -3,7 +3,7 @@ import { FormConfig } from "../components/generic-form-generator/generic-form-ge
 export const PATH_REPLAY_FORM_FIELDS: FormConfig = {
   formTitle: 'Path Replay',
   columns: 1,
-  isEditMode: false,
+  isEditMode: true,
   saveButtonText:'Query',
   showCancelButton: false,
   fields: [
@@ -23,7 +23,8 @@ export const PATH_REPLAY_FORM_FIELDS: FormConfig = {
       type: 'date',
       required: true,
       placeholder: 'Select date',
-      gridCol: 2
+      gridCol: 2,
+      selectionMode:'range'
     },
   ]
 };

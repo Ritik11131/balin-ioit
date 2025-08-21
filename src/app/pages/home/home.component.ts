@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { TrackMapComponent } from './components/track-map/track-map.component';
 import { ListViewComponent } from './components/list-view/list-view.component';
 import { Store } from '@ngrx/store';
-import { loadVehicles, stopSingleVehiclePolling } from '../../store/vehicle/vehicle.actions';
+import { loadVehicles, selectVehicle, stopSingleVehiclePolling } from '../../store/vehicle/vehicle.actions';
 import { loadGeofences } from '../../store/geofence/geofence.actions';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { selectSelectedVehicle, selectVehiclesLoaded } from '../../store/vehicle/vehicle.selectors';
@@ -33,7 +33,7 @@ import { GenericPathReplayComponent } from "../../shared/components/generic-path
     </div>
   `
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private uiService = inject(UiService);
   public pathReplayService = inject(PathReplayService);
@@ -50,8 +50,16 @@ export class HomeComponent implements OnInit {
 
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.store.dispatch(stopSingleVehiclePolling());
+    this.store.dispatch(selectVehicle({ vehicle: null }));
+  }
+
   onListTabChange(index: number) {
     this.store.dispatch(stopSingleVehiclePolling());
+    this.store.dispatch(selectVehicle({ vehicle: null }));
     this.uiService.closeDrawer();
     this.activeTab = index === 0 ? 'vehicles' : 'geofences';
     

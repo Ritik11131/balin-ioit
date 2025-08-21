@@ -31,7 +31,7 @@ import {
   selectSearchTerm,
   selectSelectedVehicle
 } from '../../../../store/vehicle/vehicle.selectors';
-import { loadVehicles, searchVehicles, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
+import { loadVehicles, searchVehicles, selectVehicle, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
 import { Store } from '@ngrx/store';
 import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
 import { PathReplayService } from '../../../service/path-replay.service';
@@ -274,7 +274,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
       )
       .subscribe(([_, vehicles]) => {
         console.log(vehicles, 'okkkkk');
-
+        this.store.dispatch(selectVehicle({vehicle: null}));
         if (this.map) {
           this.updateMapMarkers(vehicles); // redraw markers
         }

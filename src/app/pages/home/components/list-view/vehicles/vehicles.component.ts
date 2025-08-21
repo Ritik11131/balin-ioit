@@ -69,7 +69,6 @@ export class VehiclesComponent {
     this.destroy$.next();
     this.destroy$.complete();
     this.store.dispatch(stopSingleVehiclePolling());
-    this.store.dispatch(selectVehicle({ vehicle: null }));
   }
 
   private subscribeToStoreChanges(): void {

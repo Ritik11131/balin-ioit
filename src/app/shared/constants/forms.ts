@@ -463,7 +463,8 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'date',
       required: true,
       placeholder: 'Select installation date',
-      gridCol: 2
+      gridCol: 2,
+      selectionMode:'single'
     },
     {
       key: 'planType',

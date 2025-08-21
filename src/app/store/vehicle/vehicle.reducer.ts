@@ -161,7 +161,7 @@ on(updateSelectedVehicle, (state, { vehicle }) => {
   on(stopSingleVehiclePolling, (state) => ({
     ...state,
     polling: false,
-    selectedVehicle: null,
-    selectedVehicleId: null
+    // selectedVehicle: null,
+    // selectedVehicleId: null
   }))
 );

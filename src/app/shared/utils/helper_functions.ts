@@ -37,4 +37,45 @@ export const pathReplayConvertedValidJson = (data:any) => {
 
     // Slice the array from the first unique point (including the first unique)
     return firstUniqueIndex > 0 ? trackPath.slice(firstUniqueIndex - 1) : trackPath;
+}
+
+export const buildHistoryRequests = (vehicleId: number, startDate: string, endDate: string) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const diffDays = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+  const requests: { fromTime: string; toTime: string; deviceId: number }[] = [];
+
+  if (diffDays > 7) {
+    // take only latest date
+    const yyyy = end.getFullYear();
+    const mm = String(end.getMonth() + 1).padStart(2, '0');
+    const dd = String(end.getDate()).padStart(2, '0');
+
+    requests.push({
+      deviceId: vehicleId,
+      fromTime: `${yyyy}-${mm}-${dd}T00:00:00+05:30`,
+      toTime:   `${yyyy}-${mm}-${dd}T23:59:59+05:30`
+    });
+  } else {
+    // build one request per day
+    let current = new Date(start);
+    while (current <= end) {
+      const yyyy = current.getFullYear();
+      const mm = String(current.getMonth() + 1).padStart(2, '0');
+      const dd = String(current.getDate()).padStart(2, '0');
+
+      requests.push({
+        deviceId: vehicleId,
+        fromTime: `${yyyy}-${mm}-${dd}T00:00:00+05:30`,
+        toTime:   `${yyyy}-${mm}-${dd}T23:59:59+05:30`
+      });
+
+      current.setDate(current.getDate() + 1);
+    }
   }
+
+  return requests;
+}
+
