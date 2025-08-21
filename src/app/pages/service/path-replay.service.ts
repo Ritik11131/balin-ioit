@@ -118,6 +118,7 @@ export class PathReplayService {
         this.playbackControlObject.speed = 500;
         this.trackPlayer.setSpeed(500);
         this.trackPlayer.setProgress(0);
+        this.resetPathReplay();
       },
       status: 'PlayBack'
     };
@@ -162,4 +163,37 @@ export class PathReplayService {
       this.playbackControlObject.progress = progress * 100;
     });
   }
+
+  resetPathReplay() {
+  // Stop and remove track player if exists
+  if (this.trackPlayer) {
+    this.trackPlayer.remove();
+    this.trackPlayer = null;
+  }
+
+  // Reset replay state
+  this._replayActive.next({ value: false });
+
+  // Reset playback controls
+  this.playbackControlObject = {
+    speed: 500,
+    progress: 0,
+    status: 'Idle',
+    start: () => {},
+    pause: () => {},
+    remove: () => {},
+    updateSpeed: () => {},
+    updateProgress: () => {},
+    reset: () => {}
+  };
+
+  // Reset vehicle history info
+  this.vehicleHistoryInfo = {
+    speed: 0,
+    timestamp: '00:00:00'
+  };
+
+  console.log('♻️ Path Replay fully reset');
+}
+
 }

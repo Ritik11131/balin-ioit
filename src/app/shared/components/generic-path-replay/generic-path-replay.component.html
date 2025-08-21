@@ -29,11 +29,12 @@
             <div class="flex items-center gap-4">
                 <div class="px-3 py-1 rounded-full text-xs font-medium border"
                      [ngClass]="{
-                       'bg-green-50 text-green-700 border-green-200': (pathReplayService.playbackControlObject?.status || 'Ready') === 'Playing',
-                       'bg-yellow-50 text-yellow-700 border-yellow-200': (pathReplayService.playbackControlObject?.status || 'Ready') === 'Paused',
-                       'bg-gray-50 text-gray-700 border-gray-200': (pathReplayService.playbackControlObject?.status || 'Ready') === 'Ready' || (pathReplayService.playbackControlObject?.status || 'Ready') === 'Stopped'
+                       'bg-green-50 text-green-700 border-green-200': (pathReplayService.playbackControlObject?.status || 'PlayBack') === 'Started' || (pathReplayService.playbackControlObject?.status || 'PlayBack') === 'Moving',
+                       'bg-yellow-50 text-yellow-700 border-yellow-200': (pathReplayService.playbackControlObject?.status || 'PlayBack') === 'Paused',
+                       'bg-blue-50 text-blue-700 border-blue-200': (pathReplayService.playbackControlObject?.status || 'PlayBack') === 'Finished',
+                       'bg-gray-50 text-gray-700 border-gray-200': (pathReplayService.playbackControlObject?.status || 'PlayBack') === 'PlayBack'
                      }">
-                    {{ pathReplayService.playbackControlObject?.status || 'Ready' }}
+                    {{ pathReplayService.playbackControlObject?.status || 'PlayBack' }}
                 </div>
                 
                 <!-- Vehicle Info -->
@@ -44,7 +45,7 @@
                     </div>
                     <div class="flex items-center gap-1">
                         <span class="text-gray-500">Time:</span>
-                        <span class="font-semibold text-gray-800">{{ formattedTimestamp$ | async }}</span>
+                        <span class="font-semibold text-gray-800">{{ pathReplayService.vehicleHistoryInfo?.timestamp }}</span>
                     </div>
                 </div>
             </div>
@@ -85,10 +86,10 @@
                 </button>
                 
                 <button 
-                    class="play-btn w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-md"
+                    class="play-btn w-12 h-12 rounded-full bg-[var(--primary-color)] text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-md"
                     (click)="onTogglePlayPause()"
-                    [title]="(pathReplayService.playbackControlObject?.status === 'Playing') ? 'Pause' : 'Play'">
-                    <i [class]="(pathReplayService.playbackControlObject?.status === 'Playing') ? 'pi pi-pause' : 'pi pi-play'" class="text-lg"></i>
+                    [title]="(pathReplayService.playbackControlObject?.status === 'Started' || pathReplayService.playbackControlObject?.status === 'Moving') ? 'Pause' : 'Play'">
+                    <i [class]="(pathReplayService.playbackControlObject?.status === 'Started' || pathReplayService.playbackControlObject?.status === 'Moving') ? 'pi pi-pause' : 'pi pi-play'" class="text-lg"></i>
                 </button>
                 
                 <button 
@@ -113,7 +114,7 @@
                     </p-slider>
                 </div>
                 <span class="text-sm font-semibold text-blue-600 min-w-fit">
-                    {{ speedMultiplier$ | async }}
+                    {{ (pathReplayService.playbackControlObject?.speed / 1000)?.toFixed(1) + 'x'}}
                 </span>
             </div>
         </div>

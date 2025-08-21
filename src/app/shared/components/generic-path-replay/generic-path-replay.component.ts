@@ -21,6 +21,7 @@ export class GenericPathReplayComponent {
   @Input() vehicle:any;
   @Input() formFields:any;
 
+  private destroy$ = new Subject<void>();
   public pathReplayService = inject(PathReplayService);
 
   onFormSubmit(e: any) {
@@ -29,28 +30,12 @@ export class GenericPathReplayComponent {
   }
 
 
-   private destroy$ = new Subject<void>();
   
   // Computed properties using observables
   isPlaying$ = this.pathReplayService.replayActive$.pipe(
     map(replay => {
       const status = this.pathReplayService.playbackControlObject?.status;
       return status === 'Moving' || status === 'Started';
-    })
-  );
-
-  isPaused$ = this.pathReplayService.replayActive$.pipe(
-    map(() => this.pathReplayService.playbackControlObject?.status === 'Paused')
-  );
-
-  isFinished$ = this.pathReplayService.replayActive$.pipe(
-    map(() => this.pathReplayService.playbackControlObject?.status === 'Finished')
-  );
-
-  speedMultiplier$ = this.pathReplayService.replayActive$.pipe(
-    map(() => {
-      const speedValue = this.pathReplayService.playbackControlObject?.speed || 500;
-      return (speedValue / 1000).toFixed(1) + 'x';
     })
   );
 
@@ -74,35 +59,6 @@ export class GenericPathReplayComponent {
         return timePart;
       } catch {
         return timestamp;
-      }
-    })
-  );
-
-  statusColors$ = this.pathReplayService.replayActive$.pipe(
-    map(() => {
-      const status = this.pathReplayService.playbackControlObject?.status;
-      switch (status) {
-        case 'Moving':
-        case 'Started':
-          return {
-            color: 'var(--primary-color, #10b981)',
-            background: 'color-mix(in srgb, var(--primary-color, #10b981) 20%, white)'
-          };
-        case 'Paused':
-          return {
-            color: '#f59e0b',
-            background: '#fef3c7'
-          };
-        case 'Finished':
-          return {
-            color: '#ef4444',
-            background: '#fee2e2'
-          };
-        default:
-          return {
-            color: 'var(--primary-color, #10b981)',
-            background: 'color-mix(in srgb, var(--primary-color, #10b981) 20%, white)'
-          };
       }
     })
   );
@@ -142,10 +98,6 @@ export class GenericPathReplayComponent {
 
   onReset(): void {
     this.pathReplayService.handlePlaybackControls('reset');
-  }
-
-  onStop(): void {
-    this.pathReplayService.handlePlaybackControls('pause');
   }
 
   onClose(): void {
