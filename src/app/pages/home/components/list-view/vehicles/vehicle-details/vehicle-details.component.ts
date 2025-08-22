@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { Button, ButtonModule } from 'primeng/button';
 import { TieredMenuModule } from 'primeng/tieredmenu';
-import { Observable } from 'rxjs';
+import { filter, Observable, Subject, take, takeUntil } from 'rxjs';
 import { MenuItem, VehicleDetailsMenuBuilderService } from '../../../../../service/vehicle-details-menu-builder.service';
 import { CommonModule } from '@angular/common';
 import { VehicleStatusPipe } from '../../../../../../shared/pipes/vehicle-status.pipe';
@@ -10,6 +10,8 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TimeAgoPipe } from '../../../../../../shared/pipes/time-ago.pipe';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LiveStreamingService } from '../../../../../service/live-streaming.service';
+import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
+import { Store } from '@ngrx/store';
 
 export interface VehicleActionEvent {
   actionKey: string;
@@ -23,11 +25,17 @@ export interface VehicleActionEvent {
   templateUrl: './vehicle-details.component.html',
   styleUrl: './vehicle-details.component.scss'
 })
-export class VehicleDetailsComponent implements OnInit, OnChanges {
+export class VehicleDetailsComponent implements OnInit, OnChanges, OnDestroy {
+
+  private store = inject(Store);
+  private destroy$ = new Subject<void>();
+  
 
   @Input() vehicle: any;
-
   @Output() actionExecuted = new EventEmitter<VehicleActionEvent>();
+
+
+  selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
   menuItems$!: Observable<MenuItem[]> | any;
   activeTabIndex = 'overview';
@@ -51,11 +59,13 @@ export class VehicleDetailsComponent implements OnInit, OnChanges {
       (actionKey) => this.handleNavigation(actionKey)
     );
 
-    this.iframeUrl = this.liveStreamingService.getStreamingUrl({
-      protocol: this.vehicle?.apiObject?.device?.protocol,
-      uniqueId: this.vehicle?.apiObject?.device?.deviceId,
-      justStream: true,
-      themeColor: this.primaryColor
+    this.selectedVehicle$.pipe(filter(vehicle => !!vehicle),take(1),takeUntil(this.destroy$)).subscribe((vehicle) => {      
+      this.iframeUrl = this.liveStreamingService.getStreamingUrl({
+        protocol: vehicle?.apiObject?.position?.protocol,
+        uniqueId: vehicle?.apiObject?.device?.deviceId,
+        justStream: true,
+        themeColor: this.primaryColor
+      });
     });    
 
     console.log('Vehicle Details Component Initialized', this.menuItems$);
@@ -80,6 +90,11 @@ export class VehicleDetailsComponent implements OnInit, OnChanges {
       actionType: 'navigation'
     });
   }
+
+    ngOnDestroy(): void {
+      this.destroy$.next();
+      this.destroy$.complete();
+    }
 
   // this.canUseDashCam$ = this.store.select(selectIsFeatureEnabled('web', 'actions', 'dashCam'));
   //   this.canUseElocking$ = this.store.select(selectIsFeatureEnabled('web', 'actions', 'elocking'));
