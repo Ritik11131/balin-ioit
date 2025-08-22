@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/web",
+    "public": "dist/balin-iot",
     "ignore": [
       "firebase.json",
       "**/.*",
