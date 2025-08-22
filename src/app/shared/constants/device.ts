@@ -46,7 +46,8 @@ export const DEVICE_DETAILS_TABS = [
                         type: 'date',
                         required: true,
                         placeholder: 'Select installation date',
-                        gridCol: 2
+                        gridCol: 2,
+                        selectionMode:'single'
                     },
                 ]
             },

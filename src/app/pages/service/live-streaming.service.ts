@@ -21,7 +21,7 @@ export class LiveStreamingService {
   // Map protocols to actual values
   private protocolMap: Record<string, string> = {
     livetrack24: 'cvpro',
-    gt808: 'cvpro',
+    jt808: 'cvpro',
   };
 
   constructor(private sanitizer: DomSanitizer) { }

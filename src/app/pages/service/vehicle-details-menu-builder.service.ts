@@ -119,7 +119,7 @@ export class VehicleDetailsMenuBuilderService {
     },
     historyReplay: {
       label: 'History Replay',
-      icon: 'pi pi-replay',
+      icon: 'pi pi-history',
       actionType: 'command'
     },
 

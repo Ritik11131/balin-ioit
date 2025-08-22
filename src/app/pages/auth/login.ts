@@ -84,8 +84,7 @@ export class Login {
         try {
             await this.authService.login(this.email, this.password);
             this.store.dispatch({ type: '[Auth] Login Success' });
-            this.router.navigate(['/dashboard']);
-            this.uiService.showToast('success', 'Success', 'Welcome');
+            this.router.navigate(['/home']);
         } catch (error: any) {
             console.error(error);
             this.uiService.showToast('error', 'Error', 'Failed to logIN');

@@ -54,6 +54,30 @@ export class PathReplayService {
   }
 
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
+     if (this.trackPlayer) {
+      this.trackPlayer.remove();
+      this.trackPlayer = null;
+    }
+    this._historyData.next([]);
+
+    // Reset playback controls
+    this.playbackControlObject = {
+      speed: 500,
+      progress: 0,
+      status: 'Idle',
+      start: () => { },
+      pause: () => { },
+      remove: () => { },
+      updateSpeed: () => { },
+      updateProgress: () => { },
+      reset: () => { }
+    };
+
+    // Reset vehicle history info
+    this.vehicleHistoryInfo = {
+      speed: 0,
+      timestamp: '00:00:00'
+    };
     const { formValue } = historyPayload;
 
     const requests = buildHistoryRequests(
@@ -89,11 +113,6 @@ export class PathReplayService {
 
 
   public initilizeTrackPlayer(trackPathData: any[], map: any) {
-    if (this.trackPlayer) {
-      this.trackPlayer.remove();
-      this.trackPlayer = null;
-    }
-
     const primaryColor = getComputedStyle(document.documentElement)
       .getPropertyValue('--primary-color')
       .trim();
@@ -172,7 +191,7 @@ export class PathReplayService {
         this.trackPlayer.setSpeed(500);
         this.trackPlayer.setProgress(0);
       },
-      status: 'PlayBack'
+      status: 'Playback'
     };
   }
 

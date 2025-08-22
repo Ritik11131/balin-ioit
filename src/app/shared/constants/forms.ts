@@ -220,6 +220,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       label: 'Primary Sim Operator',
       type: 'select',
       placeholder: 'Select operator',
+      required: true,
       gridCol: 2,
       options: [
         {
@@ -298,7 +299,8 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'date',
       required: true,
       placeholder: 'Select installation date',
-      gridCol: 2
+      gridCol: 2,
+      selectionMode:'single'
     },
     {
       key: 'planType',
@@ -384,6 +386,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       key: 'fkSimOperator',
       label: 'Primary Sim Operator',
       type: 'select',
+      required: true,
       placeholder: 'Select operator',
       gridCol: 2,
       options: [
@@ -420,7 +423,6 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       key: 'fkSecSimOperator',
       label: 'Secondary Sim Operator',
       type: 'select',
-      required: true,
       placeholder: 'Select operator',
       gridCol: 2,
       options: [
