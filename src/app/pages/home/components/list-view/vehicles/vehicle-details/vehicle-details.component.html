@@ -29,50 +29,59 @@
 
       <p-tabpanels class="flex-1 overflow-hidden">
 
-        <!-- Overview Tab -->
-        <p-tabpanel value="overview" class="h-full flex flex-col overflow-hidden">
-          <div class="text-sm mt-4 shrink-0">
-            <ng-container *ngIf="vehicle; else skeletonOverview">
+        <p-tabpanel value="overview" class="h-full flex flex-col overflow-auto relative">
 
-              <!-- Updated -->
-              <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-                <span class="font-medium text-gray-500">Updated</span>
-                <span class="text-gray-800 font-semibold">{{ vehicle.lastUpdated | timeAgo }}</span>
-              </div>
+  <!-- Scrollable content above iframe -->
+  <div class="text-sm mt-4 pb-40"> <!-- add bottom padding to avoid overlap with iframe -->
+    <ng-container *ngIf="vehicle; else skeletonOverview">
 
-              <!-- Address -->
-              <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-                <span class="font-medium text-gray-500">Address</span>
-                <span class="text-gray-800 font-semibold">{{ vehicle.address || '—' }}</span>
-              </div>
+      <!-- Updated -->
+      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+        <span class="font-medium text-gray-500">Updated</span>
+        <span class="text-gray-800 font-semibold">{{ vehicle.lastUpdated | timeAgo }}</span>
+      </div>
 
-              <!-- Speed -->
-              <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-                <span class="font-medium text-gray-500">Speed</span>
-                <span class="text-gray-800">
-                  <span class="font-semibold">{{ vehicle?.apiObject?.position?.speed || 0 }}</span> km/h
-                </span>
-              </div>
+      <!-- Address -->
+      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+        <span class="font-medium text-gray-500">Address</span>
+        <span class="text-gray-800 font-semibold">{{ vehicle.address || '—' }}</span>
+      </div>
 
-              <!-- Odometer -->
-              <div class="flex justify-between items-center px-4 py-3">
-                <span class="font-medium text-gray-500">Odometer</span>
-                <span class="text-gray-800">
-                  <span class="font-semibold">
-                    {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
-                  </span> km
-                </span>
-              </div>
+      <!-- Speed -->
+      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+        <span class="font-medium text-gray-500">Speed</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">{{ vehicle?.apiObject?.position?.speed || 0 }}</span> km/h
+        </span>
+      </div>
 
-            </ng-container>
-          </div>
-          <div class="flex-1 overflow-hidden">
-            <h3>Live From Vehilce</h3>
-            <iframe [src]="iframeUrl" allow="microphone; camera; geolocation; autoplay; encrypted-media"
-              class="w-full h-full border-0" allowfullscreen loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </div>
-        </p-tabpanel>
+      <!-- Odometer -->
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+    </ng-container>
+  </div>
+
+  <div class="fixed bottom-0 left-0 w-full max-w-4xl mx-auto bg-gray-100 border-t z-50">
+    <span class="text-lg font-semibold px-4 py-2 block border-b">
+      Live From Vehicle
+    </span>
+    <iframe [src]="iframeUrl"
+      allow="microphone; camera; geolocation; autoplay; encrypted-media"
+      class="w-full h-80"
+      allowfullscreen loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+  <!-- Fixed iframe at bottom -->
+
+</p-tabpanel>
+
 
 
 
