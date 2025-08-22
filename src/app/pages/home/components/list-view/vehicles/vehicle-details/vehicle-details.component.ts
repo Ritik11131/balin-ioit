@@ -8,6 +8,7 @@ import { VehicleStatusPipe } from '../../../../../../shared/pipes/vehicle-status
 import { TabsModule } from 'primeng/tabs';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TimeAgoPipe } from '../../../../../../shared/pipes/time-ago.pipe';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 export interface VehicleActionEvent {
   actionKey: string;
@@ -26,11 +27,17 @@ export class VehicleDetailsComponent implements OnInit, OnChanges {
   @Input() vehicle: any;
 
   @Output() actionExecuted = new EventEmitter<VehicleActionEvent>();
-  
+
   menuItems$!: Observable<MenuItem[]> | any;
   activeTabIndex = 'overview';
+  iframeUrl!: SafeResourceUrl;
+  primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
 
-  constructor(private menuBuilder: VehicleDetailsMenuBuilderService) {}
+
+  constructor(private menuBuilder: VehicleDetailsMenuBuilderService, private sanitizer: DomSanitizer) {
+    const url = `https://live-streaming-6afbf.web.app/index.html?protocol=cvpro&uniqueId=175205591682&justStream=true&themeColor=${this.primaryColor.replace('#', '')}`;
+    this.iframeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
 
   ngOnChanges(changes: any): void {
     // Handle changes to the vehicle input if necessary
@@ -40,18 +47,18 @@ export class VehicleDetailsComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
     //Add 'implements OnInit' to the class.
-     this.menuItems$ = this.menuBuilder.buildFlatMenuItems(
+    this.menuItems$ = this.menuBuilder.buildFlatMenuItems(
       (actionKey, actionType, item) => this.handleCommand(actionKey, actionType, item),
       (actionKey) => this.handleNavigation(actionKey)
     );
 
     console.log('Vehicle Details Component Initialized', this.menuItems$);
-    
+
   }
 
   private handleCommand(actionKey: string, actionType: string, item?: MenuItem) {
     console.log(`Executing command: ${actionKey} - ${actionType}`, item);
-    
+
     this.actionExecuted.emit({
       actionKey,
       actionType,
@@ -61,7 +68,7 @@ export class VehicleDetailsComponent implements OnInit, OnChanges {
 
   private handleNavigation(actionKey: string) {
     console.log(`Navigating to: ${actionKey}`);
-    
+
     this.actionExecuted.emit({
       actionKey,
       actionType: 'navigation'
@@ -80,10 +87,10 @@ export class VehicleDetailsComponent implements OnInit, OnChanges {
   //   this.error$ = this.store.select(selectUserConfigurationError);
 
   // Permission checks
-    // this.hasDeleteUserPermission$ = this.store.select(selectHasPermission('web', 'deleteUser'));
-    // this.canCreateDealer$ = this.store.select(selectHasPermission('web', 'createDealer'));
+  // this.hasDeleteUserPermission$ = this.store.select(selectHasPermission('web', 'deleteUser'));
+  // this.canCreateDealer$ = this.store.select(selectHasPermission('web', 'createDealer'));
 
-    // Helper method to check if a feature is enabled
+  // Helper method to check if a feature is enabled
   // isFeatureEnabled(platform: 'web' | 'android', section: string, feature: string): Observable<boolean> {
   //   return this.store.select(selectIsFeatureEnabled(platform, section, feature));
   // }

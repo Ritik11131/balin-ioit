@@ -1,12 +1,12 @@
-<div class="container mx-auto max-w-4xl">
+<div class="container mx-auto max-w-4xl h-full flex flex-col overflow-hidden">
 
   <!-- Vehicle Header -->
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex justify-between items-center mb-6 shrink-0">
     <div class="flex items-center gap-3 group">
       <span [ngClass]="vehicle | vehicleStatus"
-            class="relative w-2.5 h-2.5 rounded-full transition-all duration-300 group-hover:scale-110">
+        class="relative w-2.5 h-2.5 rounded-full transition-all duration-300 group-hover:scale-110">
         <span [ngClass]="vehicle | vehicleStatus"
-              class="absolute top-0 left-0 w-full h-full rounded-full opacity-75 animate-ping"></span>
+          class="absolute top-0 left-0 w-full h-full rounded-full opacity-75 animate-ping"></span>
       </span>
       <span class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">
         {{ vehicle?.name || 'Loading...' }}
@@ -19,118 +19,136 @@
   </div>
 
   <!-- Tabs Section -->
-  <p-tabs [(value)]="activeTabIndex">
-    <p-tablist>
-      <p-tab value="overview">Overview</p-tab>
-      <p-tab value="sensors">Sensors</p-tab>
-    </p-tablist>
+  <div class="flex-1 overflow-hidden">
 
-    <p-tabpanels>
+    <p-tabs [(value)]="activeTabIndex" class="h-full flex flex-col">
+      <p-tablist>
+        <p-tab value="overview">Overview</p-tab>
+        <p-tab value="sensors">Sensors</p-tab>
+      </p-tablist>
 
-      <!-- Overview Tab -->
-    <p-tabpanel value="overview">
-  <div class="text-sm mt-4">
-    <ng-container *ngIf="vehicle; else skeletonOverview">
+      <p-tabpanels class="flex-1 overflow-hidden">
 
-      <!-- Updated -->
-      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-        <span class="font-medium text-gray-500">Updated</span>
-        <span class="text-gray-800 font-semibold">{{ vehicle.lastUpdated | timeAgo }}</span>
-      </div>
+        <!-- Overview Tab -->
+        <p-tabpanel value="overview" class="h-full flex flex-col overflow-hidden">
+          <div class="text-sm mt-4 shrink-0">
+            <ng-container *ngIf="vehicle; else skeletonOverview">
 
-      <!-- Address -->
-      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-        <span class="font-medium text-gray-500">Address</span>
-        <span class="text-gray-800 font-semibold">{{ vehicle.address || '—' }}</span>
-      </div>
+              <!-- Updated -->
+              <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+                <span class="font-medium text-gray-500">Updated</span>
+                <span class="text-gray-800 font-semibold">{{ vehicle.lastUpdated | timeAgo }}</span>
+              </div>
 
-       <!-- Speed -->
-      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
-        <span class="font-medium text-gray-500">Speed</span>
-        <span class="text-gray-800">
-          <span class="font-semibold">{{ vehicle?.apiObject?.position?.speed || 0 }}</span> km/h
-        </span>
-      </div>
+              <!-- Address -->
+              <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+                <span class="font-medium text-gray-500">Address</span>
+                <span class="text-gray-800 font-semibold">{{ vehicle.address || '—' }}</span>
+              </div>
 
-      <!-- Odometer -->
-      <div class="flex justify-between items-center px-4 py-3">
-        <span class="font-medium text-gray-500">Odometer</span>
-        <span class="text-gray-800">
-          <span class="font-semibold">
-            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
-          </span> km
-        </span>
-      </div>
+              <!-- Speed -->
+              <div class="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+                <span class="font-medium text-gray-500">Speed</span>
+                <span class="text-gray-800">
+                  <span class="font-semibold">{{ vehicle?.apiObject?.position?.speed || 0 }}</span> km/h
+                </span>
+              </div>
 
-    </ng-container>
+              <!-- Odometer -->
+              <div class="flex justify-between items-center px-4 py-3">
+                <span class="font-medium text-gray-500">Odometer</span>
+                <span class="text-gray-800">
+                  <span class="font-semibold">
+                    {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+                  </span> km
+                </span>
+              </div>
+
+            </ng-container>
+          </div>
+          <div class="flex-1 overflow-hidden">
+            <h3>Live From Vehilce</h3>
+            <iframe [src]="iframeUrl" allow="microphone; camera; geolocation; autoplay; encrypted-media"
+              class="w-full h-full border-0" allowfullscreen loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </p-tabpanel>
+
+
+
+        <!-- Sensors Tab -->
+        <p-tabpanel value="sensors" class="h-full overflow-y-auto">
+          <div class="text-sm mt-4">
+            <ng-container *ngIf="vehicle as d; else skeletonSensors">
+
+              <!-- Row -->
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">Power</span>
+                <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.ign ? 'On' : 'Off' }}</span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">External Battery</span>
+                <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.extVolt }} <span
+                    class="font-normal">V</span></span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">Internal Battery</span>
+                <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.battPer }}<span
+                    class="font-normal">%</span></span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">SOS</span>
+                <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.sos ? 'Triggered' :
+                  'Normal' }}</span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">GPS</span>
+                <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.sat }} <span
+                    class="font-normal">Satellites</span></span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">Speed</span>
+                <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.speed }} <span
+                    class="font-normal">km/h</span></span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">Odometer</span>
+                <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.odometer }} <span
+                    class="font-normal">km</span></span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">Parking</span>
+                <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.motion ? 'No' : 'Yes'
+                  }}</span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
+                <span class="font-medium text-gray-500">Wheel Status</span>
+                <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.motion ? 'Rolling' :
+                  'Stationary' }}</span>
+              </div>
+
+              <div class="flex justify-between items-center px-4 py-3">
+                <span class="font-medium text-gray-500">Immobilize</span>
+                <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.blocked ? 'Yes' : 'No'
+                  }}</span>
+              </div>
+
+            </ng-container>
+          </div>
+        </p-tabpanel>
+
+
+      </p-tabpanels>
+    </p-tabs>
   </div>
-</p-tabpanel>
-
-
-
-      <!-- Sensors Tab -->
-     <p-tabpanel value="sensors">
-  <div class="text-sm mt-4">
-    <ng-container *ngIf="vehicle as d; else skeletonSensors">
-
-      <!-- Row -->
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">Power</span>
-        <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.ign ? 'On' : 'Off' }}</span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">External Battery</span>
-        <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.extVolt }} <span class="font-normal">V</span></span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">Internal Battery</span>
-        <span class="text-gray-800 font-semibold">{{ d.apiObject?.position?.battPer }}<span class="font-normal">%</span></span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">SOS</span>
-        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.sos ? 'Triggered' : 'Normal' }}</span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">GPS</span>
-        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.sat }} <span class="font-normal">Satellites</span></span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">Speed</span>
-        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.speed }} <span class="font-normal">km/h</span></span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">Odometer</span>
-        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.odometer }} <span class="font-normal">km</span></span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">Parking</span>
-        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.motion ? 'No' : 'Yes' }}</span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3 border-b last:border-none">
-        <span class="font-medium text-gray-500">Wheel Status</span>
-        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.motion ? 'Rolling' : 'Stationary' }}</span>
-      </div>
-
-      <div class="flex justify-between items-center px-4 py-3">
-        <span class="font-medium text-gray-500">Immobilize</span>
-        <span class="text-gray-800 font-semibold">{{ d?.apiObject?.position?.details?.blocked ? 'Yes' : 'No' }}</span>
-      </div>
-
-    </ng-container>
-  </div>
-</p-tabpanel>
-
-
-    </p-tabpanels>
-  </p-tabs>
 
   <!-- Skeleton Loaders -->
   <ng-template #skeletonOverview>
