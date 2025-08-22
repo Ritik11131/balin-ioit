@@ -65,20 +65,82 @@
         </span>
       </div>
 
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center px-4 py-3">
+        <span class="font-medium text-gray-500">Odometer</span>
+        <span class="text-gray-800">
+          <span class="font-semibold">
+            {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000)?.toFixed(3) || 0 }}
+          </span> km
+        </span>
+      </div>
+      <div class="fixed bottom-0 left-0 w-full max-w-4xl">
+        <span class="text-lg font-semibold px-4 py-2">
+          Live From Vehicle
+        </span>
+        <iframe [src]="iframeUrl"
+          allow="microphone; camera; geolocation; autoplay; encrypted-media"
+          class="w-full h-80 px-4"
+          allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+
     </ng-container>
   </div>
 
-  <div class="fixed bottom-0 left-0 w-full max-w-4xl mx-auto bg-gray-100 border-t z-50">
-    <span class="text-lg font-semibold px-4 py-2 block border-b">
-      Live From Vehicle
-    </span>
-    <iframe [src]="iframeUrl"
-      allow="microphone; camera; geolocation; autoplay; encrypted-media"
-      class="w-full h-80"
-      allowfullscreen loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade"></iframe>
-  </div>
-  <!-- Fixed iframe at bottom -->
 
 </p-tabpanel>
 
