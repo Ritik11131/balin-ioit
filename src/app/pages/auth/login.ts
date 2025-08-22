@@ -10,6 +10,7 @@ import { AppFloatingConfigurator } from '../../layout/component/app.floatingconf
 import { UiService } from '../../layout/service/ui.service';
 import { AuthService } from '../service/auth.service';
 import { Store } from '@ngrx/store';
+import { StoreService } from '../service/store.service';
 
 @Component({
     selector: 'app-login',
@@ -76,7 +77,8 @@ export class Login {
         private uiService: UiService,
         private authService: AuthService,
         private router: Router,
-        private store: Store
+        private store: Store,
+        private storeService: StoreService
     ) {}
 
     async signIn(): Promise<any> {
@@ -85,6 +87,7 @@ export class Login {
             await this.authService.login(this.email, this.password);
             this.store.dispatch({ type: '[Auth] Login Success' });
             this.router.navigate(['/home']);
+            this.storeService.startAutoRefresh();
         } catch (error: any) {
             console.error(error);
             this.uiService.showToast('error', 'Error', 'Failed to logIN');
