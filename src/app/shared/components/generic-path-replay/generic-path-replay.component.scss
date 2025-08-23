@@ -1,0 +1,5 @@
+        .dotted-line {
+            background-image: linear-gradient(to bottom, var(--primary-color) 40%, transparent 40%);
+            background-size: 2px 8px;
+            background-repeat: repeat-y;
+        }

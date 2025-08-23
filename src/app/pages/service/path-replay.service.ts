@@ -6,6 +6,8 @@ import { FormEnricherService } from './form-enricher.service';
 import { HttpService } from './http.service';
 import { UiService } from '../../layout/service/ui.service';
 import { buildHistoryRequests, pathReplayConvertedValidJson } from '../../shared/utils/helper_functions';
+import { AddressService } from './address.service';
+import moment from 'moment';
 
 @Injectable({
   providedIn: 'root'
@@ -23,14 +25,19 @@ export class PathReplayService {
   private formConfigEnricher = inject(FormEnricherService);
   private http = inject(HttpService);
   private uiService = inject(UiService);
+  private addressService = inject(AddressService)
   formFields$ = this.formConfigEnricher.enrichForms([PATH_REPLAY_FORM_FIELDS]).pipe(map((res) => res[0]));
 
   trackPlayer!: any;
   playbackControlObject: any = {};
-  vehicleHistoryInfo: any = {
+  vehiclePlaybackObject: any = {
     speed: 0,
     timestamp: '00:00:00'
   };
+  vehicleStartEndInfo: any = {
+    startInfo: { address: '', timestamp: '' },
+    endInfo: { address: '', timestamp: '' }
+  }
 
   startPathReplay(formObj: any) {
     this._replayActive.next({ value: true, formObj });
@@ -49,12 +56,38 @@ export class PathReplayService {
       this.uiService.showToast('error', 'Error', error?.error?.data);
       throw error;
     } finally {
-    this.uiService.toggleLoader(false);
+      this.uiService.toggleLoader(false);
     }
   }
 
+  async setVehicleStartEndInfo(track: any[]) {
+    if (!track?.length) {
+      this.vehicleStartEndInfo = { startInfo: { address: '', timestamp: '' }, endInfo: { address: '', timestamp: '' } };
+      return;
+    }
+
+    const [start, end] = [track[0], track.at(-1)];
+
+    const [startAddress, endAddress] = await Promise.all([
+      this.addressService.getAddress(start.lat, start.lng),
+      this.addressService.getAddress(end.lat, end.lng),
+    ]);
+
+    this.vehicleStartEndInfo = {
+      startInfo: {
+        address: startAddress,
+        timestamp: moment(start.timestamp).format('DD MMM YYYY, hh:mm A') // e.g. 19 Aug 2025, 10:15 AM
+      },
+      endInfo: {
+        address: endAddress,
+        timestamp: moment(end.timestamp).format('DD MMM YYYY, hh:mm A')
+      }
+    };
+  }
+
+
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
-     if (this.trackPlayer) {
+    if (this.trackPlayer) {
       this.trackPlayer.remove();
       this.trackPlayer = null;
     }
@@ -74,10 +107,16 @@ export class PathReplayService {
     };
 
     // Reset vehicle history info
-    this.vehicleHistoryInfo = {
+    this.vehiclePlaybackObject = {
       speed: 0,
       timestamp: '00:00:00'
     };
+
+    this.vehicleStartEndInfo = {
+      startInfo: { address: '', timestamp: '' },
+      endInfo: { address: '', timestamp: '' }
+    }
+
     const { formValue } = historyPayload;
 
     const requests = buildHistoryRequests(
@@ -100,9 +139,7 @@ export class PathReplayService {
     // Merge all response data
     const allData = responses.flatMap(res => res?.data || []);
     const uniqueTrackPath = pathReplayConvertedValidJson(allData);
-    console.log(uniqueTrackPath);
-    
-
+    this.setVehicleStartEndInfo(uniqueTrackPath);
     this._historyData.next(uniqueTrackPath);
     if (uniqueTrackPath && uniqueTrackPath.length > 0) {
       map.fitBounds(uniqueTrackPath);
@@ -227,7 +264,7 @@ export class PathReplayService {
       this.playbackControlObject.status = 'Finished';
     });
     this.trackPlayer.on('progress', (progress: any, { lng, lat }: any, index: any) => {
-      this.vehicleHistoryInfo = {
+      this.vehiclePlaybackObject = {
         speed: trackPathData[index]?.speed || 0,
         timestamp: trackPathData[index]?.timestamp ? new Date(trackPathData[index].timestamp).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'
       };
@@ -262,7 +299,7 @@ export class PathReplayService {
     };
 
     // Reset vehicle history info
-    this.vehicleHistoryInfo = {
+    this.vehiclePlaybackObject = {
       speed: 0,
       timestamp: '00:00:00'
     };

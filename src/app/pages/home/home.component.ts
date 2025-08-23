@@ -55,6 +55,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
     this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(selectVehicle({ vehicle: null }));
+    this.uiService.closeDrawer();
   }
 
   onListTabChange(index: number) {

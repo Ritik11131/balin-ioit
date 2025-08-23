@@ -1,18 +1,18 @@
-import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { GenericFormGeneratorComponent } from '../generic-form-generator/generic-form-generator.component';
-import { UiService } from '../../../layout/service/ui.service';
 import { PathReplayService } from '../../../pages/service/path-replay.service';
 import { ButtonModule } from 'primeng/button';
 import { SliderModule } from 'primeng/slider';
 import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { map, Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { TooltipModule } from 'primeng/tooltip';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @Component({
   selector: 'app-generic-path-replay',
-  imports: [GenericFormGeneratorComponent, ButtonModule, SliderModule, FormsModule, DragDropModule, CommonModule, TooltipModule],
+  imports: [GenericFormGeneratorComponent, ButtonModule, SliderModule, FormsModule, DragDropModule, CommonModule, TooltipModule, SkeletonModule],
   templateUrl: './generic-path-replay.component.html',
   styleUrl: './generic-path-replay.component.scss'
 })

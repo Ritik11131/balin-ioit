@@ -9,7 +9,7 @@ export const PATH_REPLAY_FORM_FIELDS: FormConfig = {
   fields: [
     {
       key: 'vehicle',
-      label: 'Vehicle',
+      label: 'Select Vehicle',
       type: 'select',
       placeholder: 'Select a vehicle',
       gridCol: 2,
@@ -19,7 +19,7 @@ export const PATH_REPLAY_FORM_FIELDS: FormConfig = {
     },
     {
       key: 'date',
-      label: 'Date',
+      label: 'Select Date',
       type: 'date',
       required: true,
       placeholder: 'Select date',
