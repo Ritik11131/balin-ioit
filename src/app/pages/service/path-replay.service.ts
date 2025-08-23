@@ -42,7 +42,9 @@ export class PathReplayService {
     startInfo: { address: '', timestamp: '' },
     endInfo: { address: '', timestamp: '' },
     maxSpeed: 0,
-    totalDistance: 0
+    totalDistance: 0,
+    stopsData: { total: 0, data:[]},
+    historyData: { total: 0, data:[] }
   }
 
   startPathReplay(formObj: any) {
@@ -66,13 +68,15 @@ export class PathReplayService {
     }
   }
 
-  async setVehicleStartEndInfo(track: any[]) {
+  async setVehicleStartEndInfo(track: any[], stops: any[]) {
     if (!track?.length) {
       this.vehicleStartEndInfo = {
         startInfo: { address: '', timestamp: '' },
         endInfo: { address: '', timestamp: '' },
         maxSpeed: 0,
-        totalDistance: 0
+        totalDistance: 0,
+        stopsData: { total: 0, data: [] },
+        historyData: { total: 0, data: [] }
       };
       return;
     }
@@ -102,7 +106,9 @@ export class PathReplayService {
         timestamp: moment(end.timestamp).format('DD MMM YYYY, hh:mm A')
       },
       maxSpeed,
-      totalDistance: totalDistance?.toFixed(2)
+      totalDistance: totalDistance?.toFixed(2),
+      stopsData: { total: stops?.length || 0, data: stops.map((stop, index)=>{ return { label:`Stop ${index + 1}`, address:'', duration: formatStopDuration(stop)   }}) || [] },
+      historyData: { total: track?.length || 0, data: track || [] }
     };
   }
 
@@ -225,7 +231,7 @@ export class PathReplayService {
     const stopTime = formatStopTime(stop);
 
     return `
-     <div class="stop-marker-container" title="Stop ${index + 1} - Duration: ${stopDuration}">
+    <div class="stop-marker-container" title="Stop ${index + 1} - Duration: ${stopDuration}">
       <div class="relative flex items-center justify-center">
         <!-- Outer pulsing ring -->
         <div class="absolute w-8 h-8 rounded-full border-2 border-white shadow-lg animate-ping opacity-30" 
@@ -352,7 +358,11 @@ export class PathReplayService {
 
     this.vehicleStartEndInfo = {
       startInfo: { address: '', timestamp: '' },
-      endInfo: { address: '', timestamp: '' }
+      endInfo: { address: '', timestamp: '' },
+      maxSpeed: 0,
+      totalDistance: 0,
+      stopsData: { total: 0, data: [] },
+      historyData: { total: 0, data: [] }
     }
 
     const { formValue } = historyPayload;
@@ -388,7 +398,7 @@ export class PathReplayService {
     console.log(stopsData, 'stopsData');
     
     const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
-    this.setVehicleStartEndInfo(uniqueTrackPath);
+    this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
     this._historyData.next(uniqueTrackPath);
     if (uniqueTrackPath && uniqueTrackPath.length > 0) {
       map.fitBounds(uniqueTrackPath);
