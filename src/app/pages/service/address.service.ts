@@ -19,12 +19,12 @@ export class AddressService {
       // Example API — replace with your backend / Google / Nominatim endpoint
       const res: any = await this.http.get(`Geocoding/${lat}/${lng}`)
 
-      const address = res?.data ?? 'Unknown';
+      const address = res?.data ?? 'Address not found';
       this.cache.set(key, address);
       return address;
     } catch (err) {
       console.error('Error fetching address:', err);
-      return 'Unknown';
+      return 'Address not found';
     }
   }
 }

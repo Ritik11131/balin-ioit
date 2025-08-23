@@ -57,7 +57,7 @@ import { CommonModule } from '@angular/common';
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-6 mb-4">
+        <div class="grid grid-cols-2 gap-6 mb-2">
             <!-- Distance Card -->
             <div class="rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow">
                 <!-- Icon Container -->
