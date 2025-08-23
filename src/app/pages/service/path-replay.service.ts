@@ -5,7 +5,7 @@ import { PATH_REPLAY_FORM_FIELDS } from '../../shared/constants/path-replay';
 import { FormEnricherService } from './form-enricher.service';
 import { HttpService } from './http.service';
 import { UiService } from '../../layout/service/ui.service';
-import { buildHistoryRequests, pathReplayConvertedValidJson } from '../../shared/utils/helper_functions';
+import { buildHistoryRequests, extractStopCoordinates, formatStopDuration, formatStopTime, isValidCoordinate, isValidStopData, pathReplayConvertedValidJson } from '../../shared/utils/helper_functions';
 import { AddressService } from './address.service';
 import moment from 'moment';
 import * as turf from "@turf/turf";
@@ -29,6 +29,7 @@ export class PathReplayService {
   private uiService = inject(UiService);
   private addressService = inject(AddressService);
   private reportsService = inject(ReportsService);
+  private stopMarkers: L.Marker[] = [];
   formFields$ = this.formConfigEnricher.enrichForms([PATH_REPLAY_FORM_FIELDS]).pipe(map((res) => res[0]));
 
   trackPlayer!: any;
@@ -106,12 +107,229 @@ export class PathReplayService {
   }
 
 
+  /**
+   * Plots stop points on the map with animated pulse markers
+   * @param stopsData - Array of stop data from API
+   * @param map - Leaflet map instance
+   */
+  public plotStopPoints(stopsData: any[], map: any): void {
+    try {
+      // Reset/clear existing stop markers first
+      this.clearStopPoints();
+
+      // Validate inputs
+      if (!map) {
+        console.warn('Map instance not provided for plotting stop points');
+        return;
+      }
+
+      if (!stopsData || !Array.isArray(stopsData) || stopsData.length === 0) {
+        console.info('No stop data available to plot');
+        return;
+      }
+
+      // Get primary color for consistent theming
+      const primaryColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-color')
+        .trim() || '#3B82F6'; // fallback color
+
+      console.log(`Plotting ${stopsData.length} stop points`);
+
+      // Process each stop point
+      stopsData.forEach((stop, index) => {
+        try {
+          // Validate stop data structure
+          if (!isValidStopData(stop)) {
+            console.warn(`Invalid stop data at index ${index}:`, stop);
+            return;
+          }
+
+          const { latitude, longitude } = extractStopCoordinates(stop);
+
+          if (!isValidCoordinate(latitude, longitude)) {
+            console.warn(`Invalid coordinates for stop ${index}: lat=${latitude}, lng=${longitude}`);
+            return;
+          }
+
+          // Create animated HTML marker
+          const stopMarkerElement = this.createAnimatedStopMarker(primaryColor, stop, index);
+
+          // Create custom icon using the HTML element
+          const customIcon = L.divIcon({
+            html: stopMarkerElement,
+            className: 'custom-stop-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+          });
+
+          // Create and add marker to map
+          const marker = L.marker([latitude, longitude], {
+            icon: customIcon,
+            zIndexOffset: 1000 // Ensure stops appear above other elements
+          });
+
+          // Add popup with stop information
+          const popupContent = this.createStopPopupContent(stop, index);
+          marker.bindPopup(popupContent, {
+            maxWidth: 300,
+            className: 'stop-popup'
+          });
+
+          // Add marker to map and track it
+          marker.addTo(map);
+          this.stopMarkers.push(marker);
+
+        } catch (error) {
+          console.error(`Error creating stop marker at index ${index}:`, error);
+        }
+      });
+
+      // Add CSS for animations if not already present
+      this.injectStopMarkerStyles();
+
+      console.log(`Successfully plotted ${this.stopMarkers.length} stop points`);
+
+    } catch (error) {
+      console.error('Error plotting stop points:', error);
+    }
+  }
+
+  /**
+   * Clears all existing stop markers from the map
+   */
+  public clearStopPoints(): void {
+    try {
+      if (this.stopMarkers && this.stopMarkers.length > 0) {
+        console.log(`Clearing ${this.stopMarkers.length} existing stop markers`);
+
+        this.stopMarkers.forEach(marker => {
+          try {
+            marker.remove();
+          } catch (error) {
+            console.warn('Error removing stop marker:', error);
+          }
+        });
+
+        this.stopMarkers = [];
+      }
+    } catch (error) {
+      console.error('Error clearing stop points:', error);
+    }
+  }
+
+  /**
+   * Creates animated HTML element for stop marker
+   */
+  private createAnimatedStopMarker(primaryColor: string, stop: any, index: number): string {
+    const stopDuration = formatStopDuration(stop);
+    const stopTime = formatStopTime(stop);
+
+    return `
+     <div class="stop-marker-container" title="Stop ${index + 1} - Duration: ${stopDuration}">
+      <div class="relative flex items-center justify-center">
+        <!-- Outer pulsing ring -->
+        <div class="absolute w-8 h-8 rounded-full border-2 border-white shadow-lg animate-ping opacity-30" 
+             style="background-color: ${primaryColor}"></div>
+        
+        <!-- Main marker -->
+        <div class="relative w-5 h-5 rounded-full shadow-lg animate-pulse z-10" 
+             style="background-color: ${primaryColor}">
+          <!-- Inner ping animation -->
+          <div class="absolute inset-0 rounded-full animate-ping opacity-25" 
+               style="background-color: ${primaryColor}"></div>
+          
+          <!-- White square at center -->
+          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-sm z-20"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  }
+
+  /**
+   * Creates popup content for stop markers
+   */
+  private createStopPopupContent(stop: any, index: number): string {
+    const duration = formatStopDuration(stop);
+    const startTime = formatStopTime(stop.StartTime || stop.startTime);
+    const endTime = formatStopTime(stop.EndTime || stop.endTime);
+    const address = stop.Address || stop.address || 'Address not available';
+
+    return `
+    <div class="stop-popup-content">
+      <h4 class="font-bold text-lg mb-2">Stop ${index + 1}</h4>
+      <div class="space-y-1 text-sm">
+        <p><strong>Duration:</strong> ${duration}</p>
+        <p><strong>Start:</strong> ${startTime}</p>
+        <p><strong>End:</strong> ${endTime}</p>
+        <p><strong>Location:</strong> ${address}</p>
+      </div>
+    </div>
+  `;
+  }
+
+  
+
+
+  /**
+   * Injects CSS styles for stop marker animations
+   */
+  private injectStopMarkerStyles(): void {
+    const styleId = 'stop-marker-styles';
+
+    // Check if styles already exist
+    if (document.getElementById(styleId)) {
+      return;
+    }
+
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+    .stop-marker-container {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    
+    .custom-stop-marker {
+      background: transparent !important;
+      border: none !important;
+    }
+    
+    .stop-popup-content {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    @keyframes ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
+    }
+    
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    .animate-ping {
+      animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+  `;
+
+    document.head.appendChild(style);
+  }
+
+  // Updated _initPathReplayFunc method
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
     if (this.trackPlayer) {
       this.trackPlayer.remove();
       this.trackPlayer = null;
     }
     this._historyData.next([]);
+
+    // Clear existing stop points
+    this.clearStopPoints();
 
     // Reset playback controls
     this.playbackControlObject = {
@@ -176,6 +394,9 @@ export class PathReplayService {
       map.fitBounds(uniqueTrackPath);
       this.initilizeTrackPlayer(uniqueTrackPath, map);
     }
+
+    // Plot stop points after track initialization
+    this.plotStopPoints(stopsData, map);
   }
 
 
@@ -333,6 +554,9 @@ export class PathReplayService {
       speed: 0,
       timestamp: '00:00:00'
     };
+
+
+    this.clearStopPoints();
 
     console.log('♻️ Path Replay fully reset');
   }

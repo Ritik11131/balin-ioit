@@ -1,3 +1,5 @@
+import moment from "moment";
+
 const priorityMap: Record<string, number> = {
   running: 1,
   dormant: 2,
@@ -77,5 +79,120 @@ export const buildHistoryRequests = (vehicleId: number, startDate: string, endDa
   }
 
   return requests;
+}
+
+
+/**
+   * Validates stop data structure
+   */
+  export const isValidStopData = (stop: any): boolean => {
+    return stop &&
+      typeof stop === 'object' &&
+      (stop.Latitude || stop.latitude || stop.Lat) != null &&
+      (stop.Longitude || stop.longitude || stop.Lng || stop.Lon) != null;
+  }
+
+  /**
+   * Extracts coordinates from stop data (handles different property name formats)
+   */
+  export const extractStopCoordinates = (stop: any): { latitude: number; longitude: number } => {
+    const latitude = stop.Latitude || stop.latitude || stop.Lat || 0;
+    const longitude = stop.Longitude || stop.longitude || stop.Lng || stop.Lon || 0;
+
+    return {
+      latitude: parseFloat(latitude.toString()),
+      longitude: parseFloat(longitude.toString())
+    };
+  }
+
+  /**
+   * Validates coordinate values
+   */
+  export const isValidCoordinate = (lat: number, lng: number): boolean => {
+    return !isNaN(lat) && !isNaN(lng) &&
+      lat >= -90 && lat <= 90 &&
+      lng >= -180 && lng <= 180 &&
+      !(lat === 0 && lng === 0); // Exclude null island
+  }
+
+/**
+ * Formats stop duration by calculating difference between start and end times using moment.js
+ */
+export const formatStopDuration = (stop: any): string => {
+  try {
+    // Calculate duration from start and end timestamps using moment
+    const startTime = stop.dormantStart || stop.DormantStart || stop.startTime || stop.StartTime;
+    const endTime = stop.dormantEnd || stop.DormantEnd || stop.endTime || stop.EndTime;
+
+    if (!startTime || !endTime) {
+      return 'N/A';
+    }
+
+    const startMoment = moment(startTime);
+    const endMoment = moment(endTime);
+
+    // Validate moments
+    if (!startMoment.isValid() || !endMoment.isValid()) {
+      console.warn('Invalid date format in stop data:', { startTime, endTime });
+      return 'N/A';
+    }
+
+    // Calculate duration using moment
+    const duration = moment.duration(endMoment.diff(startMoment));
+    const durationMinutes = Math.round(duration.asMinutes());
+
+    // Handle negative duration (end before start)
+    if (durationMinutes < 0) {
+      console.warn('Negative duration detected:', { start: startTime, end: endTime });
+      return 'N/A';
+    }
+
+    return formatDurationMinutes(durationMinutes);
+
+  } catch (error) {
+    console.error('Error calculating stop duration:', error);
+    return 'N/A';
+  }
+}
+
+/**
+ * Helper function to format duration in minutes to readable format
+ */
+export const formatDurationMinutes = (durationMinutes: number): string => {
+  if (durationMinutes < 1) {
+    return '<1min';
+  } else if (durationMinutes < 60) {
+    return `${durationMinutes}min`;
+  } else {
+    const hours = Math.floor(durationMinutes / 60);
+    const minutes = durationMinutes % 60;
+    
+    if (minutes === 0) {
+      return `${hours}h`;
+    } else {
+      return `${hours}h ${minutes}min`;
+    }
+  }
+}
+
+/**
+ * Formats stop time from various timestamp formats using moment.js
+ */
+export const formatStopTime = (timestamp: any): string => {
+  if (!timestamp) return 'N/A';
+  
+  try {
+    const momentTime = moment(timestamp);
+    
+    if (!momentTime.isValid()) {
+      console.warn('Invalid timestamp format:', timestamp);
+      return timestamp.toString();
+    }
+    
+    return momentTime.format('hh:mm A'); // 12-hour format with AM/PM
+  } catch (error) {
+    console.error('Error formatting timestamp:', error);
+    return timestamp.toString();
+  }
 }
 
