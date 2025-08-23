@@ -9,6 +9,7 @@ import { buildHistoryRequests, pathReplayConvertedValidJson } from '../../shared
 import { AddressService } from './address.service';
 import moment from 'moment';
 import * as turf from "@turf/turf";
+import { ReportsService } from './reports.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +27,8 @@ export class PathReplayService {
   private formConfigEnricher = inject(FormEnricherService);
   private http = inject(HttpService);
   private uiService = inject(UiService);
-  private addressService = inject(AddressService)
+  private addressService = inject(AddressService);
+  private reportsService = inject(ReportsService);
   formFields$ = this.formConfigEnricher.enrichForms([PATH_REPLAY_FORM_FIELDS]).pipe(map((res) => res[0]));
 
   trackPlayer!: any;
@@ -143,27 +145,37 @@ export class PathReplayService {
       formValue?.date[1]
     );
 
-    // Run requests in parallel
-    const responses = await Promise.all(
-      requests.map(r =>
+    const [historyResults, stopsResults] = await Promise.all([
+      Promise.allSettled(requests.map(r =>
         this.fetchHistory({
           DeviceId: r.deviceId,
           FromTime: r.fromTime,
           ToTime: r.toTime
-        })
-      )
-    );
+        }).catch(err => ({ error: err.message, data: [] }))
+      )),
+      Promise.allSettled(requests.map(r =>
+        this.reportsService.fetchStopReport({
+          DeviceId: r.deviceId,
+          FromTime: r.fromTime,
+          ToTime: r.toTime
+        }).catch(err => ({ error: err.message, data: [] }))
+      ))
+    ]);
 
-    // Merge all response data
-    const allData = responses.flatMap(res => res?.data || []);
-    const uniqueTrackPath = pathReplayConvertedValidJson(allData);
+    // Extract successful data
+    const historyData = historyResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
+    const stopsData = stopsResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
+
+    console.log(historyData, 'historyData');
+    console.log(stopsData, 'stopsData');
+    
+    const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
     this.setVehicleStartEndInfo(uniqueTrackPath);
     this._historyData.next(uniqueTrackPath);
     if (uniqueTrackPath && uniqueTrackPath.length > 0) {
       map.fitBounds(uniqueTrackPath);
       this.initilizeTrackPlayer(uniqueTrackPath, map);
     }
-    console.log('📡 Path Replay API Responses:', responses);
   }
 
 
