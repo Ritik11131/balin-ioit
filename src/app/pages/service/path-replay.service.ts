@@ -8,6 +8,7 @@ import { UiService } from '../../layout/service/ui.service';
 import { buildHistoryRequests, pathReplayConvertedValidJson } from '../../shared/utils/helper_functions';
 import { AddressService } from './address.service';
 import moment from 'moment';
+import * as turf from "@turf/turf";
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +37,9 @@ export class PathReplayService {
   };
   vehicleStartEndInfo: any = {
     startInfo: { address: '', timestamp: '' },
-    endInfo: { address: '', timestamp: '' }
+    endInfo: { address: '', timestamp: '' },
+    maxSpeed: 0,
+    totalDistance: 0
   }
 
   startPathReplay(formObj: any) {
@@ -62,26 +65,41 @@ export class PathReplayService {
 
   async setVehicleStartEndInfo(track: any[]) {
     if (!track?.length) {
-      this.vehicleStartEndInfo = { startInfo: { address: '', timestamp: '' }, endInfo: { address: '', timestamp: '' } };
+      this.vehicleStartEndInfo = {
+        startInfo: { address: '', timestamp: '' },
+        endInfo: { address: '', timestamp: '' },
+        maxSpeed: 0,
+        totalDistance: 0
+      };
       return;
     }
 
     const [start, end] = [track[0], track.at(-1)];
 
+    // Fetch addresses in parallel
     const [startAddress, endAddress] = await Promise.all([
       this.addressService.getAddress(start.lat, start.lng),
       this.addressService.getAddress(end.lat, end.lng),
     ]);
 
+    // Max speed
+    const maxSpeed = track.reduce((max, point) => Math.max(max, point.speed || 0), 0);
+
+    // Total distance using Turf.js
+    const line = turf.lineString(track.map(p => [p.lng, p.lat])); // [lng, lat] order
+    const totalDistance = turf.length(line, { units: 'kilometers' }); // in km
+
     this.vehicleStartEndInfo = {
       startInfo: {
         address: startAddress,
-        timestamp: moment(start.timestamp).format('DD MMM YYYY, hh:mm A') // e.g. 19 Aug 2025, 10:15 AM
+        timestamp: moment(start.timestamp).format('DD MMM YYYY, hh:mm A')
       },
       endInfo: {
         address: endAddress,
         timestamp: moment(end.timestamp).format('DD MMM YYYY, hh:mm A')
-      }
+      },
+      maxSpeed,
+      totalDistance: totalDistance?.toFixed(2)
     };
   }
 
