@@ -13,7 +13,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   <!-- Professional Playback Controls Panel -->
 @if (pathReplayService.hasHistory$ | async) {
 <div cdkDrag
-    class="fixed bottom-6 left-1/2 transform -translate-x-1/2 control-panel rounded-xl shadow-lg border border-gray-200 bg-white"
+    class="fixed bottom-6 left-2/3 transform -translate-x-1/2 control-panel rounded-xl shadow-lg border border-gray-200 bg-white"
     style="width: 580px; z-index: 9999">
     <!-- Drag Handle -->
     <div cdkDragHandle

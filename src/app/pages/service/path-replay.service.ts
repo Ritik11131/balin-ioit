@@ -63,8 +63,6 @@ export class PathReplayService {
     } catch (error: any) {
       this.uiService.showToast('error', 'Error', error?.error?.data);
       throw error;
-    } finally {
-      this.uiService.toggleLoader(false);
     }
   }
 
@@ -107,7 +105,19 @@ export class PathReplayService {
       },
       maxSpeed,
       totalDistance: totalDistance?.toFixed(2),
-      stopsData: { total: stops?.length || 0, data: stops.map((stop, index)=>{ return { label:`Stop ${index + 1}`, address:'', duration: formatStopDuration(stop)   }}) || [] },
+      stopsData: {
+        total: stops?.length || 0,
+        data: await Promise.all(
+          stops.map(async (stop, index) => {
+            const address = await this.addressService.getAddress(stop.latitude, stop.longitude);
+            return {
+              label: `Stop ${index + 1}`,
+              address,
+              duration: formatStopDuration(stop),
+            };
+          })
+        )
+      },
       historyData: { total: track?.length || 0, data: track || [] }
     };
   }
@@ -398,7 +408,7 @@ export class PathReplayService {
     console.log(stopsData, 'stopsData');
     
     const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
-    this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
+    await this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
     this._historyData.next(uniqueTrackPath);
     if (uniqueTrackPath && uniqueTrackPath.length > 0) {
       map.fitBounds(uniqueTrackPath);
@@ -407,6 +417,7 @@ export class PathReplayService {
 
     // Plot stop points after track initialization
     this.plotStopPoints(stopsData, map);
+    this.uiService.toggleLoader(false);
   }
 
 

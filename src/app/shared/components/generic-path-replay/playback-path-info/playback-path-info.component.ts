@@ -97,7 +97,7 @@ import { CommonModule } from '@angular/common';
                 </p-tablist>
                 <p-tabpanels>
                     <p-tabpanel value="0">
-                        <div class="max-h-[160px] overflow-y-auto space-y-3 mt-4">
+                        <div class="max-h-[160px] overflow-y-auto space-y-3 mt-4 px-2">
                             @for (stop of pathReplayService.vehicleStartEndInfo?.stopsData?.data; track stop) {
                                 <div class="flex items-center">
                                     <div class="stop-marker-container mr-4">
