@@ -22,11 +22,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
             <i class="pi pi-bars text-xs text-gray-400"></i>
             <span class="font-medium text-sm text-gray-600">Playback Controls</span>
         </div>
-        <div class="flex items-center gap-1">
-            <div class="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
-            <div class="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
-            <div class="w-1.5 h-1.5 bg-gray-300 rounded-full"></div>
-        </div>
     </div>
 
     <div class="p-4">
@@ -68,13 +63,11 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
         <!-- Progress Bar Row -->
         <div class="mb-4">
             <div class="flex items-center gap-3 text-xs text-gray-500">
-                <span class="w-16 text-right">{{ '00:00' }}</span>
                 <div class="flex-1">
                     <p-slider styleClass="w-full progress-slider"
                         [ngModel]="pathReplayService.playbackControlObject?.progress || 0" [min]="0" [max]="100"
                         [step]="0.1" (onChange)="onProgressChange($event)"> </p-slider>
                 </div>
-                <span class="w-16 text-left">{{ totalTime }}</span>
             </div>
         </div>
 

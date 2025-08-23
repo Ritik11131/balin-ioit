@@ -23,7 +23,7 @@ export class StoreService implements OnDestroy {
     this.refreshStore();
 
     this.refreshSub = interval(environment.storeRefreshInterval).subscribe(() => {
-      this.refreshStore();
+      // this.refreshStore();
     });
   }
 

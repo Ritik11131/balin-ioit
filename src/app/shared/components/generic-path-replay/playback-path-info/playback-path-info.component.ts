@@ -3,9 +3,9 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { PathReplayService } from '../../../../pages/service/path-replay.service';
 
 @Component({
-    selector: 'app-playback-path-info',
-    imports: [SkeletonModule],
-    template: `
+  selector: 'app-playback-path-info',
+  imports: [SkeletonModule],
+  template: `
         <h2 class="text-xl font-semibold text-gray-800 mb-6">Path Info</h2>
 
         <div class="mb-6">
@@ -92,16 +92,16 @@ import { PathReplayService } from '../../../../pages/service/path-replay.service
 
     </div>
     `,
-    styles: [
-        `
+  styles: [
+    `
             .dotted-line {
                 background-image: linear-gradient(to bottom, var(--primary-color) 40%, transparent 40%);
                 background-size: 2px 8px;
                 background-repeat: repeat-y;
             }
         `
-    ]
+  ]
 })
 export class PlaybackPathInfoComponent {
-    public pathReplayService = inject(PathReplayService);
+  public pathReplayService = inject(PathReplayService);
 }
