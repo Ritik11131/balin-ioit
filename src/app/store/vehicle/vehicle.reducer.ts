@@ -12,7 +12,8 @@ import {
   selectVehicle,
   startSingleVehiclePolling,
   updateSelectedVehicle,
-  stopSingleVehiclePolling
+  stopSingleVehiclePolling,
+  updateSelectedVehicleLocation
 } from './vehicle.actions';
 import { constructVehicleData, sortVehiclesByStatus } from '../../shared/utils/helper_functions';
 import { initialVehicleState } from './vehicle.state';
@@ -163,5 +164,24 @@ on(updateSelectedVehicle, (state, { vehicle }) => {
     polling: false,
     // selectedVehicle: null,
     // selectedVehicleId: null
-  }))
+  })),
+
+on(updateSelectedVehicleLocation, (state, { location }) => {
+  if (!state.selectedVehicle) return state;
+
+  const updatedSelectedVehicle = {
+    ...state.selectedVehicle,
+    location
+  };
+
+  const updatedFilteredVehicles = state.filteredVehicles.map(v =>
+    v.id === updatedSelectedVehicle.id ? { ...v, location } : v
+  );
+
+  return {
+    ...state,
+    selectedVehicle: updatedSelectedVehicle,
+    filteredVehicles: updatedFilteredVehicles
+  };
+})
 );

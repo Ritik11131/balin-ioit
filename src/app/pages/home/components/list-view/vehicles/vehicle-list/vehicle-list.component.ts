@@ -27,7 +27,7 @@ import { PathReplayService } from '../../../../../service/path-replay.service';
                 } @else {
                     <cdk-virtual-scroll-viewport itemSize="124" class="scrollbar-hide" style="height: calc(100vh - 280px);">
                         <div *cdkVirtualFor="let vehicle of fetchedVehicles; let last = last; trackBy: trackByVehicleId" [class.mb-4]="!last" class="px-2">
-                            <app-vehicle-card [vehicle]="vehicle" [isSelected]="(selectedVehicle$ | async) === vehicle" (cardSelected)="onVehicleSelected($event)" />
+                            <app-vehicle-card [vehicle]="vehicle" [isSelected]="(selectedVehicle$ | async)?.id === vehicle?.id" (cardSelected)="onVehicleSelected($event)" />
                         </div>
                     </cdk-virtual-scroll-viewport>
                 }

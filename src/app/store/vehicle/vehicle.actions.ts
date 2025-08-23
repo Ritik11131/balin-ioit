@@ -48,3 +48,9 @@ export const updateSelectedVehicle = createAction(
   '[Vehicle] Update Selected Vehicle',
   props<{ vehicle: any }>()
 );
+
+export const updateSelectedVehicleLocation = createAction(
+  '[Vehicle] Update Selected Vehicle Location',
+  props<{ location: string }>()
+);
+
