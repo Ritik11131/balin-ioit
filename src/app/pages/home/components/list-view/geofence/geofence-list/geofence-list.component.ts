@@ -16,7 +16,7 @@ import { GeofenceService } from '../../../../../service/geofence.service';
     imports: [GeofenceCardComponent, ScrollingModule, GeofenceSkeletonCardComponent, CommonModule, GeofenceDetailsComponent],
     template: `
 
-        <div class="max-h-[calc(100vh-280px)] overflow-y-scroll scrollbar-hide mt-4">
+        <div class="max-h-[calc(100vh-280px)] overflow-y-scroll scrollbar-hide">
             <div class="flex flex-col">
                 @if (isLoading) {
                     <!-- Show Skeleton Cards when loading -->
@@ -37,7 +37,7 @@ import { GeofenceService } from '../../../../../service/geofence.service';
 
 
          <ng-template #geofenceDetailsTemplate>
-            <app-geofence-details [geofence]="selectedGeofence$ | async" [geofenceLinkedVehicles]="geofenceLinkedVehicles" />
+            <app-geofence-details [geofence]="selectedGeofence$ | async" [geofenceLinkedVehicles]="geofenceLinkedVehicles" (actionExecuted)="onActionExecuted($event)" />
         </ng-template>
     `,
     styles: ``
@@ -50,20 +50,51 @@ export class GeofenceListComponent {
     private store = inject(Store);
     private geofenceService = inject(GeofenceService);
     private uiService = inject(UiService);
-    
+
     selectedGeofence$: Observable<any> = this.store.select(selectSelectedGeofence);
     geofenceLinkedVehicles = []
 
     async onGeofenceSelected(geofence: any): Promise<void> {
-        this.store.dispatch(selectGeofence({ geofence }));
-        this.uiService.openDrawer(this.geofenceDetailsTemplate);
-        this.geofenceLinkedVehicles = await this.geofenceService.fetchGeofenceLinkedVehicles(geofence.id) ?? [];
+        try {
+            this.store.dispatch(selectGeofence({ geofence }));
+            const vehicles = await this.geofenceService.fetchGeofenceLinkedVehicles(geofence.id);
+            this.geofenceLinkedVehicles = vehicles ?? [];
+            this.uiService.openDrawer(this.geofenceDetailsTemplate);
+            console.log('Linked vehicles:', this.geofenceLinkedVehicles);
+        } catch (error) {
+            console.error('Error fetching geofence linked vehicles:', error);
+            this.geofenceLinkedVehicles = [];
+        }
     }
+
 
     trackByGeofenceId = (index: number, geofence: any) => geofence?.id ?? index;
 
+
+    onActionExecuted(event: any) {
+        switch (event.actionKey) {
+            case 'edit':
+                this.handleGeofenceEdit();
+                break;
+            case 'delete':
+                this.handleGeofenceDelete();
+                break;
+            // Add more cases as needed
+            default:
+                console.log('Unhandled action:', event);
+        }
+    }
+
+    handleGeofenceEdit() {
+
+    }
+
+    handleGeofenceDelete() {
+
+    }
+
     ngOnDestroy(): void {
-        
+
         console.log('GeofenceListComponent destroyed and cleaned up');
     }
 }

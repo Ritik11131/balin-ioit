@@ -30,7 +30,6 @@ export class VehicleDetailsComponent implements OnInit, OnChanges, OnDestroy {
   private store = inject(Store);
   private destroy$ = new Subject<void>();
   
-
   @Input() vehicle: any;
   @Output() actionExecuted = new EventEmitter<VehicleActionEvent>();
 

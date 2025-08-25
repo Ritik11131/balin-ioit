@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TabsModule } from 'primeng/tabs';
@@ -16,6 +16,8 @@ export class GeofenceDetailsComponent {
   @Input() geofence: any;
   @Input() geofenceLinkedVehicles: any[] = [];
 
+  @Output() actionExecuted = new EventEmitter<any>();
+
   geofenceMenuItems = [
     {
       label: 'Edit',
@@ -30,8 +32,7 @@ export class GeofenceDetailsComponent {
   ];
 
   handleCommand(actionKey: string, actionType: string) {
-    console.log(`Executing command: ${actionKey} - ${actionType}`);
-    // Emit an event or perform an action based on the command
+     this.actionExecuted.emit({ actionKey, actionType });
   }
   
 

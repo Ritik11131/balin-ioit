@@ -9,7 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
     selector: 'app-geofence-filter',
     imports: [IconFieldModule, InputIconModule, ButtonModule, InputTextModule, CommonModule],
     template: `
-        <div class="w-full h-[90px] bg-transparent py-4 flex flex-col justify-between gap-4">
+        <div class="w-full h-[60px] bg-transparent py-4 flex flex-col justify-between gap-4">
             <div class="flex items-center justify-between w-full">
                 <div class="flex">
                     <p-button icon="pi pi-plus" outlined label="Create"></p-button>

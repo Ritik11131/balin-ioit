@@ -3,7 +3,7 @@ import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { VehicleSkeletonCardComponent } from './vehicle-skeleton-card/vehicle-skeleton-card.component';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
-import { startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
+import { selectVehicle, startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
 import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
 import { CommonModule } from '@angular/common';
 import { UiService } from '../../../../../../layout/service/ui.service';
@@ -12,9 +12,9 @@ import { PathReplayService } from '../../../../../service/path-replay.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-    selector: 'app-vehicle-list',
-    imports: [CommonModule, VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule, VehicleDetailsComponent],
-    template: `
+  selector: 'app-vehicle-list',
+  imports: [CommonModule, VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule, VehicleDetailsComponent],
+  template: `
         <!-- Cards Wrapper Container -->
         <div class="max-h-[calc(100vh-280px)] overflow-y-scroll scrollbar-hide mt-4">
             <div class="flex flex-col">
@@ -40,22 +40,22 @@ import { Subject, takeUntil } from 'rxjs';
         </ng-template>
 
     `,
-    styles: ``
+  styles: ``
 })
 export class VehicleListComponent {
 
-    @ViewChild('vehicleDetailsTemplate') vehicleDetailsTemplate: any;
-    @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
+  @ViewChild('vehicleDetailsTemplate') vehicleDetailsTemplate: any;
+  @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
 
-    @Input() fetchedVehicles: any = [];
-    @Input() isLoading: any = false;
+  @Input() fetchedVehicles: any = [];
+  @Input() isLoading: any = false;
 
-    private destroy$ = new Subject<void>();
-    private store = inject(Store);
-    private uiService = inject(UiService);
-    private pathReplayService = inject(PathReplayService);
-    selectedVehicle$ = this.store.select(selectSelectedVehicle);
-    
+  private destroy$ = new Subject<void>();
+  private store = inject(Store);
+  private uiService = inject(UiService);
+  private pathReplayService = inject(PathReplayService);
+  selectedVehicle$ = this.store.select(selectSelectedVehicle);
+
 
 
   ngAfterViewInit() {
@@ -69,23 +69,17 @@ export class VehicleListComponent {
     });
   }
 
-    trackByVehicleId = (index: number, vehicle: any) => vehicle?.id ?? index;
+  trackByVehicleId = (index: number, vehicle: any) => vehicle?.id ?? index;
 
-    onVehicleSelected(vehicle: any) {
-    console.log('Selected vehicle:', vehicle);
-
-    // Step 1: Stop previous polling (if any)
+  onVehicleSelected(vehicle: any) {
+    this.store.dispatch(selectVehicle({ vehicle }));
     this.store.dispatch(stopSingleVehiclePolling());
-
-    // Step 2: Start polling this new vehicle
     this.store.dispatch(startSingleVehiclePolling({ vehicleId: vehicle.id }));
-
-    // Step 4: Open side drawer
     this.uiService.openDrawer(this.vehicleDetailsTemplate);
   }
 
-    onActionExecuted(event: VehicleActionEvent) {
-    switch(event.actionKey) {
+  onActionExecuted(event: VehicleActionEvent) {
+    switch (event.actionKey) {
       case 'immobilizer':
         this.handleImmobilizer(event.actionType);
         break;
@@ -141,8 +135,8 @@ export class VehicleListComponent {
     this.pathReplayService.startPathReplay(null);
   }
 
-    ngOnDestroy(): void {
-      this.destroy$.next();
-      this.destroy$.complete();
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

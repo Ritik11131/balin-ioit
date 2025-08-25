@@ -1,10 +1,13 @@
-<div class="container mx-auto max-w-4xl px-4 py-6">
+<div class="container mx-auto max-w-4xl py-6">
 
     <!-- Vehicle Header -->
     <div class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-3 group">
+        <div class="flex flex-col group">
             <span class="text-lg font-semibold text-gray-800 group-hover:text-gray-900">
                 {{ geofence?.geometryName || 'Loading...' }}
+            </span>
+            <span class="text-sm text-gray-500 group-hover:text-gray-900">
+                {{ geofenceLinkedVehicles.length || 0 }} Linked Vehicles
             </span>
         </div>
         <div>
@@ -14,28 +17,42 @@
     </div>
 
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4 text-gray-700">
+    <!-- Geofence Details -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <ng-container *ngIf="geofence; else skeletonView">
-            <div class="card-box">
-                <div class="label">Radius</div>
-                <div>{{ geofence.radius }} km</div>
+            <!-- Radius Card -->
+            <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+                <p class="text-xs uppercase tracking-wide text-gray-500">Radius</p>
+                <p class="mt-1 text-lg font-semibold text-gray-800">
+                    {{ geofence.radius }} km
+                </p>
             </div>
-            <div class="card-box" [style.backgroundColor]="geofence.color" [style.color]="'white'">
-                <div class=" font-bold text-white">Color</div>
-                <div>{{ geofence.color }}</div>
+
+            <!-- Color Card -->
+            <div class="p-4 rounded-xl shadow-sm" [style.backgroundColor]="geofence.color" [style.color]="'#fff'">
+                <p class="text-xs uppercase tracking-wide opacity-80">Color</p>
+                <p class="mt-1 text-lg font-semibold">
+                    {{ geofence.color }}
+                </p>
             </div>
         </ng-container>
     </div>
-    <div class="mt-4">
+
+    <!-- Linked Vehicles -->
+    <div class="mt-6">
         <h3 class="text-sm font-semibold text-gray-600 mb-3">Linked Vehicles</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4 text-gray-700">
-            @for (linkedVehicles of geofenceLinkedVehicles; track $index) {
-                <div class="card-box">
-                    <div class="label">{{linkedVehicles?.name}}</div>
-                </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            @for (linkedVehicle of geofenceLinkedVehicles; track $index) {
+            <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white hover:shadow-md transition">
+                <p class="text-sm font-medium text-gray-800">
+                    {{ linkedVehicle?.name }}
+                </p>
+            </div>
             }
         </div>
     </div>
+
 
     <!-- Skeleton Loaders -->
     <ng-template #skeletonView>
