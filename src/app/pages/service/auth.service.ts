@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private parentToken: string | null = null;
+  public parentToken: string | null = null;
   private childTokens: { id: string; userName: string; token: string }[] = [];
   public currentToken: string | null = null;
 
@@ -125,6 +125,8 @@ export class AuthService {
   switchToParent() {
     this.currentToken = this.parentToken;
     localStorage.setItem('active_token', this.parentToken!);
+    this.childTokens = [];
+    localStorage.removeItem('child_tokens');
     this.decodeToken();
     this.setUserDetails(this.decodedToken);
     this.updateActiveUser();

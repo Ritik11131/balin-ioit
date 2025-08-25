@@ -11,6 +11,8 @@ import { ButtonModule } from 'primeng/button';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { AuthService } from '../../pages/service/auth.service';
 import { Subject, takeUntil } from 'rxjs';
+import { logout } from '../../store/core/action';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-topbar',
@@ -48,12 +50,13 @@ export class AppTopbar implements OnInit, OnDestroy {
   userName!: string;
   userType!: string;
 
-   private destroy$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     public layoutService: LayoutService,
     private authService: AuthService,
     private router: Router,
+    private store: Store,
     private storeService: StoreService
   ) {}
 
@@ -76,37 +79,43 @@ export class AppTopbar implements OnInit, OnDestroy {
 
   buildMenu() {
     const children = this.authService.getChildren();
+    const isChildActive = this.authService.currentToken !== this.authService.parentToken;
     const childItems = children.map((child, index) => ({
       label: `Go To ${child.userName}`,
       icon: 'pi pi-sign-out',
       command: () => {
         this.authService.switchToChild(index);
+            this.store.dispatch(logout());
         this.storeService.startAutoRefresh();
       }
     }));
 
     this.items = [
-      {
-        label: 'Switch to Parent',
-        icon: 'pi pi-user-edit',
-        command: () => {
-          this.authService.switchToParent()
-          this.storeService.startAutoRefresh();
-        }
-      },
-      {
-        label: 'Child Accounts',
-        icon: 'pi pi-users',
-        items: childItems
-      },
-      {
-        label: 'Logout',
-        icon: 'pi pi-sign-out',
-        command: () => {
-          this.authService.logout();
-          this.router.navigate(['/auth/login']);
-        }
-      },
+      // Show "Switch to Parent" only if a child user is active
+      ...(isChildActive
+        ? [
+            {
+              label: 'Switch to Parent',
+              icon: 'pi pi-user-edit',
+              command: () => {
+                this.authService.switchToParent();
+                    this.store.dispatch(logout());
+                this.storeService.startAutoRefresh();
+              }
+            }
+          ]
+        : []),
+
+      // Show "Child Accounts" only if child logins exist
+      ...(childItems.length
+        ? [
+            {
+              label: 'Child Accounts',
+              icon: 'pi pi-users',
+              items: childItems
+            }
+          ]
+        : []),
       { separator: true }
     ];
   }
