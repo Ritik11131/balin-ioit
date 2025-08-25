@@ -1,7 +1,7 @@
 import { Component, inject, Input, ViewChild } from '@angular/core';
 import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { VehicleSkeletonCardComponent } from './vehicle-skeleton-card/vehicle-skeleton-card.component';
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
 import { startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
 import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { UiService } from '../../../../../../layout/service/ui.service';
 import { VehicleActionEvent, VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
 import { PathReplayService } from '../../../../../service/path-replay.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-vehicle-list',
@@ -25,7 +26,7 @@ import { PathReplayService } from '../../../../../service/path-replay.service';
                       }
                     </div>
                 } @else {
-                    <cdk-virtual-scroll-viewport itemSize="124" class="scrollbar-hide" style="height: calc(100vh - 280px);">
+                    <cdk-virtual-scroll-viewport itemSize="124" class="scrollbar-hide scroll-smooth" style="height: calc(100vh - 280px);">
                         <div *cdkVirtualFor="let vehicle of fetchedVehicles; let last = last; trackBy: trackByVehicleId" [class.mb-4]="!last" class="px-2">
                             <app-vehicle-card [vehicle]="vehicle" [isSelected]="(selectedVehicle$ | async)?.id === vehicle?.id" (cardSelected)="onVehicleSelected($event)" />
                         </div>
@@ -44,14 +45,29 @@ import { PathReplayService } from '../../../../../service/path-replay.service';
 export class VehicleListComponent {
 
     @ViewChild('vehicleDetailsTemplate') vehicleDetailsTemplate: any;
+    @ViewChild(CdkVirtualScrollViewport) viewport!: CdkVirtualScrollViewport;
 
     @Input() fetchedVehicles: any = [];
     @Input() isLoading: any = false;
 
+    private destroy$ = new Subject<void>();
     private store = inject(Store);
     private uiService = inject(UiService);
     private pathReplayService = inject(PathReplayService);
     selectedVehicle$ = this.store.select(selectSelectedVehicle);
+    
+
+
+  ngAfterViewInit() {
+    this.selectedVehicle$.pipe(takeUntil(this.destroy$)).subscribe(selected => {
+      if (selected && this.viewport) {
+        const index = this.fetchedVehicles.findIndex((v: any) => v.id === selected.id);
+        if (index > -1) {
+          this.viewport.scrollToIndex(index, 'smooth');
+        }
+      }
+    });
+  }
 
     trackByVehicleId = (index: number, vehicle: any) => vehicle?.id ?? index;
 
@@ -126,8 +142,7 @@ export class VehicleListComponent {
   }
 
     ngOnDestroy(): void {
-        // Cleanup logic if needed
-        console.log('VehicleListComponent destroyed and cleaned up');
-        
+      this.destroy$.next();
+      this.destroy$.complete();
     }
 }

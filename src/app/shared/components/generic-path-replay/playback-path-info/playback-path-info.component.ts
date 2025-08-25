@@ -98,35 +98,36 @@ import { CommonModule } from '@angular/common';
                 <p-tabpanels>
                     <p-tabpanel value="0">
                         <div class="max-h-[160px] overflow-y-auto space-y-3 mt-4 px-2">
-                            @for (stop of pathReplayService.vehicleStartEndInfo?.stopsData?.data; track stop) {
-                                <div class="flex items-center">
-                                    <div class="stop-marker-container mr-4">
-                                        <div class="relative flex items-center justify-center">
-                                            <!-- Outer pulsing ring -->
-                                            <div class="absolute w-8 h-8 rounded-full border-2 border-white shadow-lg opacity-30" [ngStyle]="{ 'background-color': 'var(--primary-color)' }"></div>
+                            @if (pathReplayService.vehicleStartEndInfo?.stopsData?.data?.length > 0) {
+                                @for (stop of pathReplayService.vehicleStartEndInfo?.stopsData?.data; track stop) {
+                                    <div class="flex items-center">
+                                        <div class="stop-marker-container mr-4">
+                                            <div class="relative flex items-center justify-center">
+                                                <div class="absolute w-8 h-8 rounded-full border-2 border-white shadow-lg opacity-30" [ngStyle]="{ 'background-color': 'var(--primary-color)' }"></div>
+                                                <div class="relative w-5 h-5 rounded-full shadow-lg z-10" [ngStyle]="{ 'background-color': 'var(--primary-color)' }">
+                                                    <div class="absolute inset-0 rounded-full opacity-25" [ngStyle]="{ 'background-color': 'var(--primary-color)' }"></div>
+                                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-sm z-20"></div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                            <!-- Main marker -->
-                                            <div class="relative w-5 h-5 rounded-full shadow-lg z-10" [ngStyle]="{ 'background-color': 'var(--primary-color)' }">
-                                                <!-- Inner ping animation -->
-                                                <div class="absolute inset-0 rounded-full opacity-25" [ngStyle]="{ 'background-color': 'var(--primary-color)' }"></div>
-
-                                                <!-- White square at center -->
-                                                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-sm z-20"></div>
+                                        <div class="flex-grow">
+                                            <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                                <div class="text-md text-gray-500">
+                                                    <span>{{ stop.label }}</span>
+                                                    <span class="ml-2">[{{ stop.duration || '-' }}]</span>
+                                                </div>
+                                                <div class="truncate max-w-[200px] text-sm text-gray-800 font-medium mt-1">
+                                                    {{ stop.address || 'Address not available' }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="flex-grow">
-                                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                                            <div class="text-md text-gray-500">
-                                                <span>{{ stop.label }}</span>
-                                                <span class="ml-2">[{{ stop.duration || '-' }}]</span>
-                                            </div>
-                                            <div class="truncate max-w-[200px] text-sm text-gray-800 font-medium mt-1">
-                                                {{ stop.address || 'Address not available' }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                }
+                            } @else {
+                                <div>
+                                    <p-skeleton width="15rem" styleClass="mb-2" />
+                                    <p-skeleton width="5rem" />
                                 </div>
                             }
                         </div>
