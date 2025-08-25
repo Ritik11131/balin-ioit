@@ -30,7 +30,7 @@ import { Store } from '@ngrx/store';
             <app-configurator />
           </div>
 
-          <div class="flex items-center cursor-pointer relative" (click)="menu.toggle($event)">
+          <div class="flex items-center cursor-pointer relative" (click)="items.length && menu.toggle($event)">
             <p-button icon="pi pi-user" [rounded]="true" [outlined]="true" class="mr-2"></p-button>
             <div class="flex flex-col mr-2">
               <span class="font-medium text-gray-800">{{ userName }}</span>
@@ -82,7 +82,7 @@ export class AppTopbar implements OnInit, OnDestroy {
     const isChildActive = this.authService.currentToken !== this.authService.parentToken;
     const childItems = children.map((child, index) => ({
       label: `Go To ${child.userName}`,
-      icon: 'pi pi-sign-out',
+      icon: 'pi pi-sign-in',
       command: () => {
         this.authService.switchToChild(index);
             this.store.dispatch(logout());
@@ -96,7 +96,7 @@ export class AppTopbar implements OnInit, OnDestroy {
         ? [
             {
               label: 'Switch to Parent',
-              icon: 'pi pi-user-edit',
+              icon: 'pi pi-sign-in',
               command: () => {
                 this.authService.switchToParent();
                     this.store.dispatch(logout());
@@ -115,9 +115,11 @@ export class AppTopbar implements OnInit, OnDestroy {
               items: childItems
             }
           ]
-        : []),
-      { separator: true }
+        : [])
     ];
+
+    console.log(this.items);
+    
   }
 
   toggleDarkMode() {
