@@ -1,5 +1,5 @@
 import { StoreService } from './../../pages/service/store.service';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -10,6 +10,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { AuthService } from '../../pages/service/auth.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-topbar',
@@ -40,12 +41,14 @@ import { AuthService } from '../../pages/service/auth.service';
     </div>
   `
 })
-export class AppTopbar implements OnInit {
+export class AppTopbar implements OnInit, OnDestroy {
   @Input() isSidebarExpanded = false;
 
   items: MenuItem[] = [];
   userName!: string;
   userType!: string;
+
+   private destroy$ = new Subject<void>();
 
   constructor(
     public layoutService: LayoutService,
@@ -57,6 +60,17 @@ export class AppTopbar implements OnInit {
   ngOnInit(): void {
     this.userName = this.authService.userName;
     this.userType = this.authService.userType;
+
+    this.authService.activeUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        if (user) {
+          this.userName = user.userName;
+          this.userType = user.userType;
+          this.buildMenu();
+        }
+      });
+
     this.buildMenu();
   }
 
@@ -67,11 +81,7 @@ export class AppTopbar implements OnInit {
       icon: 'pi pi-sign-out',
       command: () => {
         this.authService.switchToChild(index);
-        this.userName = this.authService.userName;
-        this.userType = this.authService.userType;
-        this.buildMenu(); // Rebuild menu after removing later children
         this.storeService.startAutoRefresh();
-        
       }
     }));
 
@@ -80,13 +90,8 @@ export class AppTopbar implements OnInit {
         label: 'Switch to Parent',
         icon: 'pi pi-user-edit',
         command: () => {
-          console.log('okk');
-          this.authService.switchToParent();
-          this.userName = this.authService.userName;
-          this.userType = this.authService.userType;
-          this.buildMenu();
+          this.authService.switchToParent()
           this.storeService.startAutoRefresh();
-          
         }
       },
       {
@@ -108,5 +113,10 @@ export class AppTopbar implements OnInit {
 
   toggleDarkMode() {
     this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
+  }
+
+    ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

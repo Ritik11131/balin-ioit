@@ -84,7 +84,7 @@ export class Login {
     async signIn(): Promise<any> {
         this.uiService.toggleLoader(true);
         try {
-            await this.authService.loginParent(this.email, this.password);
+            await this.authService.login(this.email, this.password);
             this.store.dispatch({ type: '[Auth] Login Success' });
             this.router.navigate(['/home']);
             this.storeService.startAutoRefresh();
