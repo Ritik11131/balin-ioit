@@ -9,19 +9,21 @@ import { loadDeviceTypes } from '../../store/device-type/actions';
 import { loadVehicles } from '../../store/vehicle/vehicle.actions';
 import { loadGeofences } from '../../store/geofence/geofence.actions';
 import { loadUserConfiguration } from '../../store/user-configuration/actions';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class StoreService implements OnDestroy {
   private refreshSub?: Subscription;
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private authService:AuthService) {}
 
   /**
    * Start auto-refresh every N minutes (from environment config)
    */
   startAutoRefresh() {
+    this.stopAutoRefresh();
+    if(this.authService.currentToken === null) return;
     this.refreshStore();
-
     this.refreshSub = interval(environment.storeRefreshInterval).subscribe(() => {
       // this.refreshStore();
     });

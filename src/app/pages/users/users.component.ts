@@ -22,6 +22,8 @@ import { ChipModule } from 'primeng/chip';
 import { USER_DETAILS_TABS } from '../../shared/constants/user';
 import { UserService } from '../service/user.service';
 import { DeviceService } from '../service/device.service';
+import { AuthService } from '../service/auth.service';
+import { StoreService } from '../service/store.service';
 
 @Component({
   selector: 'app-users',
@@ -33,9 +35,11 @@ export class UsersComponent implements OnInit, OnDestroy {
   @ViewChild('createUpdateUser') createUpdateUser: any;
   @ViewChild('viewMoreDetails') viewMoreDetails: any;
   private store = inject(Store);
+  private authService = inject(AuthService);
   private uiService = inject(UiService);
   private userService = inject(UserService);
-  private deviceService = inject(DeviceService)
+  private deviceService = inject(DeviceService);
+  private storeService = inject(StoreService);
   private confirmationService = inject(ConfirmationService)
   private destroy$ = new Subject<void>();
   
@@ -70,7 +74,7 @@ dataMap: Record<string, any[]> = {
     'Update': (row) => this.editHandler(row),
     'Delete': (row) => this.deleteHandler(row),
     'More': (row) => this.viewMoreDetailsHandler(row),
-    'Login As Child': (row) => console.log('Login as Child', row)
+    'Login As Child': (row) => this.handleChildLogins(row)
   };
 
   handleInTableActions(event: any) {
@@ -223,6 +227,26 @@ dataMap: Record<string, any[]> = {
       this.loadingMap['linkedDevices'] = false;
     }
   }
+
+async handleChildLogins(row: any): Promise<void> {
+  try {
+    const res = await this.userService.getUserDetailsById(row?.id);
+    const { loginId, password, id, userName } = res?.data;
+
+    if (!loginId || !password) {
+      console.error('Child credentials not found');
+      return;
+    }
+
+    await this.authService.loginChild(loginId, password, id, userName);
+    this.storeService.startAutoRefresh();
+    console.log(`Switched to child: ${userName}`);
+  } catch (error) {
+    console.error('Error logging in as child:', error);
+  }
+}
+
+
 
 
 }
