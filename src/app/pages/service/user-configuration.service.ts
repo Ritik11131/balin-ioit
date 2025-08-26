@@ -15,8 +15,9 @@ export class UserConfigurationService {
   configuration$: Observable<UserConfiguration | null> = this.store.select(selectUserConfiguration);
 
   /** Get current configuration snapshot (mutable copy) */
-  async getConfigurationSnapshot(): Promise<UserConfiguration | null> {
-    const config = await firstValueFrom(this.configuration$);
+  async getConfigurationSnapshot(user: any): Promise<UserConfiguration | null> {
+    const response = (await this.userService.fetchUserConfigurationById(user?.id))?.data;
+    const config = {...response, attributes: typeof response?.attributes === 'string' ? JSON.parse(response?.attributes) : response?.attributes} as UserConfiguration;    
     if (!config) return null;
 
     // Return a deep copy to allow editing without mutating the store
@@ -33,9 +34,10 @@ export class UserConfigurationService {
     value: boolean,
     sectionKey: keyof UserConfiguration['attributes']['webConfig'],
     platform: 'web' | 'android' = 'web',
-    childUserConfigurationObject: any
+    childUserConfigurationObject: any,
+    user: any
   ) {
-    const config = await this.getConfigurationSnapshot();
+    const config = await this.getConfigurationSnapshot(user);
     if (!config) return;
 
     // Map 'web'/'android' to actual keys

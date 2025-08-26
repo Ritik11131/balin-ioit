@@ -302,7 +302,7 @@ async handleChildLoginFromDetails(): Promise<void> {
 }
 
  onFieldChange(fieldKey: string, value: boolean, sectionKey: string) {
-    this.userConfigurationService.updateField(fieldKey, value, sectionKey as any, 'web', this.childUserConfigurationObject);
+    this.userConfigurationService.updateField(fieldKey, value, sectionKey as any, 'web', this.childUserConfigurationObject, this.user);
   }
 
 
