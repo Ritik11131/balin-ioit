@@ -86,7 +86,6 @@ export class AppTopbar implements OnInit, OnDestroy {
       command: () => {
         this.authService.switchToChild(index);
         this.store.dispatch(logout());
-        this.router.navigate(['/pages/devices']);
         this.storeService.startAutoRefresh();
       }
     }));
@@ -101,7 +100,6 @@ export class AppTopbar implements OnInit, OnDestroy {
               command: () => {
                 this.authService.switchToParent();
                 this.store.dispatch(logout());
-                this.router.navigate(['/pages/devices']);
                 this.storeService.startAutoRefresh();
               }
             }

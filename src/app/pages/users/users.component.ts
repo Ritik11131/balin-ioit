@@ -296,6 +296,10 @@ async handleChildLogins(row: any): Promise<void> {
   }
 }
 
+async handleChildLoginFromDetails(): Promise<void> {
+  this.uiService.closeDrawer();
+  await this.handleChildLogins(this.user);
+}
 
  onFieldChange(fieldKey: string, value: boolean, sectionKey: string) {
     this.userConfigurationService.updateField(fieldKey, value, sectionKey as any, 'web', this.childUserConfigurationObject);
