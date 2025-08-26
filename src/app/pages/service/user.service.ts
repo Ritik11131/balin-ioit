@@ -147,6 +147,16 @@ export class UserService {
       );
     }
 
+    async fetchUserConfigurationById(id: any): Promise<any> {
+    try {
+      const response = await this.http.get('UserConfiguration', {}, id);
+      return response;
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error', error?.error?.data);
+      throw error;
+    }
+  }
+
   async getUserDetailsById(id: any): Promise<any> {
     try {
       const response = await this.http.get('User', {}, id);

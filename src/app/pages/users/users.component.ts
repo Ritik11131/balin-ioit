@@ -26,7 +26,7 @@ import { AuthService } from '../service/auth.service';
 import { StoreService } from '../service/store.service';
 import { CheckboxModule } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
-import { PlatformConfig, UserConfiguration } from '../../store/user-configuration/state';
+import { PlatformConfig, UserConfiguration, UserConfigurationAttributes } from '../../store/user-configuration/state';
 import { UserConfigurationService } from '../service/user-configuration.service';
 
 @Component({
@@ -61,6 +61,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   selectedRowItems: any[] = [];
   user!:any;
   userConfiguration!: UserConfiguration | null | any;
+  childUserConfigurationObject!: any;
   activeTab = 'details';
 
 // Maps for generic handling
@@ -173,27 +174,58 @@ dataMap: Record<string, any[]> = {
         });
   }
 
-  async viewMoreDetailsHandler(row: any): Promise<void> {
-    console.log(row);
-    this.user = row;
-    this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
-
-     this.userConfigurationService.configuration$.subscribe(config => {
-      if (config?.attributes?.webConfig) {
-        this.userConfiguration = config.attributes.webConfig;
-        console.log(this.userConfiguration);
-
-      } else {
-        this.userConfiguration = {} as PlatformConfig;
-      }
-    });
-
-    
-    await Promise.all([
-      this.loadSubUsers(row.id),
-      this.loadLinkedDevices(row.id)
-    ]);
+async viewMoreDetailsHandler(row: any): Promise<void> {
+  if (!row?.id) {
+    console.warn('Invalid user row:', row);
+    return;
   }
+
+  try {
+    this.uiService.toggleLoader(true);
+    this.user = row;
+
+    // Fetch user configuration safely
+    const response = await this.userService.fetchUserConfigurationById(row.id);
+    
+    if (!response?.result || !response?.data) {
+      console.warn('No configuration found for user:', row.id);
+      this.userConfiguration = {} as PlatformConfig;
+      this.childUserConfigurationObject = null;
+    } else {
+      // Safely parse attributes
+      let parsedAttributes: UserConfigurationAttributes = { webConfig: {} as PlatformConfig, androidConfig: {} as PlatformConfig };
+      try {
+        parsedAttributes = response.data.attributes
+        ? (typeof response.data.attributes === 'string'
+          ? JSON.parse(response.data.attributes)
+          : response.data.attributes)
+          : parsedAttributes;
+        } catch (parseError) {
+          console.error('Failed to parse user configuration attributes:', parseError);
+        }
+        
+        this.childUserConfigurationObject = response.data;
+        this.userConfiguration = parsedAttributes.webConfig ?? ({} as PlatformConfig);
+        
+        console.log('Fetched user configuration:', parsedAttributes);
+      }
+      
+      // Load related data in parallel with proper error handling
+      await Promise.allSettled([
+        this.loadSubUsers(row.id).catch(err => console.error('Failed to load sub-users:', err)),
+        this.loadLinkedDevices(row.id).catch(err => console.error('Failed to load linked devices:', err))
+      ]);
+    } catch (error) {
+      console.error('Error in viewMoreDetailsHandler:', error);
+      this.userConfiguration = {} as PlatformConfig;
+      this.childUserConfigurationObject = null;
+    } finally {
+      this.uiService.toggleLoader(false);
+    }
+    // Open drawer early to show UI immediately
+    this.uiService.openDrawer(this.viewMoreDetails,' ','!w-[80vw] md:!w-[80vw] lg:!w-[80vw]',true);
+}
+
 
   private async updateUser(id:any, data:any): Promise<void> {
     const res = await this.userService.updateUser(id, data);
@@ -266,7 +298,7 @@ async handleChildLogins(row: any): Promise<void> {
 
 
  onFieldChange(fieldKey: string, value: boolean, sectionKey: string) {
-    this.userConfigurationService.updateField(fieldKey, value, sectionKey as any, 'web', this.user?.id);
+    this.userConfigurationService.updateField(fieldKey, value, sectionKey as any, 'web', this.childUserConfigurationObject);
   }
 
 

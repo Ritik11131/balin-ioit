@@ -65,6 +65,7 @@ export const USER_DETAILS_TABS = [
           { label: 'Dashboard', key: 'dashboard' },
           { label: 'Device List', key: 'devicelist' },
           { label: 'User List', key: 'userlist' },
+          { label: 'Reports', key: 'reports' },
           { label: 'BMS', key: 'bms' },
           { label: 'ETA', key: 'eta' },
           { label: 'Raw Data', key: 'rawData' },

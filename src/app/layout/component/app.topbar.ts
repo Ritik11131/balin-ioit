@@ -85,7 +85,8 @@ export class AppTopbar implements OnInit, OnDestroy {
       icon: 'pi pi-sign-in',
       command: () => {
         this.authService.switchToChild(index);
-            this.store.dispatch(logout());
+        this.store.dispatch(logout());
+        this.router.navigate(['/pages/devices']);
         this.storeService.startAutoRefresh();
       }
     }));
@@ -99,7 +100,8 @@ export class AppTopbar implements OnInit, OnDestroy {
               icon: 'pi pi-sign-in',
               command: () => {
                 this.authService.switchToParent();
-                    this.store.dispatch(logout());
+                this.store.dispatch(logout());
+                this.router.navigate(['/pages/devices']);
                 this.storeService.startAutoRefresh();
               }
             }

@@ -33,7 +33,7 @@ export class UserConfigurationService {
     value: boolean,
     sectionKey: keyof UserConfiguration['attributes']['webConfig'],
     platform: 'web' | 'android' = 'web',
-    userId: any
+    childUserConfigurationObject: any
   ) {
     const config = await this.getConfigurationSnapshot();
     if (!config) return;
@@ -56,18 +56,21 @@ export class UserConfigurationService {
     }
   };
 
+  console.log(updatedConfig,'updatedConfig');
+  
+
     // Update store immediately
-    this.store.dispatch(updateUserConfiguration({ configuration: updatedConfig }));
+    // this.store.dispatch(updateUserConfiguration({ configuration: updatedConfig }));
 
     // Save to backend
-    this.saveConfiguration(updatedConfig, userId);
+    this.saveUserConfiguration(updatedConfig, childUserConfigurationObject);
   }
 
   /** Save updated configuration to backend API */
-  async saveConfiguration(config: UserConfiguration, userId: any) {
+  async saveUserConfiguration(config: UserConfiguration, childUserConfigurationObject: any) {
     try {
       // API expects attributes as string
-      const payload = { fkUserId : userId, id:config?.id, attributes: JSON.stringify(config.attributes) };
+      const payload = { fkUserId : childUserConfigurationObject?.fkUserId, id:childUserConfigurationObject?.id, attributes: JSON.stringify(config.attributes) };
       console.log(payload,'payload');
       
       await this.userService.updateUserConfiguration(payload);

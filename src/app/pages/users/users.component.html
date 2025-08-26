@@ -26,6 +26,9 @@
                     <div class="text-xs md:text-sm text-gray-500">{{ user?.email || '—' }}</div>
                 </div>
             </div>
+            <div>
+                <p-button icon="pi pi-sign-in" [outlined]="true" (onClick)="handleChildLogins(user)"></p-button>
+            </div>
         </div>
 
         <p-divider></p-divider>
