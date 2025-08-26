@@ -474,3 +474,46 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
     }
   ]
 };
+
+
+export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
+  formTitle: 'Create WhiteLabel',
+  columns: 1,
+  isEditMode: false,
+  fields: [
+    {
+      key: 'personName',
+      label: 'Full Name',
+      type: 'text',
+      required: true,
+      placeholder: 'Enter the full name of the contact person',
+      gridCol: 1
+    },
+    {
+      key: 'url',
+      label: 'Domain Name',
+      type: 'text',
+      required: true,
+      placeholder: 'e.g. mycompany.com',
+      gridCol: 2
+    },
+    {
+      key: 'baseUrl',
+      label: 'Base URL',
+      type: 'text',
+      required: true,
+      placeholder: 'e.g. https://mycompany.com',
+      gridCol: 2
+    },
+    {
+      key: 'message',
+      label: 'Custom Message',
+      type: 'textarea',
+      placeholder: 'Write a message or note (max 500 characters)',
+      rows: 4,
+      required: true,
+      maxLength: 500,
+      gridCol: 2
+    }
+  ]
+};

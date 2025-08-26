@@ -1,0 +1,13 @@
+<div class="p-8">
+    <div class="w-[calc(100vw-150px)]">
+        <app-generic-table [selectedItems]="selectedRowItems" [toolBarStartActions]="toolbarItems"
+            [tableConfig]="tableConfig" [tableData]="whiteLabels" [isLoading]="isLoading"
+            (onActionClick)="handleInTableActions($event)" (onToolBarStartAction)="handleToolBarActions($event)" />
+    </div>
+</div>
+
+<ng-template #createUpdateWhiteLabel>
+    <app-generic-form-generator [config]="formFields" [initialData]="formFields.isEditMode ? editData : null"
+        (formSubmit)="onWhiteLabelFormSubmit($event)" (formCancel)="onFormCancel()"
+        (formValueChanges)="onFormValueChange($event)"></app-generic-form-generator>
+</ng-template>

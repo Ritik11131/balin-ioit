@@ -128,10 +128,8 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                         </td>
                         @for (col of columns; track $index) {
                             <td>
-                                @if (col.download) {
-                                    <a [href]="rowData[col.field]" download class="p-button p-button-text p-button-sm">
-                                        <i class="pi pi-download" style="font-size: 1rem"></i>
-                                    </a>
+                                @if (col.hyperlink) {
+                                    <p-button [label]="rowData[col.field]" link />
                                 } @else if (col.view) {
                                     <a [href]="rowData[col.field]" target="_blank" class="p-button p-button-text p-button-sm">
                                         <i class="pi pi-eye" style="font-size: 1rem"></i>

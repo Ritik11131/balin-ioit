@@ -63,3 +63,28 @@ export const DEVICE_TABLE_CONFIG = {
     globalFilterFields: [],
     dataKey: 'id'
 };
+
+export const WHITELABEL_TABLE_CONFIG = {
+     title: 'WhiteLabel',
+    columns: [
+        { field: 'personName', header: 'Person Name', minWidth: '10rem' },
+        { field: 'url', header: 'Domain', minWidth: '4rem', hyperlink: true },
+        { field: 'creationTime', header: 'Time of Creation', minWidth: '4rem', date:true },
+
+    ],
+    showActionsColumn: {
+        enabled: true, actions: [
+            {
+                label: 'Update',
+                icon: 'pi pi-user-edit',
+            },
+              {
+                label: 'Delete',
+                icon: 'pi pi-trash',
+            },
+        ]
+    },
+
+    globalFilterFields: [],
+    dataKey: 'id'
+}
