@@ -51,15 +51,38 @@ export const USER_DETAILS_TABS = [
         }
     },
     {
-        label: 'Configuration',
-        icon: 'pi pi-cog',
-        key: 'config',
-        type: 'cards',
-        cardFields: [
-            { label: 'Time Zone', key: 'timeZone' },
-            { label: 'Alert Level', key: 'alertLevel', chip: true },
-            { label: 'Notifications', key: 'notificationsEnabled', boolean: true },
-            { label: 'Language', key: 'language' }
+    label: 'Configuration',
+    icon: 'pi pi-cog',
+    key: 'config',
+    type: 'config',
+    configSections: [
+      {
+        label: 'Modules',
+        description:'Enable or disable specific modules for the user',
+        key: 'modules',
+        fields: [
+          { label: 'Home', key: 'home' },
+          { label: 'Dashboard', key: 'dashboard' },
+          { label: 'Device List', key: 'devicelist' },
+          { label: 'User List', key: 'userlist' },
+          { label: 'BMS', key: 'bms' },
+          { label: 'ETA', key: 'eta' },
+          { label: 'Raw Data', key: 'rawData' },
+          { label: 'Subscription', key: 'subscription' },
+          { label: 'Notification', key: 'notification' }
         ]
-    }
+      },
+      {
+        label: 'Reports',
+        key: 'reports',
+        description:'Enable or disable specific reports for the user',
+        fields: [
+          { label: 'Trip Report', key: 'tripReport' },
+          { label: 'Idle Report', key: 'idleReport' },
+          { label: 'Alert Report', key: 'alertReport' },
+          { label: 'Fuel Report', key: 'fuelReport' }
+        ]
+      }
+    ]
+  }
 ];

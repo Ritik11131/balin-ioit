@@ -209,4 +209,15 @@ export class UserService {
       throw error;
     }
   }
+
+  async updateUserConfiguration(data: any): Promise<any> {
+     try {
+      const response: any = await this.http.put('UserConfiguration', data?.id, data);
+      this.uiService.showToast('success', 'Success', response?.data)
+      return response;
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error' ,error?.error?.data);
+      throw error;
+    }
+  }
 }

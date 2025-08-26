@@ -24,10 +24,14 @@ import { UserService } from '../service/user.service';
 import { DeviceService } from '../service/device.service';
 import { AuthService } from '../service/auth.service';
 import { StoreService } from '../service/store.service';
+import { CheckboxModule } from 'primeng/checkbox';
+import { FormsModule } from '@angular/forms';
+import { PlatformConfig, UserConfiguration } from '../../store/user-configuration/state';
+import { UserConfigurationService } from '../service/user-configuration.service';
 
 @Component({
   selector: 'app-users',
-  imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent, ButtonModule, SkeletonModule,DividerModule, AvatarModule, TabsModule, BadgeModule, TableModule, ChipModule],
+  imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent, ButtonModule, SkeletonModule,DividerModule, AvatarModule, TabsModule, BadgeModule, TableModule, ChipModule, CheckboxModule, FormsModule],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
@@ -40,12 +44,14 @@ export class UsersComponent implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private deviceService = inject(DeviceService);
   private storeService = inject(StoreService);
-  private confirmationService = inject(ConfirmationService)
+  private userConfigurationService = inject(UserConfigurationService);
+  private confirmationService = inject(ConfirmationService);
   private destroy$ = new Subject<void>();
   
   toolbarItems = USER_TABLE_TOOLBAR;
   tableConfig = USER_TABLE_CONFIG;
   formFields = CREATE_USER_FORM_FIELDS;
+  tabsConfig: any = USER_DETAILS_TABS;
 
   users$: Observable<any[]> = this.store.select(selectUsers);
   isLoading$: Observable<boolean> = this.store.select(selectUsersLoading);
@@ -54,8 +60,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   editData!: any
   selectedRowItems: any[] = [];
   user!:any;
+  userConfiguration!: UserConfiguration | null | any;
   activeTab = 'details';
-  tabsConfig: any = USER_DETAILS_TABS;
 
 // Maps for generic handling
 loadingMap: Record<string, boolean> = {
@@ -84,7 +90,7 @@ dataMap: Record<string, any[]> = {
 
 
   ngOnInit(): void {
-       this.usersLoaded$.pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
+    this.usersLoaded$.pipe(takeUntil(this.destroy$)).subscribe((loaded) => {
       if (!loaded) {
         this.store.dispatch(loadUsers());
       }
@@ -171,6 +177,18 @@ dataMap: Record<string, any[]> = {
     console.log(row);
     this.user = row;
     this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
+
+     this.userConfigurationService.configuration$.subscribe(config => {
+      if (config?.attributes?.webConfig) {
+        this.userConfiguration = config.attributes.webConfig;
+        console.log(this.userConfiguration);
+
+      } else {
+        this.userConfiguration = {} as PlatformConfig;
+      }
+    });
+
+    
     await Promise.all([
       this.loadSubUsers(row.id),
       this.loadLinkedDevices(row.id)
@@ -245,6 +263,11 @@ async handleChildLogins(row: any): Promise<void> {
     console.error('Error logging in as child:', error);
   }
 }
+
+
+ onFieldChange(fieldKey: string, value: boolean, sectionKey: string) {
+    this.userConfigurationService.updateField(fieldKey, value, sectionKey as any, 'web', this.user?.id);
+  }
 
 
 

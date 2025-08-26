@@ -18,3 +18,8 @@ export const loadUserConfigurationFailure = createAction(
 export const clearUserConfiguration = createAction(
   '[User Configuration] Clear User Configuration'
 );
+
+export const updateUserConfiguration = createAction(
+  '[User Configuration] Update',
+  props<{ configuration: UserConfiguration }>()
+);

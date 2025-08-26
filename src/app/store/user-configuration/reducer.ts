@@ -23,5 +23,10 @@ export const userConfigurationReducer = createReducer(
     error: error.message || 'Failed to load user configuration',
     loaded: false
   })),
-  on(UserConfigurationActions.clearUserConfiguration, () => initialUserConfigurationState)
+  on(UserConfigurationActions.clearUserConfiguration, () => initialUserConfigurationState),
+
+  on(UserConfigurationActions.updateUserConfiguration, (state, { configuration }) => ({
+  ...state,
+  configuration
+}))
 );

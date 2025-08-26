@@ -1,7 +1,7 @@
 <div class="p-8">
     <div class="w-[calc(100vw-150px)]">
         <app-generic-table [selectedItems]="selectedRowItems" [toolBarStartActions]="toolbarItems"
-            [tableConfig]="tableConfig" [tableData]="(users$ | async)" [isLoading]="isLoading$ | async"
+            [tableConfig]="tableConfig" [tableData]="users$ | async" [isLoading]="isLoading$ | async"
             (onActionClick)="handleInTableActions($event)" (onToolBarStartAction)="handleToolBarActions($event)" />
     </div>
 </div>
@@ -12,10 +12,8 @@
         (formValueChanges)="onFormValueChange($event)"></app-generic-form-generator>
 </ng-template>
 
-
 <ng-template #viewMoreDetails>
     <div class="w-full mx-auto">
-
         <!-- Header -->
         <div class="flex items-center justify-between mb-4 md:mb-6">
             <div class="flex items-center gap-3">
@@ -42,8 +40,9 @@
             <p-tabpanels>
                 @for (tab of tabsConfig; track tab.key) {
                 <p-tabpanel [value]="tab.key">
-                     @if (tab.type === 'table') {
-                        <app-generic-table [tableConfig]="tab.tableConfig" [tableData]="dataMap[tab.key] || []" [isLoading]="loadingMap[tab.key]"/>
+                    @if (tab.type === 'table') {
+                    <app-generic-table [tableConfig]="tab.tableConfig" [tableData]="dataMap[tab.key] || []"
+                        [isLoading]="loadingMap[tab.key]" />
                     }
 
                     <!-- Card Type -->
@@ -56,7 +55,7 @@
                                 @if (card.chip) {
                                 <p-chip [label]="user?.[card.key] || '—'"></p-chip>
                                 } @else if (card.date) {
-                                {{ user?.[card.key] | date:'medium' }}
+                                {{ user?.[card.key] | date: 'medium' }}
                                 } @else if (card.boolean) {
                                 {{ user?.[card.key] ? 'Enabled' : 'Disabled' }}
                                 } @else {
@@ -68,6 +67,83 @@
                     </div>
                     }
 
+                    <!-- Config Type -->
+                    @if (tab.type === 'config') {
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        @for (section of tab.configSections; track section.key) {
+                        <div
+                            class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                            <!-- Section Header -->
+                            <div class="flex items-center gap-3 p-6 pb-4 border-b border-gray-100 bg-gray-50/50">
+                                <div class="bg-primary/10 p-2.5 rounded-xl shrink-0">
+                                    <i class="pi pi-check-square text-primary text-base"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="font-semibold text-gray-900 text-lg tracking-tight truncate">
+                                        {{ section.label }}
+                                    </span>
+                                    @if (section.description) {
+                                    <p class="text-sm text-gray-600 mt-1">{{ section.description }}</p>
+                                    }
+                                </div>
+                                <!-- Optional: Show count of selected items -->
+                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full shrink-0"> {{ 5 }}
+                                    selected </span>
+                            </div>
+
+                            <!-- Fields Container -->
+                            <div class="p-6">
+                                <!-- Responsive Grid: 1 column on mobile, 2 on tablet, 3+ on desktop -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                                    @for (field of section.fields; track field.key) {
+                                    <div class="group relative">
+                                        <label [for]="field.key" 
+                                        class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 
+                                            hover:border-primary/50 hover:bg-primary/5 
+                                            cursor-pointer transition-all duration-200
+                                            group-focus-within:border-primary/70 group-focus-within:bg-primary/10
+                                            {{ userConfiguration[field.key] ? 'bg-primary/10 border-primary/30' : 'bg-white' }}">
+                                            <p-checkbox [ngModel]="userConfiguration?.[section.key]?.[field.key]"
+                                                (ngModelChange)="onFieldChange(field.key, $event, section.key)"
+                                                binary="true" [inputId]="field.key" class="shrink-0"></p-checkbox>
+                                            <div class="min-w-0 flex-1">
+                                                <span class="text-sm font-medium text-gray-800 leading-tight block">
+                                                    {{ field.label }}
+                                                </span>
+                                                @if (field.description) {
+                                                <span class="text-xs text-gray-600 block mt-1">
+                                                    {{ field.description }}
+                                                </span>
+                                                }
+                                            </div>
+                                        </label>
+                                    </div>
+                                    }
+                                </div>
+
+                                <!-- Empty State -->
+                                @if (section.fields.length === 0) {
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="pi pi-info-circle text-2xl mb-2"></i>
+                                    <p class="text-sm">No configuration options available</p>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Empty State for No Sections -->
+                    @if (tab.configSections.length === 0) {
+                    <div class="text-center py-12">
+                        <div class="bg-gray-50 rounded-xl p-8 max-w-md mx-auto">
+                            <i class="pi pi-cog text-4xl text-gray-400 mb-4"></i>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Configuration Available</h3>
+                            <p class="text-gray-600 text-sm">Configuration options will appear here when available.</p>
+                        </div>
+                    </div>
+                    }
+                    }
                 </p-tabpanel>
                 }
             </p-tabpanels>
