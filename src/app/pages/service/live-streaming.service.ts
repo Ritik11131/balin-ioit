@@ -22,6 +22,8 @@ export class LiveStreamingService {
   private protocolMap: Record<string, string> = {
     livetrack24: 'cvpro',
     jt808: 'cvpro',
+    cbalin: 'cvpro',
+    cbalinlock: 'cvpro',
   };
 
   constructor(private sanitizer: DomSanitizer) { }
@@ -48,6 +50,8 @@ export class LiveStreamingService {
     });
 
     const url = `${this.baseUrl}?${params.toString()}`;
+    console.log(url,'urllll');
+    
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 }

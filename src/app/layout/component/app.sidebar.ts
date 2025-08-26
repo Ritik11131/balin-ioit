@@ -1,11 +1,11 @@
 // sidebar.component.ts
 import { CommonModule } from '@angular/common';
 import { Component, Output, EventEmitter } from '@angular/core';
-import { sidebarItems } from '../../shared/constants/sidebar';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../pages/service/auth.service';
+import { SidebarService } from '../../pages/service/sidebar.service';
 
 
 
@@ -21,7 +21,7 @@ import { AuthService } from '../../pages/service/auth.service';
 
             <!-- 2. NAVIGATION ICONS -->
             <div class="flex flex-col items-center gap-4 mt-3 w-full px-7">
-                @for (item of sidebarNavigationItems; track $index) {
+                @for (item of (sidebarItems$ | async); track $index) {
                     <ng-container>
                         <div
                             (click)="setActive(item.key, item.route)"
@@ -134,71 +134,57 @@ import { AuthService } from '../../pages/service/auth.service';
 export class AppSidebar {
     @Output() sidebarToggle = new EventEmitter<boolean>();
 
-    isExpanded = false;
-    activeItem = '';
-    clickedItem = '';
+  isExpanded = false;
+  activeItem = '';
+  clickedItem = '';
+  sidebarItems$!: Observable<any[]>;
+  private routerSubscription!: Subscription;
 
-    sidebarNavigationItems = sidebarItems;
-    private routerSubscription: Subscription = new Subscription();
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private sidebarService: SidebarService
+  ) {}
 
-    constructor(private router: Router, private authService: AuthService) {}
+  ngOnInit() {
+    // filter items based on config
+    this.sidebarItems$ = this.sidebarService.getSidebarItems();
 
-    ngOnInit() {
-        // Set initial active item based on current route
-        this.setActiveItemFromRoute(this.router.url);
+    // set active item initially
+    this.activeItem = this.sidebarService.getActiveKeyFromRoute(this.router.url);
 
-        // Listen to route changes
-        this.routerSubscription = this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event: NavigationEnd) => {
-            this.setActiveItemFromRoute(event.urlAfterRedirects);
-        });
+    // listen to route changes
+    this.routerSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.activeItem = this.sidebarService.getActiveKeyFromRoute(event.urlAfterRedirects);
+      });
+  }
+
+  ngOnDestroy() {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
     }
+  }
 
-    ngOnDestroy() {
-        if (this.routerSubscription) {
-            this.routerSubscription.unsubscribe();
-        }
+  setActive(key: string, route: string) {
+    this.activeItem = key;
+    this.clickedItem = key;
+    this.router.navigate([route]);
+
+    setTimeout(() => (this.clickedItem = ''), 300);
+    if (this.isExpanded) {
+      this.toggleSidebar();
     }
+  }
 
-    private setActiveItemFromRoute(url: string) {
-        console.log(url);
+  toggleSidebar() {
+    this.isExpanded = !this.isExpanded;
+    this.sidebarToggle.emit(this.isExpanded);
+  }
 
-        // Find the navigation item that matches the current route
-        const matchedItem = this.sidebarNavigationItems.find((item) => url === item.route);
-        console.log(matchedItem);
-
-        if (matchedItem) {
-            this.activeItem = matchedItem.key;
-        }
-    }
-
-    setActive(key: string, route: string) {
-        console.log(key, route);
-
-        this.activeItem = key;
-        this.clickedItem = key;
-
-        // Navigate to the route
-        this.router.navigate([route]);
-
-        // Reset animation after delay
-        setTimeout(() => {
-            this.clickedItem = '';
-        }, 300);
-        if (this.isExpanded) {
-            this.toggleSidebar();
-        }
-    }
-
-    toggleSidebar() {
-        this.isExpanded = !this.isExpanded;
-        this.sidebarToggle.emit(this.isExpanded);
-    }
-
-    handleLogout() {
-        console.log('Logout clicked');
-        // Implement logout logic here
-        // For example, clear user session, redirect to login page, etc.
-        this.authService.logout();
-        this.router.navigate(['/auth/login']);
-    }
+  handleLogout() {
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
+  }
 }
