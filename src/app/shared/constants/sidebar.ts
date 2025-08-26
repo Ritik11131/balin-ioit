@@ -1,4 +1,11 @@
 export const sidebarItems = [
+   {
+    name: 'Whitelabel',
+    key: 'whitelabel',
+    icon: 'pi pi-sitemap',
+    route: '/whitelabel',
+    requiredModuleKey: 'whitelabel'
+  },
   {
     name: 'Home',
     key: 'home',

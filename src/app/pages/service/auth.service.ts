@@ -16,8 +16,16 @@ export class AuthService {
   public decodedToken: any = null;
   public userName: string = '';
   public userType: string = '';
+  public userRole: string = '';
 
   public activeUser$ = new BehaviorSubject<{ userName: string; userType: string } | null>(null);
+
+  roleMap: Record<string | number, string> = {
+    '0': 'Super Admin',
+    '1': 'Admin',
+    '2': 'Customer',
+    // Add more roles here if needed
+  };
 
   private store = inject(Store);
 
@@ -88,12 +96,8 @@ export class AuthService {
   private setUserDetails(decodedToken: any) {
     if (!decodedToken) return;
     this.userName = decodedToken.unique_name || '';
-    this.userType =
-      decodedToken.role === '0'
-        ? 'Super Admin'
-        : decodedToken.role === '2'
-        ? 'Customer'
-        : 'Admin';
+    this.userRole = decodedToken.role || '';
+    this.userType = this.roleMap[decodedToken.role] || 'Unknown';
   }
 
   addChild(child: { id: string; userName: string; token: string }) {

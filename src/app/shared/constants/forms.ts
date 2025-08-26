@@ -1,4 +1,5 @@
 import { FormConfig } from "../components/generic-form-generator/generic-form-generator.component";
+import { USER_TYPES } from "./user";
 
 export const CREATE_USER_FORM_FIELDS: FormConfig = {
   formTitle: 'Create User',
@@ -55,10 +56,7 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       placeholder: 'Select type of user',
       gridCol: 2,
       required: true,
-      options: [
-        { label: 'Admin', value: 1 },
-        { label: 'Customer', value: 2 },
-      ]
+      options: USER_TYPES
     },
     {
       key: 'address',
@@ -129,10 +127,7 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
       placeholder: 'Select type of user',
       gridCol: 2,
       required: true,
-      options: [
-        { label: 'Admin', value: 1 },
-        { label: 'Customer', value: 2 },
-      ]
+      options: USER_TYPES
     },
     {
       key: 'address',

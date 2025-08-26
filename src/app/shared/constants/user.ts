@@ -61,16 +61,17 @@ export const USER_DETAILS_TABS = [
         description:'Enable or disable specific modules for the user',
         key: 'modules',
         fields: [
-          { label: 'Home', key: 'home' },
-          { label: 'Dashboard', key: 'dashboard' },
-          { label: 'Device List', key: 'devicelist' },
-          { label: 'User List', key: 'userlist' },
-          { label: 'Reports', key: 'reports' },
-          { label: 'BMS', key: 'bms' },
-          { label: 'ETA', key: 'eta' },
-          { label: 'Raw Data', key: 'rawData' },
-          { label: 'Subscription', key: 'subscription' },
-          { label: 'Notification', key: 'notification' }
+          { label: 'WhiteLabel', key: 'whitelabel', permissions: ['0'] },
+          { label: 'Home', key: 'home', permissions: ['0','1'] },
+          { label: 'Dashboard', key: 'dashboard', permissions: ['0','1'] },
+          { label: 'Device List', key: 'devicelist', permissions: ['0','1'] },
+          { label: 'User List', key: 'userlist', permissions: ['0','1'] },
+          { label: 'Reports', key: 'reports', permissions: ['0','1'] },
+          { label: 'BMS', key: 'bms', permissions: ['0','1'] },
+          { label: 'ETA', key: 'eta', permissions: ['0','1'] },
+          { label: 'Raw Data', key: 'rawData', permissions: ['0','1'] },
+          { label: 'Subscription', key: 'subscription', permissions: ['0','1'] },
+          { label: 'Notification', key: 'notification', permissions: ['0','1'] }
         ]
       },
       {
@@ -87,3 +88,8 @@ export const USER_DETAILS_TABS = [
     ]
   }
 ];
+
+export const USER_TYPES = [
+    { label: 'Admin', value: 1 },
+    { label: 'Customer', value: 2 },
+]

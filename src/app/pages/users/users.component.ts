@@ -51,7 +51,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   toolbarItems = USER_TABLE_TOOLBAR;
   tableConfig = USER_TABLE_CONFIG;
   formFields = CREATE_USER_FORM_FIELDS;
-  tabsConfig: any = USER_DETAILS_TABS;
+  tabsConfig: any = [];
 
   users$: Observable<any[]> = this.store.select(selectUsers);
   isLoading$: Observable<boolean> = this.store.select(selectUsersLoading);
@@ -222,6 +222,23 @@ async viewMoreDetailsHandler(row: any): Promise<void> {
     } finally {
       this.uiService.toggleLoader(false);
     }
+
+     this.tabsConfig = USER_DETAILS_TABS.map((tab: any) => {
+      if (tab.type !== 'config') return tab;
+
+      return {
+        ...tab,
+        configSections: tab.configSections
+          .map((section: any) => ({
+            ...section,
+            fields: section.fields.filter(
+              (f: any) => !f.permissions || f.permissions.includes(this.authService.userRole)
+            )
+          }))
+          .filter((section: any) => section.fields.length > 0) // remove empty sections
+      };
+    });
+    
     // Open drawer early to show UI immediately
     this.uiService.openDrawer(this.viewMoreDetails,' ','!w-[80vw] md:!w-[80vw] lg:!w-[80vw]',true);
 }
