@@ -39,4 +39,26 @@ export class WhitelabelService {
       
     }
   }
+
+    async deleteWhiteLabel(data: any): Promise<any> {
+    try {
+      const response = await this.http.delete('SASRegister', data?.id);
+      return response;
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error', error?.error?.data);
+      throw error;
+      
+    }
+  }
+
+
+    async getWhiteLabelDetailsById(id: any): Promise<any> {
+    try {
+      const response = await this.http.get('SASRegister/GetById', {}, id);
+      return response;
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error', error?.error?.data);
+      throw error;
+    }
+  }
 }

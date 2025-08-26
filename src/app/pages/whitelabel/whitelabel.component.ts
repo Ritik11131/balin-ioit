@@ -3,9 +3,10 @@ import { GenericTableComponent } from '../../shared/components/generic-table/gen
 import { GenericFormGeneratorComponent } from '../../shared/components/generic-form-generator/generic-form-generator.component';
 import { WHITELABEL_TABLE_TOOLBAR } from '../../shared/constants/table-toolbar';
 import { WHITELABEL_TABLE_CONFIG } from '../../shared/constants/table-config';
-import { CREATE_WHITELABEL_FORM_FIELDS } from '../../shared/constants/forms';
+import { CREATE_WHITELABEL_FORM_FIELDS, UPDATE_WHITELABEL_FORM_FIELDS } from '../../shared/constants/forms';
 import { WhitelabelService } from '../service/whitelabel.service';
 import { UiService } from '../../layout/service/ui.service';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-whitelabel',
@@ -26,7 +27,12 @@ export class WhitelabelComponent {
   whiteLabels: any[] = [];
   isLoading: boolean = false;
 
-  constructor(private whiteLabelService: WhitelabelService, private uiService: UiService) { }
+  private actionHandlers: Record<string, (row: any) => void> = {
+    'Update': (row) => this.editHandler(row),
+    'Delete': (row) => this.deleteHandler(row),
+  };
+
+  constructor(private whiteLabelService: WhitelabelService, private uiService: UiService, private confirmationService: ConfirmationService) { }
 
   ngOnInit(): void {
     //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
@@ -61,7 +67,8 @@ export class WhitelabelComponent {
 
 
   onFormValueChange($event: any) {
-    throw new Error('Method not implemented.');
+   console.log($event);
+   
   }
   async onWhiteLabelFormSubmit(event: any): Promise<any> {
    console.log('WhiteLabel form submitted:', event);
@@ -72,12 +79,25 @@ export class WhitelabelComponent {
       await this.updateWhiteLabel(mergedObj?.id, mergedObj);
     } else {
       console.log('create');
-      const mergedObj = {...formValue}
+      const createWhiteLabelObj = {
+        personName: formValue?.personName, 
+        url: formValue?.url, 
+        attributes: JSON.stringify({
+          logo: formValue?.logo, 
+          favicon: formValue?.favicon, 
+          message: formValue?.message,
+          baseUrl: formValue?.baseUrl
+        })}
+      const mergedObj = {...createWhiteLabelObj}
       await this.createWhiteLabel(mergedObj);
     }
   }
 
-
+  private async deleteWhiteLabel(data: any): Promise<void> {
+    const res = await this.whiteLabelService.deleteWhiteLabel(data);
+    this.uiService.showToast('success','Success', res?.data);
+    await this.init();
+  }
 
 private async updateWhiteLabel(id: any, data: any): Promise<void> {
   try {
@@ -131,16 +151,92 @@ private async createWhiteLabel(data: any): Promise<void> {
 }
 
   onFormCancel() {
-    throw new Error('Method not implemented.');
+     this.formFields = CREATE_WHITELABEL_FORM_FIELDS;
+        this.uiService.closeDrawer();
   }
+
+
   handleToolBarActions(event: any) {
     if (event.key === 'create') {
       this.formFields = CREATE_WHITELABEL_FORM_FIELDS;
-      this.uiService.openDrawer(this.createUpdateWhiteLabel, ' ', '', true)
+      this.uiService.openDrawer(this.createUpdateWhiteLabel, ' ', '!w-[45vw] md:!w-[45vw] lg:!w-[45vw]', true)
     }
   }
-  handleInTableActions($event: { label: string; row: any; }) {
-    throw new Error('Method not implemented.');
+
+  private async loadWhiteLabelObject(userId: number) {
+    try {
+      const res = await this.whiteLabelService.getWhiteLabelDetailsById(userId);
+      const data = res?.data ?? {};
+      const attributes = (() => {
+        try {
+          return typeof data.attributes === 'string' ? JSON.parse(data.attributes) : data.attributes ?? {};
+        } catch {
+          return {};
+        }
+      })();
+
+      const { logo = '', favicon = '', message = '', baseUrl = '' } = attributes;
+
+      this.editData = {
+        personName: data.personName ?? '',
+        url: data.url ?? '',
+        logo, favicon, message, baseUrl
+      };
+
+      console.log(logo,favicon);
+      
+    } catch (error) {
+      console.error('Failed to load white label:', error);
+      this.editData = null;
+    }
+  }
+
+
+
+
+  handleInTableActions(event: any) {
+    const { label, row } = event;
+    this.actionHandlers[label]?.(row);
+  }
+
+    async editHandler(row: any): Promise<void> {
+      this.formFields = UPDATE_WHITELABEL_FORM_FIELDS;
+      this.uiService.openDrawer(this.createUpdateWhiteLabel,' ','!w-[45vw] md:!w-[45vw] lg:!w-[45vw]',true)
+      await Promise.all([
+        this.loadWhiteLabelObject(row?.id)
+      ])
+    }
+
+  async deleteHandler(row: any): Promise<void> {
+     this.confirmationService.confirm({
+            target: row,
+            message: `Are you sure that you want to delete ${row?.personname}?`,
+            header: 'Confirmation',
+            closable: true,
+            closeOnEscape: true,
+            icon: 'pi pi-exclamation-triangle',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Save',
+                severity:'danger'
+            },
+            accept: async () => {
+              await this.deleteWhiteLabel(row);
+                // this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted' });
+            },
+            reject: () => {
+                // this.messageService.add({
+                //     severity: 'error',
+                //     summary: 'Rejected',
+                //     detail: 'You have rejected',
+                //     life: 3000,
+                // });
+            },
+        });
   }
 
 

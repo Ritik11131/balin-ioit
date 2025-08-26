@@ -2,7 +2,7 @@
 export interface FormField {
   key: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'multiselect' | 'checkbox' | 'radio' | 'date' | 'calendar' | 'autocomplete';
+  type: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'multiselect' | 'checkbox' | 'radio' | 'date' | 'calendar' | 'autocomplete' | 'fileupload';
   required?: boolean;
   placeholder?: string;
   value?: any;
@@ -19,6 +19,10 @@ export interface FormField {
   max?: number;
   minLength?: number;
   maxLength?: number;
+
+  multiple?: boolean;
+  accept?: string;
+  maxFileSize?: number;
 }
 
 export interface ValidationRule {
@@ -47,7 +51,6 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractContro
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -58,6 +61,9 @@ import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
+import { FileUploadModule } from 'primeng/fileupload';
+import { UiService } from '../../../layout/service/ui.service';
+import { FileSizePipe } from '../../pipes/file-size.pipe';
 
 @Component({
   selector: 'app-generic-form-generator',
@@ -77,7 +83,9 @@ import { DatePickerModule } from 'primeng/datepicker';
     AutoCompleteModule,
     ButtonModule,
     CardModule,
-    FloatLabelModule
+    FloatLabelModule,
+    FileUploadModule,
+    FileSizePipe
   ],
   template: `
 <div class="w-full">
@@ -102,7 +110,11 @@ import { DatePickerModule } from 'primeng/datepicker';
     >
 
       @for (field of config.fields; track field.key) {
-        <div [ngClass]="getFieldGridClass(field)" class="flex flex-col gap-2">
+        <div [ngClass]="{
+        'col-span-1': field.gridCol === 1,
+        'col-span-2': field.gridCol === 2,
+        'col-span-3': field.gridCol === 3,
+      }" class="flex flex-col gap-2">
 
           @switch (field.type) {
 
@@ -201,6 +213,45 @@ import { DatePickerModule } from 'primeng/datepicker';
                 </ng-template>
             }
 
+             @case ('fileupload') {
+              <ng-container *ngTemplateOutlet="fieldWrapper; context: { field: field, input: fileUploadInput }"></ng-container>
+              <ng-template #fileUploadInput>
+                <p-fileUpload 
+                  [id]="field.key"
+                  mode="advanced"
+                  name="files[]"
+                  [multiple]="field.multiple || false"
+                  [accept]="field.accept || '*'"
+                  [maxFileSize]="field.maxFileSize || 10000000"
+                  [showUploadButton]="false"
+                  [showCancelButton]="false"
+                  chooseLabel="Choose Files"
+                  uploadLabel="Upload"
+                  cancelLabel="Cancel"
+                  (onSelect)="onFileSelect($event, field.key)"
+                  (onRemove)="onFileRemove($event, field.key)"
+                  (onClear)="onFileClear(field.key)"
+                  class="w-full"
+                >
+                  <ng-template pTemplate="content" let-files>
+                    @if(files.length > 0) {
+                      <div class="flex flex-col gap-2">
+                        @for (file of files; track $index) {
+                          <div class="flex items-center justify-between p-2 border rounded">
+                            <div class="flex items-center gap-2">
+                              <i class="pi pi-file text-primary"></i>
+                              <span class="text-sm">{{file.name}}</span>
+                              <span class="text-xs text-muted-color">({{file.size | fileSize: 3}})</span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </ng-template>
+                </p-fileUpload>
+              </ng-template>
+            }
+
           }
         </div>
       }
@@ -243,8 +294,9 @@ export class GenericFormGeneratorComponent implements OnInit, OnChanges {
 
   dynamicForm!: FormGroup;
   filteredSuggestions: any[] = [];
+  uploadedFiles: { [key: string]: File[] } = {};
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private uiService: UiService) {}
 
   ngOnInit() {
     this.buildForm();
@@ -428,5 +480,37 @@ export class GenericFormGeneratorComponent implements OnInit, OnChanges {
   // Public method to set form value
   setFormValue(data: any) {
     this.dynamicForm.patchValue(data);
+  }
+
+  // File upload methods
+  onFileSelect(event: any, fieldKey: string) {
+    if (!this.uploadedFiles[fieldKey]) {
+      this.uploadedFiles[fieldKey] = [];
+    }
+    
+    for (let file of event.files) {
+      this.uploadedFiles[fieldKey].push(file);
+    }
+    
+    // Update form control
+    this.dynamicForm.get(fieldKey)?.setValue(this.uploadedFiles[fieldKey]);
+    this.uiService.showToast('success', 'File Selected', `${event.files.length} file(s) selected for ${fieldKey}`);
+  }
+
+  onFileRemove(event: any, fieldKey: string) {
+    if (this.uploadedFiles[fieldKey]) {
+      const index = this.uploadedFiles[fieldKey].findIndex(f => f.name === event.file.name);
+      if (index > -1) {
+        this.uploadedFiles[fieldKey].splice(index, 1);
+      }
+    }
+    
+    // Update form control
+    this.dynamicForm.get(fieldKey)?.setValue(this.uploadedFiles[fieldKey] || []);
+  }
+
+  onFileClear(fieldKey: string) {
+    this.uploadedFiles[fieldKey] = [];
+    this.dynamicForm.get(fieldKey)?.setValue([]);
   }
 }

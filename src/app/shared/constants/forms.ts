@@ -7,6 +7,14 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
   isEditMode: false,
   fields: [
     {
+      key: 'email',
+      label: 'Email Address',
+      type: 'email',
+      required: true,
+      placeholder: 'Enter your email address',
+      gridCol: 2 // Spans 2 columns
+    },
+    {
       key: 'userName',
       label: 'Username',
       type: 'text',
@@ -15,12 +23,12 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       gridCol: 1
     },
     {
-      key: 'email',
-      label: 'Email Address',
-      type: 'email',
+      key: 'password',
+      label: 'Password',
+      type: 'password',
       required: true,
-      placeholder: 'Enter your email address',
-      gridCol: 2 // Spans 2 columns
+      placeholder: 'Enter password',
+      gridCol: 1
     },
     {
       key: 'mobileNo',
@@ -39,14 +47,6 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter loginID',
-      gridCol: 1
-    },
-    {
-      key: 'password',
-      label: 'Password',
-      type: 'password',
-      required: true,
-      placeholder: 'Enter password',
       gridCol: 1
     },
     {
@@ -78,6 +78,14 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
   isEditMode: true,
   fields: [
     {
+      key: 'email',
+      label: 'Email Address',
+      type: 'email',
+      required: true,
+      placeholder: 'Enter your email address',
+      gridCol: 2 // Spans 2 columns
+    },
+    {
       key: 'userName',
       label: 'Username',
       type: 'text',
@@ -86,12 +94,12 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
       gridCol: 1
     },
     {
-      key: 'email',
-      label: 'Email Address',
-      type: 'email',
+      key: 'password',
+      label: 'Password',
+      type: 'password',
       required: true,
-      placeholder: 'Enter your email address',
-      gridCol: 2 // Spans 2 columns
+      placeholder: 'Enter password',
+      gridCol: 1
     },
     {
       key: 'mobileNo',
@@ -110,14 +118,6 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter loginID',
-      gridCol: 1
-    },
-    {
-      key: 'password',
-      label: 'Password',
-      type: 'password',
-      required: true,
-      placeholder: 'Enter password',
       gridCol: 1
     },
     {
@@ -478,7 +478,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
 
 export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
   formTitle: 'Create WhiteLabel',
-  columns: 1,
+  columns: 2,
   isEditMode: false,
   fields: [
     {
@@ -495,7 +495,7 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'e.g. mycompany.com',
-      gridCol: 2
+      gridCol: 1
     },
     {
       key: 'baseUrl',
@@ -506,6 +506,24 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       gridCol: 2
     },
     {
+     key: 'logo',
+     label: 'Logo',
+     type: 'fileupload',
+     multiple: false,
+     accept: 'image/*',
+     maxFileSize: 5000000, // 5MB
+     gridCol: 1
+   },
+   {
+     key: 'favicon',
+     label: 'Favicon',
+     type: 'fileupload',
+     multiple: false,
+     accept: 'image/*',
+     maxFileSize: 10000000, // 10MB
+     gridCol: 1
+   },
+    {
       key: 'message',
       label: 'Custom Message',
       type: 'textarea',
@@ -514,6 +532,68 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       required: true,
       maxLength: 500,
       gridCol: 2
-    }
+    },
+  ]
+};
+
+
+export const UPDATE_WHITELABEL_FORM_FIELDS: FormConfig = {
+  formTitle: 'Create WhiteLabel',
+  columns: 2,
+  isEditMode: true,
+  fields: [
+    {
+      key: 'personName',
+      label: 'Full Name',
+      type: 'text',
+      required: true,
+      placeholder: 'Enter the full name of the contact person',
+      gridCol: 1
+    },
+    {
+      key: 'url',
+      label: 'Domain Name',
+      type: 'text',
+      required: true,
+      placeholder: 'e.g. mycompany.com',
+      gridCol: 1
+    },
+    {
+      key: 'baseUrl',
+      label: 'Base URL',
+      type: 'text',
+      required: true,
+      placeholder: 'e.g. https://mycompany.com',
+      gridCol: 2
+    },
+    {
+     key: 'logo',
+     label: 'Logo',
+     type: 'fileupload',
+     multiple: false,
+     accept: 'image/*',
+     maxFileSize: 5000000, // 5MB
+     gridCol: 1
+   },
+   {
+     key: 'favicon',
+     label: 'Favicon',
+     type: 'fileupload',
+     multiple: false,
+     accept: 'image/*',
+     maxFileSize: 10000000, // 10MB
+     gridCol: 1
+   },
+    {
+      key: 'message',
+      label: 'Custom Message',
+      type: 'textarea',
+      placeholder: 'Write a message or note (max 500 characters)',
+      rows: 4,
+      required: true,
+      maxLength: 500,
+      gridCol: 2
+    },
+
   ]
 };
