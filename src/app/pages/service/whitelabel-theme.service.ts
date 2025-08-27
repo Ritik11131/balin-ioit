@@ -28,9 +28,9 @@ export class WhitelabelThemeService {
     console.log('Applying theme...');
 
     if (this.isLoaded) return;
-
+        
     try {
-      const res: any = await this.http.get('SASRegister?url=ritik.com');
+      const res: any = await this.http.get(`SASRegister?url=${window.location.host}`);
       const attributes = res?.data?.attributes
         ? JSON.parse(res.data.attributes)
         : {};
