@@ -61,4 +61,18 @@ export class WhitelabelService {
       throw error;
     }
   }
+
+async uploadWhiteLabelImages(files: File[]): Promise<any> {
+  const formData = new FormData();
+  files.forEach(file => formData.append('file', file));
+
+  try {
+    const response = await this.http.post('SASRegister/Upload', formData);
+    return response;
+  } catch (error: any) {
+    this.uiService.showToast('error', 'Error', error?.error?.data || 'File upload failed');
+    throw error;
+  }
+}
+
 }

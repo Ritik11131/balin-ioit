@@ -74,15 +74,28 @@ export class WhitelabelComponent {
    console.log('WhiteLabel form submitted:', event);
     const {isEditMode, formValue} = event;
     if(isEditMode) {
-      const mergedObj = {...this.editData, ...formValue}
-      console.log(mergedObj);
-      await this.updateWhiteLabel(mergedObj?.id, mergedObj);
+      console.log(this.editData,formValue);
+      const updateWhiteLabelObj = {
+        id: this.editData?.id,
+        lastUpdateOn: this.editData?.lastUpdateOn,
+        creationTime: this.editData?.creationTime,
+        personName: formValue?.personName, 
+        url: formValue?.url, 
+        attributes: JSON.stringify({
+          title: formValue?.title,
+          logo: formValue?.logo, 
+          favicon: formValue?.favicon, 
+          message: formValue?.message,
+          baseUrl: formValue?.baseUrl
+        })}
+      await this.updateWhiteLabel(updateWhiteLabelObj?.id, updateWhiteLabelObj);
     } else {
       console.log('create');
       const createWhiteLabelObj = {
         personName: formValue?.personName, 
         url: formValue?.url, 
         attributes: JSON.stringify({
+          title: formValue?.title,
           logo: formValue?.logo, 
           favicon: formValue?.favicon, 
           message: formValue?.message,
@@ -175,12 +188,15 @@ private async createWhiteLabel(data: any): Promise<void> {
         }
       })();
 
-      const { logo = '', favicon = '', message = '', baseUrl = '' } = attributes;
+      const { title = '', logo = '', favicon = '', message = '', baseUrl = '' } = attributes;
 
       this.editData = {
+        id: data?.id,
+        lastUpdateOn: data?.lastUpdateOn,
+        creationTime: data?.creationTime,
         personName: data.personName ?? '',
         url: data.url ?? '',
-        logo, favicon, message, baseUrl
+        logo, favicon, message, baseUrl, title
       };
 
       console.log(logo,favicon);

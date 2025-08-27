@@ -64,6 +64,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { FileUploadModule } from 'primeng/fileupload';
 import { UiService } from '../../../layout/service/ui.service';
 import { FileSizePipe } from '../../pipes/file-size.pipe';
+import { WhitelabelService } from '../../../pages/service/whitelabel.service';
 
 @Component({
   selector: 'app-generic-form-generator',
@@ -296,7 +297,7 @@ export class GenericFormGeneratorComponent implements OnInit, OnChanges {
   filteredSuggestions: any[] = [];
   uploadedFiles: { [key: string]: File[] } = {};
 
-  constructor(private fb: FormBuilder, private uiService: UiService) {}
+  constructor(private fb: FormBuilder, private uiService: UiService, private whiteLabelService: WhitelabelService) {}
 
   ngOnInit() {
     this.buildForm();
@@ -482,20 +483,30 @@ export class GenericFormGeneratorComponent implements OnInit, OnChanges {
     this.dynamicForm.patchValue(data);
   }
 
-  // File upload methods
-  onFileSelect(event: any, fieldKey: string) {
-    if (!this.uploadedFiles[fieldKey]) {
-      this.uploadedFiles[fieldKey] = [];
-    }
-    
-    for (let file of event.files) {
-      this.uploadedFiles[fieldKey].push(file);
-    }
-    
-    // Update form control
-    this.dynamicForm.get(fieldKey)?.setValue(this.uploadedFiles[fieldKey]);
-    this.uiService.showToast('success', 'File Selected', `${event.files.length} file(s) selected for ${fieldKey}`);
+async onFileSelect(event: any, fieldKey: string): Promise<void> {
+  console.log(event);
+  
+  if (!this.uploadedFiles[fieldKey]) {
+    this.uploadedFiles[fieldKey] = [];
   }
+
+  const files: File[] = event.currentFiles || [];
+  this.uploadedFiles[fieldKey].push(...files);
+  console.log(files);
+  
+
+  try {
+    const response: any = await this.whiteLabelService.uploadWhiteLabelImages(files);
+
+    // Update form control
+    this.dynamicForm.get(fieldKey)?.setValue(response?.data);
+
+    this.uiService.showToast('success', 'File Uploaded', `${files.length} file(s) uploaded for ${fieldKey}`);
+  } catch (error: any) {
+    this.uiService.showToast('error', 'Upload Failed', error?.message || 'Something went wrong');
+  }
+}
+
 
   onFileRemove(event: any, fieldKey: string) {
     if (this.uploadedFiles[fieldKey]) {

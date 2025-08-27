@@ -486,16 +486,16 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       label: 'Title',
       type: 'text',
       required: true,
-      placeholder: 'Enter the title',
-      gridCol: 2
+      placeholder: 'e.g. Title',
+      gridCol: 1
     },
     {
       key: 'personName',
       label: 'Full Name',
       type: 'text',
       required: true,
-      placeholder: 'Enter the full name of the contact person',
-      gridCol: 2
+      placeholder: 'e.g. Person Name',
+      gridCol: 1
     },
     {
       key: 'url',
@@ -546,25 +546,25 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
 
 
 export const UPDATE_WHITELABEL_FORM_FIELDS: FormConfig = {
-  formTitle: 'Create WhiteLabel',
+  formTitle: 'Update WhiteLabel',
   columns: 2,
   isEditMode: true,
   fields: [
-      {
+    {
       key: 'title',
       label: 'Title',
       type: 'text',
       required: true,
-      placeholder: 'Enter the title',
-      gridCol: 2
+      placeholder: 'e.g. Title',
+      gridCol: 1
     },
     {
       key: 'personName',
       label: 'Full Name',
       type: 'text',
       required: true,
-      placeholder: 'Enter the full name of the contact person',
-      gridCol: 2
+      placeholder: 'e.g. Person Name',
+      gridCol: 1
     },
     {
       key: 'url',
