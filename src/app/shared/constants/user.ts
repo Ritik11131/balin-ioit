@@ -84,6 +84,27 @@ export const USER_DETAILS_TABS = [
           { label: 'Alert Report', key: 'alertReport' },
           { label: 'Fuel Report', key: 'fuelReport' }
         ]
+      },
+       {
+        label: 'Actions',
+        key: 'actions',
+        description:'Enable or disable specific actions for the device',
+        fields: [
+          { label: 'Boot', key: 'bootLock' },
+          { label: 'Wheel', key: 'wheelLock' },
+          { label: 'Per Wheel', key: 'perWheelLock'},
+          { label: 'Overspeed', key: 'setOverSpeed'},
+          { label: 'View Device On Google Maps', key: 'navigateToGoogle'},
+          { label: 'Vehicle History Playback', key: 'historyReplay' },
+          { label: 'Immobilizer', key: 'immobilizer' },
+          { label: 'Pad Locking', key: 'padlocking' },
+          { label: 'Parking', key: 'parking' },
+          { label: 'ELocking', key: 'elocking' },
+          { label: 'Dash Cam', key: 'dashCam' },
+          { label: 'Live Tracking Link', key: 'trackingLink' },
+          { label: 'Security', key: 'security' },
+          { label: 'CCTV', key: 'cctv' },
+        ]
       }
     ]
   }
