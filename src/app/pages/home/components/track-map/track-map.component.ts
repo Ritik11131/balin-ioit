@@ -35,6 +35,7 @@ import { loadVehicles, searchVehicles, selectVehicle, stopSingleVehiclePolling }
 import { Store } from '@ngrx/store';
 import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
 import { PathReplayService } from '../../../service/path-replay.service';
+import { VehicleMarkerService } from '../../../service/vehicle-marker.service';
 
 // Extend the Leaflet namespace to include MarkerClusterGroup
 declare global {
@@ -43,7 +44,7 @@ declare global {
   }
 }
 
-interface VehicleData {
+export interface VehicleData {
   id: number;
   name: string;
   lastUpdated: string;
@@ -124,6 +125,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   userLocationMarker?: Marker;
   private store = inject(Store);
   private pathReplayService = inject(PathReplayService);
+  private vehicleMarkerService = inject(VehicleMarkerService);
   private destroy$ = new Subject<void>();
 
   public clusteringEnabled = true;
@@ -390,7 +392,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
     // Create markers for each vehicle
     const markers: Marker[] = [];
     validVehicles.forEach(vehicle => {
-      const vehicleMarker = this.createVehicleMarker(vehicle);
+      const vehicleMarker = this.vehicleMarkerService.createVehicleMarker(vehicle);
       if (vehicleMarker) {
         markers.push(vehicleMarker);
       }
@@ -454,118 +456,6 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
     return L.featureGroup(); // Return empty layer if failed
   }
 }
-
-
-  private createVehicleMarker(vehicle: VehicleData): Marker | null {
-    try {
-      const position = vehicle.apiObject.position;
-      const vehicleIcon = this.getVehicleIcon(position.status.status);
-      
-      const vehicleMarker = marker([position.latitude, position.longitude], {
-        icon: vehicleIcon,
-        title: vehicle.name
-      });
-
-      // Create popup content
-      const popupContent = this.createPopupContent(vehicle);
-      vehicleMarker.bindPopup(popupContent, {
-        className: 'custom-popup',
-        maxWidth: 320,
-        closeButton: true
-      });
-
-      vehicleMarker.on('click', () => {
-        console.log('Vehicle clicked:', vehicle);
-      });
-
-      return vehicleMarker;
-    } catch (error) {
-      console.error('Error creating marker for vehicle:', vehicle, error);
-      return null;
-    }
-  }
-
-  private getVehicleIcon(status: string): DivIcon {
-    const statusConfig: { [key: string]: { color: string; bgColor: string; pulseColor: string } } = {
-      'running': { color: 'text-white', bgColor: 'bg-green-500', pulseColor: 'shadow-green-400' },
-      'dormant': { color: 'text-white', bgColor: 'bg-yellow-500', pulseColor: 'shadow-yellow-400' },
-      'stop': { color: 'text-white', bgColor: 'bg-red-500', pulseColor: 'shadow-red-400' },
-      // 'maintenance': { color: 'text-white', bgColor: 'bg-purple-500', pulseColor: 'shadow-purple-400' },
-      'offline': { color: 'text-white', bgColor: 'bg-gray-500', pulseColor: 'shadow-gray-400' },
-      'default': { color: 'text-white', bgColor: 'bg-grey-200', pulseColor: 'shadow-grey-300' }
-    };
-
-    const config = statusConfig[status?.toLowerCase()] || statusConfig['default'];
-    const isRunning = status?.toLowerCase() === 'running';
-    
-    return divIcon({
-      className: 'custom-vehicle-marker',
-      html: `
-        <div class="relative">
-          <div class="w-4 h-4 ${config.bgColor} rounded-full border-2 border-white shadow-lg ${config.color} flex items-center justify-center ${isRunning ? 'animate-pulse' : ''}">
-            <div class="w-2 h-2 bg-white rounded-full opacity-80"></div>
-          </div>
-          ${isRunning ? `<div class="absolute inset-0 ${config.bgColor} rounded-full animate-ping opacity-25"></div>` : ''}
-        </div>
-      `,
-      iconSize: [16, 16],
-      iconAnchor: [8, 8]
-    });
-  }
-
-  private createPopupContent(vehicle: VehicleData): string {
-    const position = vehicle.apiObject.position;
-    const device = vehicle.apiObject.device;
-    const statusColorClass = this.getStatusColorClass(position.status.status);
-    
-    return `
-      <div class="p-3 min-w-[280px]">
-        <div class="border-b border-gray-200 pb-3 mb-3">
-          <h3 class="font-semibold text-gray-900 text-lg">${vehicle.name}</h3>
-          <p class="text-sm text-gray-600">ID: ${device.deviceId}</p>
-        </div>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between items-center">
-            <span class="text-gray-600 font-medium">Status:</span>
-            <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColorClass}">
-              ${position.status.status.toUpperCase()}
-            </span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-600 font-medium">Speed:</span>
-            <span class="text-gray-900 font-semibold">${position.speed} km/h</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-600 font-medium">Heading:</span>
-            <span class="text-gray-900">${position.heading?.toFixed(1)}°</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-600 font-medium">Battery:</span>
-            <span class="text-gray-900 font-semibold">${position.details.battPer || '-'}%</span>
-          </div>
-          <div class="pt-2 border-t border-gray-100">
-            <div class="text-xs text-gray-500 space-y-1">
-              <div><span class="font-medium">Location:</span> ${position.latitude?.toFixed(6)}, ${position.longitude?.toFixed(6)}</div>
-              <div><span class="font-medium">Last Update:</span> ${new Date(vehicle.lastUpdated).toLocaleString()}</div>
-              <div><span class="font-medium">Duration:</span> ${position.status.duration}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  private getStatusColorClass(status: string): string {
-    const statusClasses: { [key: string]: string } = {
-      'running': 'bg-green-100 text-green-800',
-      'dormant': 'bg-yellow-100 text-yellow-800',
-      'stop': 'bg-red-100 text-red-800',
-      'maintenance': 'bg-purple-100 text-purple-800',
-      'offline': 'bg-gray-100 text-gray-800',
-      'default': 'bg-gray-100 text-gray-500'
-    };
-    return statusClasses[status?.toLowerCase()] || statusClasses['default'];
-  }
 
   private fitMapToMarkers(vehicles: VehicleData[], isSingleSubscribed?:boolean): void {
     if (vehicles.length === 1) {
