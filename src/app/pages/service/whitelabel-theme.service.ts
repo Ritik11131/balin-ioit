@@ -28,7 +28,7 @@ export class WhitelabelThemeService {
     console.log('Applying theme...');
 
     if (this.isLoaded) return;
-        
+
     try {
       const res: any = await this.http.get(`SASRegister?url=${window.location.host}`);
       const attributes = res?.data?.attributes
@@ -45,6 +45,7 @@ export class WhitelabelThemeService {
       };
 
       this.themeSubject.next(theme);
+      document.title = theme.title ?? 'App';
       this.applyFavicon(theme.favicon);
       this.layoutService.layoutConfig.update((state) => ({ ...state, primary: theme.themeColor || 'emerald' }));
       this.isLoaded = true;
