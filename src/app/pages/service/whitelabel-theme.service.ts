@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { WhitelabelService } from './whitelabel.service';
 import { HttpService } from './http.service';
+import { LayoutService } from '../../layout/service/layout.service';
 
 export interface ThemeData {
   logo?: string;
@@ -22,7 +21,7 @@ export class WhitelabelThemeService {
   theme$: Observable<ThemeData> = this.themeSubject.asObservable();
   private isLoaded = false;
 
-  constructor(private http: HttpService) { }
+  constructor(private http: HttpService, private layoutService: LayoutService) { }
 
   // Called once in APP_INITIALIZER
   async loadTheme(): Promise<void> {
@@ -31,7 +30,7 @@ export class WhitelabelThemeService {
     if (this.isLoaded) return;
 
     try {
-      const res: any = await this.http.get('SASRegister?url=iot.baliniot.in');
+      const res: any = await this.http.get('SASRegister?url=ritik.com');
       const attributes = res?.data?.attributes
         ? JSON.parse(res.data.attributes)
         : {};
@@ -47,6 +46,7 @@ export class WhitelabelThemeService {
 
       this.themeSubject.next(theme);
       this.applyFavicon(theme.favicon);
+      this.layoutService.layoutConfig.update((state) => ({ ...state, primary: theme.themeColor || 'emerald' }));
       this.isLoaded = true;
     } catch (error) {
       console.error('Failed to load theme', error);

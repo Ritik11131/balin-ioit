@@ -27,6 +27,20 @@ import { Store } from '@ngrx/store';
 
         <div class="flex items-center gap-4">
           <div class="relative">
+              <!-- <button
+              pButton
+              outlined
+              text
+              class="layout-topbar-action layout-topbar-action-highlight"
+              pStyleClass="@next"
+              enterFromClass="hidden"
+              enterActiveClass="animate-scalein"
+              leaveToClass="hidden"
+              leaveActiveClass="animate-fadeout"
+              [hideOnOutsideClick]="true"
+            >
+              <i class="pi pi-palette"></i>
+            </button> -->
             <app-configurator />
           </div>
 

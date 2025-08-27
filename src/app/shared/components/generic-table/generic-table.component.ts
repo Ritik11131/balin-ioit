@@ -135,7 +135,7 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                                         <i class="pi pi-eye" style="font-size: 1rem"></i>
                                     </a>
                                 } @else {
-                                    {{ col.subfield ? rowData[col.field]?.[col.subfield] || '--' : col.date ? (rowData[col.field] | date) || '--' : rowData[col.field] || '--' }}
+                                    {{ col.subfield ? rowData[col.field]?.[col.subfield] || '--' : col.date ? (rowData[col.field] | date: 'medium') || '--' : rowData[col.field] || '--' }}
                                 }
                             </td>
                         }

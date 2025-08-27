@@ -503,8 +503,15 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'e.g. mycompany.com',
-      gridCol: 2
+      gridCol: 1
     },
+    {
+     key: 'themeColor',
+     label: 'Theme Color',
+     type: 'colorpicker',
+     required: true,
+     gridCol: 1
+   },
     {
       key: 'baseUrl',
       label: 'Base URL',
@@ -572,8 +579,15 @@ export const UPDATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'e.g. mycompany.com',
-      gridCol: 2
+      gridCol: 1
     },
+        {
+     key: 'themeColor',
+     label: 'Theme Color',
+     type: 'colorpicker',
+     required: true,
+     gridCol: 1
+   },
     {
       key: 'baseUrl',
       label: 'Base URL',

@@ -86,7 +86,8 @@ export class WhitelabelComponent {
           logo: formValue?.logo, 
           favicon: formValue?.favicon, 
           message: formValue?.message,
-          baseUrl: formValue?.baseUrl
+          baseUrl: formValue?.baseUrl,
+          themeColor: formValue?.themeColor,
         })}
       await this.updateWhiteLabel(updateWhiteLabelObj?.id, updateWhiteLabelObj);
     } else {
@@ -99,7 +100,8 @@ export class WhitelabelComponent {
           logo: formValue?.logo, 
           favicon: formValue?.favicon, 
           message: formValue?.message,
-          baseUrl: formValue?.baseUrl
+          baseUrl: formValue?.baseUrl,
+          themeColor: formValue?.themeColor,
         })}
       const mergedObj = {...createWhiteLabelObj}
       await this.createWhiteLabel(mergedObj);
@@ -188,7 +190,7 @@ private async createWhiteLabel(data: any): Promise<void> {
         }
       })();
 
-      const { title = '', logo = '', favicon = '', message = '', baseUrl = '' } = attributes;
+      const { title = '', logo = '', favicon = '', message = '', baseUrl = '', themeColor = '' } = attributes;
 
       this.editData = {
         id: data?.id,
@@ -196,7 +198,7 @@ private async createWhiteLabel(data: any): Promise<void> {
         creationTime: data?.creationTime,
         personName: data.personName ?? '',
         url: data.url ?? '',
-        logo, favicon, message, baseUrl, title
+        logo, favicon, message, baseUrl, title, themeColor
       };
 
       console.log(logo,favicon);
