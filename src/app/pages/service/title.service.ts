@@ -10,7 +10,7 @@ import { sidebarItems } from '../../shared/constants/sidebar';
 })
 export class TitleService {
   // Use IOCL as the app name
-  private readonly appName = 'Test';
+  public appName = 'Test';
   
   // Define menu structure directly in the service
   // This mirrors your PrimeNG menu configuration

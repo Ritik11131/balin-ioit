@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpService } from './http.service';
 import { LayoutService } from '../../layout/service/layout.service';
+import { TitleService } from './title.service';
 
 export interface ThemeData {
   logo?: string;
@@ -21,7 +22,7 @@ export class WhitelabelThemeService {
   theme$: Observable<ThemeData> = this.themeSubject.asObservable();
   private isLoaded = false;
 
-  constructor(private http: HttpService, private layoutService: LayoutService) { }
+  constructor(private http: HttpService, private layoutService: LayoutService, private titleService: TitleService) { }
 
   // Called once in APP_INITIALIZER
   async loadTheme(): Promise<void> {
@@ -45,7 +46,7 @@ export class WhitelabelThemeService {
       };
 
       this.themeSubject.next(theme);
-      document.title = theme.title ?? 'App';
+      this.titleService.appName = theme.title || 'App';
       this.applyFavicon(theme.favicon);
       this.layoutService.layoutConfig.update((state) => ({ ...state, primary: theme.themeColor || 'emerald' }));
       this.isLoaded = true;
