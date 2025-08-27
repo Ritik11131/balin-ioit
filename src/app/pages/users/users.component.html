@@ -75,7 +75,7 @@
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                         @for (section of tab.configSections; track section.key) {
                         <div
-                            class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                            class="bg-white rounded-xl border border-gray-200 shadow-sm">
                             <!-- Section Header -->
                             <div class="flex items-center gap-3 p-6 pb-4 border-b border-gray-100 bg-gray-50/50">
                                 <div class="bg-primary/10 p-2.5 rounded-xl shrink-0">
@@ -95,7 +95,7 @@
                             </div>
 
                             <!-- Fields Container -->
-                            <div class="p-6">
+                            <div class="p-6 overflow-y-auto max-h-60">
                                 <!-- Responsive Grid: 1 column on mobile, 2 on tablet, 3+ on desktop -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                                     @for (field of section.fields; track field.key) {

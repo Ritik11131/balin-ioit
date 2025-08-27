@@ -86,9 +86,9 @@ export const USER_DETAILS_TABS = [
         ]
       },
        {
-        label: 'Actions',
+        label: 'Vehicle Actions',
         key: 'actions',
-        description:'Enable or disable specific actions for the device',
+        description:'Enable or disable specific actions for the user',
         fields: [
           { label: 'Boot', key: 'bootLock' },
           { label: 'Wheel', key: 'wheelLock' },
