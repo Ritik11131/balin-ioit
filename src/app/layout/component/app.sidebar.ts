@@ -1,11 +1,12 @@
 // sidebar.component.ts
 import { CommonModule } from '@angular/common';
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, inject } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../pages/service/auth.service';
 import { SidebarService } from '../../pages/service/sidebar.service';
+import { WhitelabelThemeService } from '../../pages/service/whitelabel-theme.service';
 
 
 
@@ -16,12 +17,14 @@ import { SidebarService } from '../../pages/service/sidebar.service';
         <div class="fixed top-0 left-0 h-screen bg-white flex flex-col py-6 justify-between transition-all duration-300 ease-in-out z-50 border-r border-gray-200" [ngClass]="isExpanded ? 'w-[280px]' : 'w-[88px]'">
             <!-- 1. LOGO SECTION -->
             <div class="flex flex-col items-center gap-4 px-4">
-                <img src="images/sidebar/logo.svg" alt="Logo" class="w-[32px] h-[32px]" />
+                @if (theme$ | async; as theme) {
+                    <img [src]="theme.logo" alt="Logo" class="w-[45px] h-[45px]" />
+                }
             </div>
 
             <!-- 2. NAVIGATION ICONS -->
             <div class="flex flex-col items-center gap-4 mt-3 w-full px-7">
-                @for (item of (sidebarItems$ | async); track $index) {
+                @for (item of sidebarItems$ | async; track $index) {
                     <ng-container>
                         <div
                             (click)="setActive(item.key, item.route)"
@@ -134,57 +137,58 @@ import { SidebarService } from '../../pages/service/sidebar.service';
 export class AppSidebar {
     @Output() sidebarToggle = new EventEmitter<boolean>();
 
-  isExpanded = false;
-  activeItem = '';
-  clickedItem = '';
-  sidebarItems$!: Observable<any[]>;
-  private routerSubscription!: Subscription;
+    isExpanded = false;
+    activeItem = '';
+    clickedItem = '';
+    sidebarItems$!: Observable<any[]>;
+    private routerSubscription!: Subscription;
+    private themeService = inject(WhitelabelThemeService);
 
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-    private sidebarService: SidebarService
-  ) {}
+    theme$ = this.themeService.theme$;
 
-  ngOnInit() {
-    // filter items based on config
-    this.sidebarItems$ = this.sidebarService.getSidebarItems();
+    constructor(
+        private router: Router,
+        private authService: AuthService,
+        private sidebarService: SidebarService
+    ) {}
 
-    // set active item initially
-    this.activeItem = this.sidebarService.getActiveKeyFromRoute(this.router.url);
+    ngOnInit() {
+        // filter items based on config
+        this.sidebarItems$ = this.sidebarService.getSidebarItems();
 
-    // listen to route changes
-    this.routerSubscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this.activeItem = this.sidebarService.getActiveKeyFromRoute(event.urlAfterRedirects);
-      });
-  }
+        // set active item initially
+        this.activeItem = this.sidebarService.getActiveKeyFromRoute(this.router.url);
 
-  ngOnDestroy() {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
+        // listen to route changes
+        this.routerSubscription = this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event: NavigationEnd) => {
+            this.activeItem = this.sidebarService.getActiveKeyFromRoute(event.urlAfterRedirects);
+        });
     }
-  }
 
-  setActive(key: string, route: string) {
-    this.activeItem = key;
-    this.clickedItem = key;
-    this.router.navigate([route]);
-
-    setTimeout(() => (this.clickedItem = ''), 300);
-    if (this.isExpanded) {
-      this.toggleSidebar();
+    ngOnDestroy() {
+        if (this.routerSubscription) {
+            this.routerSubscription.unsubscribe();
+        }
     }
-  }
 
-  toggleSidebar() {
-    this.isExpanded = !this.isExpanded;
-    this.sidebarToggle.emit(this.isExpanded);
-  }
+    setActive(key: string, route: string) {
+        this.activeItem = key;
+        this.clickedItem = key;
+        this.router.navigate([route]);
 
-  handleLogout() {
-    this.authService.logout();
-    this.router.navigate(['/auth/login']);
-  }
+        setTimeout(() => (this.clickedItem = ''), 300);
+        if (this.isExpanded) {
+            this.toggleSidebar();
+        }
+    }
+
+    toggleSidebar() {
+        this.isExpanded = !this.isExpanded;
+        this.sidebarToggle.emit(this.isExpanded);
+    }
+
+    handleLogout() {
+        this.authService.logout();
+        this.router.navigate(['/auth/login']);
+    }
 }

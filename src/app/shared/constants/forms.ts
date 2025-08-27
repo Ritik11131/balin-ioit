@@ -481,13 +481,21 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
   columns: 2,
   isEditMode: false,
   fields: [
+      {
+      key: 'title',
+      label: 'Title',
+      type: 'text',
+      required: true,
+      placeholder: 'Enter the title',
+      gridCol: 2
+    },
     {
       key: 'personName',
       label: 'Full Name',
       type: 'text',
       required: true,
       placeholder: 'Enter the full name of the contact person',
-      gridCol: 1
+      gridCol: 2
     },
     {
       key: 'url',
@@ -495,7 +503,7 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'e.g. mycompany.com',
-      gridCol: 1
+      gridCol: 2
     },
     {
       key: 'baseUrl',
@@ -542,13 +550,21 @@ export const UPDATE_WHITELABEL_FORM_FIELDS: FormConfig = {
   columns: 2,
   isEditMode: true,
   fields: [
+      {
+      key: 'title',
+      label: 'Title',
+      type: 'text',
+      required: true,
+      placeholder: 'Enter the title',
+      gridCol: 2
+    },
     {
       key: 'personName',
       label: 'Full Name',
       type: 'text',
       required: true,
       placeholder: 'Enter the full name of the contact person',
-      gridCol: 1
+      gridCol: 2
     },
     {
       key: 'url',
@@ -556,7 +572,7 @@ export const UPDATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'e.g. mycompany.com',
-      gridCol: 1
+      gridCol: 2
     },
     {
       key: 'baseUrl',

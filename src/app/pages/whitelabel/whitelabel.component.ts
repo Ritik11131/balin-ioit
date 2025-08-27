@@ -22,7 +22,7 @@ export class WhitelabelComponent {
   toolbarItems = WHITELABEL_TABLE_TOOLBAR;
   tableConfig = WHITELABEL_TABLE_CONFIG;
 
-  editData!: any
+  editData!: any;
   selectedRowItems: any[] = [];
   whiteLabels: any[] = [];
   isLoading: boolean = false;
@@ -68,8 +68,8 @@ export class WhitelabelComponent {
 
   onFormValueChange($event: any) {
    console.log($event);
-   
   }
+
   async onWhiteLabelFormSubmit(event: any): Promise<any> {
    console.log('WhiteLabel form submitted:', event);
     const {isEditMode, formValue} = event;

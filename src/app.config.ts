@@ -1,5 +1,5 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, isDevMode, provideAppInitializer  } from '@angular/core';
+import { ApplicationConfig, inject, isDevMode, provideAppInitializer  } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeng/themes/aura';
@@ -25,6 +25,12 @@ import { VehicleTypeEffects } from './app/store/vehicle-type/effects';
 import { vehicleTypeReducer } from './app/store/vehicle-type/reducer';
 import { DeviceTypeEffects } from './app/store/device-type/effects';
 import { deviceTypeReducer } from './app/store/device-type/reducer';
+import { WhitelabelThemeService } from './app/pages/service/whitelabel-theme.service';
+
+export function initTheme() {
+  const themeService = inject(WhitelabelThemeService);
+  return themeService.loadTheme();
+}
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -65,6 +71,7 @@ export const appConfig: ApplicationConfig = {
 
   ]),
   provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
+   provideAppInitializer(initTheme),
 ]
 
 };
