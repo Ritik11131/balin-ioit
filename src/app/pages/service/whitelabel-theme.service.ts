@@ -26,8 +26,6 @@ export class WhitelabelThemeService {
 
   // Called once in APP_INITIALIZER
   async loadTheme(): Promise<void> {
-    console.log('Applying theme...');
-
     if (this.isLoaded) return;
 
     try {

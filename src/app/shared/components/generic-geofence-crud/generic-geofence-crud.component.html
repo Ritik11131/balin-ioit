@@ -1,14 +1,13 @@
 <div class="flex h-[calc(100vh-135px)]">
-    <!-- Map Section -->
     <div class="relative flex-1">
         <div leaflet [leafletOptions]="options" (leafletMapReady)="onMapReady($event)" class="w-full h-full"></div>
 
-        <!-- Map Controls -->
+        <!-- Map Controls
         <div class="absolute top-4 right-4 flex flex-col gap-2">
             <p-button icon="pi pi-refresh" [text]="true" [rounded]="true" severity="secondary" (onClick)="clearMap()" pTooltip="Clear Map" tooltipPosition="left"></p-button>
 
             <p-button icon="pi pi-eye" [text]="true" [rounded]="true" severity="info" (onClick)="fitMapToGeometry()" pTooltip="Fit to Geometry" tooltipPosition="left" [disabled]="!currentLayer"></p-button>
-        </div>
+        </div> -->
     </div>
 
     <!-- Form Section -->

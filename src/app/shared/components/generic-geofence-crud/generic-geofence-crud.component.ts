@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Input, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -6,18 +6,15 @@ import { ColorPickerModule } from 'primeng/colorpicker';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { MessageService, ConfirmationService } from 'primeng/api';
-
+import { UiService } from '../../../layout/service/ui.service';
 import * as L from 'leaflet';
 import 'leaflet-draw';
+import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { GeofenceService } from '../../../pages/service/geofence.service';
 import { GenericFormGeneratorComponent } from "../generic-form-generator/generic-form-generator.component";
 import { CREATE_GEOFENCE_FORM_FIELDS } from '../../constants/forms';
-import { UiService } from '../../../layout/service/ui.service';
-import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { WhitelabelThemeService } from '../../../pages/service/whitelabel-theme.service';
 
-// geofence.model.ts
 export interface GeofencePayload {
   id?: number;
   fkCustomerUserId?: number;
@@ -41,7 +38,6 @@ export interface GeofencePayload {
     ConfirmDialogModule,
     GenericFormGeneratorComponent
   ],
-  providers: [MessageService, ConfirmationService],
   templateUrl: './generic-geofence-crud.component.html',
   styleUrl: './generic-geofence-crud.component.scss'
 })
@@ -49,24 +45,29 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
   @Input() editGeofence?: GeofencePayload;
 
   private themeService = inject(WhitelabelThemeService);
-
   private map!: L.Map;
   private drawnItems!: L.FeatureGroup;
   private drawControl!: L.Control.Draw;
-  private mapLayers = {
-    street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 18
-    }),
-    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: '&copy; Esri',
-      maxZoom: 18
-    }),
+  private currentLayer: L.Layer | null = null;
+  private geometryType: 'circle' | 'polygon' | null = null;
+
+  formData: any = { color: '', radius: 1000, geometryName: '' };
+  formFields = CREATE_GEOFENCE_FORM_FIELDS;
+  isSaving = false;
+
+  tailwindColors500: Record<string, string> = {
+    emerald: '#10B981', green: '#22C55E', lime: '#84CC16', orange: '#F97316',
+    amber: '#F59E0B', yellow: '#EAB308', teal: '#14B8A6', cyan: '#06B6D4',
+    sky: '#0EA5E9', blue: '#3B82F6', indigo: '#6366F1', violet: '#8B5CF6',
+    purple: '#A855F7', fuchsia: '#D946EF', pink: '#EC4899', rose: '#F43F5E'
   };
 
-  currentLayer: L.Layer | null = null;
-  geometryType: 'circle' | 'polygon' | null = null;
-  editData!: any;
+  mapLayers = {
+    street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 18 }),
+    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri', maxZoom: 18 }),
+  };
+
+  editData!:any;
 
   options = {
     layers: [this.mapLayers.street],
@@ -75,104 +76,46 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
     zoomControl: false
   };
 
-  tailwindColors500: Record<string, string> = {
-  emerald: '#10B981',
-  green: '#22C55E',
-  lime: '#84CC16',
-  orange: '#F97316',
-  amber: '#F59E0B',
-  yellow: '#EAB308',
-  teal: '#14B8A6',
-  cyan: '#06B6D4',
-  sky: '#0EA5E9',
-  blue: '#3B82F6',
-  indigo: '#6366F1',
-  violet: '#8B5CF6',
-  purple: '#A855F7',
-  fuchsia: '#D946EF',
-  pink: '#EC4899',
-  rose: '#F43F5E'
-};
-
-  isSaving = false;
-  formFields = CREATE_GEOFENCE_FORM_FIELDS;
-  formData: any = { color: '#FF5733', radius: 1000, geometryName: '' }; // initial defaults
-
   constructor(
     private geofenceService: GeofenceService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService,
-    private uiService: UiService,
+    private uiService: UiService
   ) {}
 
   ngOnInit() {
-     // Subscribe to theme service to get default color
-  this.themeService.theme$.subscribe(theme => {
-    if (theme?.themeColor) {
-      this.formData.color = theme.themeColor;
-    }
-  });
-    if (this.editGeofence) {
-      this.loadEditData();
-    }
+    // Set default color from theme
+    this.themeService.theme$.subscribe(theme => {
+      if (theme?.themeColor) this.formData.color = theme.themeColor;
+    });
+
+    if (this.editGeofence) this.loadEditData();
   }
 
   ngOnDestroy() {
-    if (this.map) {
-      this.map.remove();
-    }
+    if (this.map) this.map.remove();
   }
 
-  onMapReady(map: L.Map): void {
+  onMapReady(map: L.Map) {
     this.map = map;
-
-    // Zoom control
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
 
-    // Init drawn items
     this.drawnItems = new L.FeatureGroup();
     this.map.addLayer(this.drawnItems);
 
-    // Draw control
     this.drawControl = new L.Control.Draw({
       position: 'topright',
       draw: {
-        polygon: {
-          allowIntersection: false,
-          drawError: {
-            color: '#e1e100',
-            message: 'Shape edges cannot cross!'
-          },
-          shapeOptions: {
-            color: this.formData.color,
-            weight: 3,
-            fillOpacity: 0.2
-          }
-        },
-        circle: {
-          shapeOptions: {
-            color: this.formData.color,
-            weight: 3,
-            fillOpacity: 0.2
-          }
-        },
-        rectangle: false,
-        polyline: false,
-        marker: false,
-        circlemarker: false
+        polygon: { allowIntersection: false, drawError: { color: '#e1e100', message: 'Shape edges cannot cross!' }, shapeOptions: { color: this.formData.color, weight: 3, fillOpacity: 0.2 } },
+        circle: { shapeOptions: { color: this.formData.color, weight: 3, fillOpacity: 0.2 } },
+        rectangle: false, polyline: false, marker: false, circlemarker: false
       },
-      edit: {
-        featureGroup: this.drawnItems,
-        remove: true
-      }
+      edit: { featureGroup: this.drawnItems, remove: true }
     });
 
     this.map.addControl(this.drawControl);
 
-    // Events
-    this.map.on(L.Draw.Event.CREATED, (event: any) => this.onDrawCreated(event));
-    this.map.on(L.Draw.Event.EDITED, (event: any) => this.onDrawEdited(event));
-    this.map.on(L.Draw.Event.DELETED, (event: any) => this.onDrawDeleted(event));
+    this.map.on(L.Draw.Event.CREATED, (e: any) => this.onDrawCreated(e));
+    this.map.on(L.Draw.Event.EDITED, (e: any) => this.onDrawEdited(e));
+    this.map.on(L.Draw.Event.DELETED, (e: any) => this.onDrawDeleted(e));
   }
 
   private onDrawCreated(event: any) {
@@ -183,40 +126,48 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
 
     if (layer instanceof L.Circle) {
       this.geometryType = 'circle';
-      this.formData.radius = Math.round(layer.getRadius());
+      const radius = Math.round(layer.getRadius());
+      this.formData.radius = radius;
+      layer.feature = {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [layer.getLatLng().lng, layer.getLatLng().lat] },
+        properties: { radius, color: this.formData.color }
+      };
     } else if (layer instanceof L.Polygon) {
       this.geometryType = 'polygon';
     }
 
     this.updateLayerColors(this.formData.color);
-
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: `${this.geometryType} created successfully`
-    });
+    this.uiService.showToast('success', 'Success', `${this.geometryType} created successfully`);
   }
 
   private onDrawEdited(event: any) {
     const layers = event.layers;
     layers.eachLayer((layer: any) => {
       if (layer instanceof L.Circle) {
-        this.formData.radius = Math.round(layer.getRadius());
+        const radius = Math.round(layer.getRadius());
+        this.formData.radius = radius;
+        if (layer.feature) layer.feature.properties.radius = radius;
+        else layer.feature = {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [layer.getLatLng().lng, layer.getLatLng().lat] },
+          properties: { radius, color: this.formData.color }
+        };
       }
     });
-
-    this.messageService.add({ severity: 'info', summary: 'Updated', detail: 'Geometry modified' });
+    this.uiService.showToast('info', 'Updated', `${this.geometryType} modified successfully`);
   }
 
   private onDrawDeleted(_: any) {
     this.currentLayer = null;
     this.geometryType = null;
-    this.messageService.add({ severity: 'warn', summary: 'Deleted', detail: 'Geometry removed' });
+    this.uiService.showToast('warn', 'Deleted', `${this.geometryType} deleted successfully`);
   }
 
   private updateLayerColors(color: string) {
     if (this.currentLayer && (this.currentLayer as any).setStyle) {
       (this.currentLayer as any).setStyle({ color, fillColor: color });
+      // if (this.currentLayer.feature) this.currentLayer.feature.properties.color = color;
     }
   }
 
@@ -231,33 +182,27 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
 
     try {
       const geoJson = JSON.parse(this.editGeofence.Geojson);
-      const layer = L.geoJSON(geoJson, {
-        style: {
-          color: this.editGeofence.color,
-          weight: 3,
-          fillOpacity: 0.2
-        },
+      const geoLayer = L.geoJSON(geoJson, {
+        style: { color: this.editGeofence.color, weight: 3, fillOpacity: 0.2 },
         pointToLayer: (feature, latlng) => {
           if (feature.properties?.radius) {
-            return L.circle(latlng, {
-              radius: feature.properties.radius,
-              color: this.editGeofence!.color,
-              weight: 3,
-              fillOpacity: 0.2
-            });
+            const circle = L.circle(latlng, { radius: feature.properties.radius, color: this.editGeofence!.color, weight: 3, fillOpacity: 0.2 });
+            circle.feature = feature;
+            return circle;
           }
           return L.marker(latlng);
         }
       });
 
-      this.drawnItems.addLayer(layer);
-      layer.eachLayer((l: L.Layer) => {
-        this.currentLayer = l;
-        this.geometryType = l instanceof L.Circle ? 'circle' : 'polygon';
+      geoLayer.eachLayer((layer: L.Layer) => {
+        this.drawnItems.addLayer(layer);
+        this.currentLayer = layer;
+        this.geometryType = layer instanceof L.Circle ? 'circle' : 'polygon';
       });
+
       this.fitMapToGeometry();
     } catch {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load geometry data' });
+      this.uiService.showToast('error', 'Error', 'Failed to load geometry data');
     }
   }
 
@@ -266,7 +211,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
 
     if (this.currentLayer instanceof L.Circle) {
       const center = this.currentLayer.getLatLng();
-      const radius = this.currentLayer.getRadius();
+      const radius = Math.round(this.currentLayer.getRadius());
       return {
         type: 'FeatureCollection',
         features: [{
@@ -279,7 +224,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
       const latLngs = (this.currentLayer as any).getLatLngs()[0] || [];
       if (latLngs.length < 3) throw new Error('Polygon must have at least 3 points');
       const coordinates = latLngs.map((ll: L.LatLng) => [ll.lng, ll.lat]);
-      coordinates.push(coordinates[0]); // close polygon
+      coordinates.push(coordinates[0]);
       return {
         type: 'FeatureCollection',
         features: [{
@@ -291,6 +236,15 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
     }
 
     throw new Error('Unsupported geometry');
+  }
+
+  onFormValueChange(values: any) {
+    this.formData = { ...this.formData, ...values };
+    if (values.color) this.updateLayerColors(values.color);
+    if (values.radius && this.currentLayer instanceof L.Circle) {
+      this.currentLayer.setRadius(values.radius);
+      if (this.currentLayer.feature) this.currentLayer.feature.properties.radius = values.radius;
+    }
   }
 
   clearMap() {
@@ -316,17 +270,8 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
   async onGeofenceFormSubmit(event: any): Promise<void> {
     const { isEditMode, formValue } = event;
     this.formData = { ...this.formData, ...formValue };
-    if (isEditMode) {
-      console.log('Update:', this.formData);
-    } else {
-      console.log('Create:', this.formData);
-    }
 
-
-     if (!this.currentLayer) {
-      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please draw a geometry' });
-      return;
-    }
+    if (!this.currentLayer) return;
 
     this.isSaving = true;
     try {
@@ -347,18 +292,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
 
       this.isSaving = false;
     } catch (err) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to generate geometry data' });
       this.isSaving = false;
-    }
-  }
-
-  onFormValueChange(values: any) {
-    console.log(values,'values');
-    
-    this.formData = { ...this.formData, ...values };
-    if (values.color) this.updateLayerColors(values.color);
-    if (values.radius && this.currentLayer instanceof L.Circle) {
-      this.currentLayer.setRadius(values.radius);
     }
   }
 
