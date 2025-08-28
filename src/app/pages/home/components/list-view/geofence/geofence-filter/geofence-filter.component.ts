@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -12,7 +12,7 @@ import { InputTextModule } from 'primeng/inputtext';
         <div class="w-full h-[60px] bg-transparent py-4 flex flex-col justify-between gap-4">
             <div class="flex items-center justify-between w-full">
                 <div class="flex">
-                    <p-button icon="pi pi-plus" outlined label="Create"></p-button>
+                    <p-button icon="pi pi-plus" outlined label="Create" (onClick)="onCreateGeofence()"></p-button>
                 </div>
 
                 <p-iconfield>
@@ -25,4 +25,11 @@ import { InputTextModule } from 'primeng/inputtext';
     `,
     styles: ``
 })
-export class GeofenceFilterComponent {}
+export class GeofenceFilterComponent {
+      @Output() createGeofenceClick = new EventEmitter<any>();
+
+      onCreateGeofence() {
+        this.createGeofenceClick.emit({actionType: 'create'})
+      }
+
+}
