@@ -203,7 +203,7 @@ export interface FormConfig {
                                 @case ('date') {
                                     <ng-container *ngTemplateOutlet="fieldWrapper; context: { field: field, input: dateInput }"></ng-container>
                                     <ng-template #dateInput>
-                                        <p-datepicker styleClass="w-full" [id]="field.key" [formControlName]="field.key" [showIcon]="true" [selectionMode]="field?.selectionMode" [readonlyInput]="true" inputId="buttondisplay" [showOnFocus]="false" />
+                                        <p-datepicker styleClass="w-full" [id]="field.key" [placeholder]="field.placeholder" [formControlName]="field.key" [showIcon]="true" [selectionMode]="field?.selectionMode" [readonlyInput]="true" inputId="buttondisplay" [showOnFocus]="false" />
                                     </ng-template>
                                 }
 
