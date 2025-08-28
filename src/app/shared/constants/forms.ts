@@ -12,7 +12,7 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       type: 'email',
       required: true,
       placeholder: 'Enter your email address',
-      gridCol: 2 // Spans 2 columns
+      gridCol: 1 // Spans 2 columns
     },
     {
       key: 'userName',
@@ -54,7 +54,7 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       label: 'User Type',
       type: 'select',
       placeholder: 'Select type of user',
-      gridCol: 2,
+      gridCol: 1,
       required: true,
       options: USER_TYPES
     },
@@ -66,7 +66,7 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       rows: 4,
       required: true,
       maxLength: 500,
-      gridCol: 2
+      gridCol: 1
     }
   ]
 };
@@ -83,7 +83,7 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
       type: 'email',
       required: true,
       placeholder: 'Enter your email address',
-      gridCol: 2 // Spans 2 columns
+      gridCol: 1 // Spans 2 columns
     },
     {
       key: 'userName',
@@ -125,7 +125,7 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
       label: 'User Type',
       type: 'select',
       placeholder: 'Select type of user',
-      gridCol: 2,
+      gridCol: 1,
       required: true,
       options: USER_TYPES
     },
@@ -137,7 +137,7 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
       rows: 4,
       required: true,
       maxLength: 500,
-      gridCol: 2
+      gridCol: 1
     }
   ]
 };
@@ -154,7 +154,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter unique ID',
-      gridCol: 2,
+      gridCol: 1,
       validators: [
         { type: 'required', message: 'Unique Id is required' }
       ]
@@ -165,7 +165,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter IMEI (15 digits)',
-      gridCol: 2,
+      gridCol: 1,
       minLength: 15,
       validators: [
         { type: 'minLength', value: 15, message: 'IMEI must be at least 15 digits' }
@@ -177,14 +177,14 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter serial number',
-      gridCol: 3
+      gridCol: 1
     },
     {
       key: 'fkDeviceType',
       label: 'Device Type',
       type: 'select',
       placeholder: 'Select device type',
-      gridCol: 2,
+      gridCol: 1,
       required: true,
       options: [], // dynamic from API
        dataSource: 'deviceTypes'
@@ -195,7 +195,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'select',
       required: true,
       placeholder: 'Select vehicle type',
-      gridCol: 2,
+      gridCol: 1,
       options: [], // dynamic from API
       dataSource: 'vehicleTypes'
     },
@@ -205,7 +205,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter primary sim number',
-      gridCol: 2,
+      gridCol: 1,
       validators: [
         { type: 'required', message: 'Primary sim number is required' }
       ]
@@ -216,7 +216,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'select',
       placeholder: 'Select operator',
       required: true,
-      gridCol: 2,
+      gridCol: 1,
       options: [
         {
           "label": "Airtel",
@@ -245,7 +245,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       label: 'Secondary Sim Number',
       type: 'text',
       placeholder: 'Enter secondary sim number',
-      gridCol: 2
+      gridCol: 1
     },
     {
       key: 'fkSecSimOperator',
@@ -253,7 +253,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'select',
       required: true,
       placeholder: 'Select operator',
-      gridCol: 2,
+      gridCol: 1,
       options: [
         {
           "label": "Airtel",
@@ -283,7 +283,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter vehicle number',
-      gridCol: 2,
+      gridCol: 1,
       validators: [
         { type: 'required', message: 'Vehicle number is required' }
       ]
@@ -294,7 +294,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'date',
       required: true,
       placeholder: 'Select installation date',
-      gridCol: 2,
+      gridCol: 1,
       selectionMode:'single'
     },
     {
@@ -302,7 +302,7 @@ export const CREATE_DEVICE_FORM_FIELDS: FormConfig = {
       label: 'Plan',
       type: 'select',
       placeholder: 'Select plan',
-      gridCol: 2,
+      gridCol: 1,
       options: [],
       dataSource: 'plans'
     }
@@ -321,7 +321,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter unique ID',
-      gridCol: 2,
+      gridCol: 1,
       validators: [
         { type: 'required', message: 'Unique Id is required' }
       ]
@@ -332,7 +332,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter IMEI (15 digits)',
-      gridCol: 2,
+      gridCol: 1,
       minLength: 15,
       validators: [
         { type: 'minLength', value: 15, message: 'IMEI must be at least 15 digits' }
@@ -344,14 +344,14 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter serial number',
-      gridCol: 3
+      gridCol: 1
     },
     {
       key: 'fkDeviceType',
       label: 'Device Type',
       type: 'select',
       placeholder: 'Select device type',
-      gridCol: 2,
+      gridCol: 1,
       required: true,
       options: [],
       dataSource: 'deviceTypes' 
@@ -362,7 +362,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'select',
       required: true,
       placeholder: 'Select vehicle type',
-      gridCol: 2,
+      gridCol: 1,
       options: [], // dynamic from API
       dataSource: 'vehicleTypes'
     },
@@ -372,7 +372,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter primary sim number',
-      gridCol: 2,
+      gridCol: 1,
       validators: [
         { type: 'required', message: 'Primary sim number is required' }
       ]
@@ -383,7 +383,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'select',
       required: true,
       placeholder: 'Select operator',
-      gridCol: 2,
+      gridCol: 1,
       options: [
         {
           "label": "Airtel",
@@ -412,14 +412,14 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       label: 'Secondary Sim Number',
       type: 'text',
       placeholder: 'Enter secondary sim number',
-      gridCol: 2
+      gridCol: 1
     },
     {
       key: 'fkSecSimOperator',
       label: 'Secondary Sim Operator',
       type: 'select',
       placeholder: 'Select operator',
-      gridCol: 2,
+      gridCol: 1,
       options: [
         {
           "label": "Airtel",
@@ -449,7 +449,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter vehicle number',
-      gridCol: 2,
+      gridCol: 1,
       validators: [
         { type: 'required', message: 'Vehicle number is required' }
       ]
@@ -460,7 +460,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       type: 'date',
       required: true,
       placeholder: 'Select installation date',
-      gridCol: 2,
+      gridCol: 1,
       selectionMode:'single'
     },
     {
@@ -468,7 +468,7 @@ export const UPDATE_DEVICE_FORM_FIELDS: FormConfig = {
       label: 'Plan',
       type: 'select',
       placeholder: 'Select plan',
-      gridCol: 2,
+      gridCol: 1,
       options: [],
       dataSource: 'plans'
     }
