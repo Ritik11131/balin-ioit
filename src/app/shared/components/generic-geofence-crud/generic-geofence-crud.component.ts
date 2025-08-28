@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -15,6 +15,8 @@ import { GenericFormGeneratorComponent } from '../generic-form-generator/generic
 import { CREATE_GEOFENCE_FORM_FIELDS } from '../../constants/forms';
 import { WhitelabelThemeService } from '../../../pages/service/whitelabel-theme.service';
 import { Subscription } from 'rxjs';
+import { loadGeofences } from '../../../store/geofence/geofence.actions';
+import { Store } from '@ngrx/store';
 
 // Patch buggy _resize
 (L.Edit.Circle.prototype as any)._resize = function (t: L.LatLng) {
@@ -43,7 +45,8 @@ export interface GeofencePayload {
     color: string;
     radius?: number;
     geometryName: string;
-    Geojson: string;
+    geojson?: string;
+    geofenceGeometry?: any;
 }
 
 @Component({
@@ -53,10 +56,11 @@ export interface GeofencePayload {
     templateUrl: './generic-geofence-crud.component.html',
     styleUrl: './generic-geofence-crud.component.scss'
 })
-export class GeofenceCrudComponent implements OnInit, OnDestroy {
+export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
     @Input() editGeofence?: GeofencePayload;
 
     private themeService = inject(WhitelabelThemeService);
+    private store = inject(Store);
     private themeSubscription?: Subscription;
 
     private map!: L.Map;
@@ -67,7 +71,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
 
     formData: any = {
         color: '#3B82F6', // Default blue color
-        radius: 1000,
+        radius: 0,
         geometryName: ''
     };
     formFields = { ...CREATE_GEOFENCE_FORM_FIELDS };
@@ -136,6 +140,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
             },
             polyline: false,
             marker: false,
+            rectangle: false,
             circlemarker: false
         },
         edit: {
@@ -143,7 +148,20 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
         }
     };
 
-    constructor(private uiService: UiService) {}
+    constructor(
+        private uiService: UiService,
+        private geofenceService: GeofenceService
+    ) {}
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['editGeofence'] && changes['editGeofence'].currentValue) {
+            // Only run when editGeofence changes and has a value
+            this.loadEditData();
+            if (this.editGeofence) {
+                setTimeout(() => this.loadGeometry(), 100);
+            }
+        }
+    }
 
     ngOnInit() {
         this.themeSubscription = this.themeService.theme$.subscribe((theme) => {
@@ -152,10 +170,6 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
                 this.updateDrawControlColors(theme.themeColor);
             }
         });
-
-        if (this.editGeofence) {
-            this.loadEditData();
-        }
     }
 
     ngOnDestroy() {
@@ -185,9 +199,10 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
         this.bindDrawEvents();
 
         // If editing, load the geometry after map is ready
-        if (this.editGeofence) {
-            setTimeout(() => this.loadGeometry(), 100);
-        }
+
+        setTimeout(() => {
+            this.map.invalidateSize();
+        }, 100);
     }
 
     private bindDrawEvents() {
@@ -384,10 +399,10 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
     }
 
     private loadGeometry() {
-        if (!this.editGeofence?.Geojson) return;
+        if (!this.editGeofence?.geojson) return;
 
         try {
-            const geoJson = JSON.parse(this.editGeofence.Geojson);
+            const geoJson = JSON.parse(this.editGeofence.geojson);
 
             const geoLayer = L.geoJSON(geoJson, {
                 style: () => ({
@@ -564,7 +579,8 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
             const payload: GeofencePayload = {
                 geometryName: this.formData.geometryName.trim(),
                 color: selectedColor,
-                Geojson: JSON.stringify(geoJsonData)
+                geojson: JSON.stringify(geoJsonData),
+                radius: this.formData.radius
             };
 
             // Add radius for circles
@@ -578,13 +594,13 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
                 console.log('Update payload:', payload);
 
                 // Call update service
-                // await this.geofenceService.updateGeofence(payload);
+                await this.updateGeofence(this.editGeofence.id, payload);
                 this.uiService.showToast('success', 'Success', 'Geofence updated successfully');
             } else {
                 console.log('Create payload:', payload);
 
                 // Call create service
-                // await this.geofenceService.createGeofence(payload);
+                await this.createGeofence(payload);
                 this.uiService.showToast('success', 'Success', 'Geofence created successfully');
             }
         } catch (error) {
@@ -599,5 +615,19 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy {
         this.formFields = { ...CREATE_GEOFENCE_FORM_FIELDS };
         this.clearMap();
         this.uiService.closeDrawer();
+    }
+
+    private async createGeofence(data: any): Promise<void> {
+        const res = await this.geofenceService.createGeofence(data);
+        this.uiService.closeDrawer();
+        this.uiService.showToast('success', 'Success', res?.data);
+        this.store.dispatch(loadGeofences());
+    }
+
+    private async updateGeofence(id: any, data: any): Promise<void> {
+        const res = await this.geofenceService.updateGeofence(id, data);
+        this.uiService.closeDrawer();
+        this.uiService.showToast('success', 'Success', res?.data);
+        this.store.dispatch(loadGeofences());
     }
 }

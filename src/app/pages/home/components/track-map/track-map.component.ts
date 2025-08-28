@@ -414,7 +414,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   private createGeofenceLayer(geofence: any): L.Layer {
   try {
-    const parsedGeometry = JSON.parse(geofence.geofenceGeometry);
+    const parsedGeometry = JSON.parse(geofence.geojson);
     const color = geofence.color || '#3388ff';
 
     // Create a FeatureGroup so we can call getBounds()

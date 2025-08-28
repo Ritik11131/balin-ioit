@@ -3,7 +3,7 @@ import { GeofenceListComponent } from "./geofence-list/geofence-list.component";
 import { GeofenceFilterComponent } from "./geofence-filter/geofence-filter.component";
 import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { selectGeofenceLoading, selectGeofences } from '../../../../../store/geofence/geofence.selectors';
+import { selectGeofenceLoading, selectGeofences, selectSelectedGeofence } from '../../../../../store/geofence/geofence.selectors';
 import { CommonModule } from '@angular/common';
 import { selectGeofence } from '../../../../../store/geofence/geofence.actions';
 import { UiService } from '../../../../../layout/service/ui.service';
@@ -14,12 +14,12 @@ import { GeofenceCrudComponent } from "../../../../../shared/components/generic-
   imports: [GeofenceListComponent, GeofenceFilterComponent, CommonModule, GeofenceCrudComponent],
   template: `
    <div class="p-2">
-    <app-geofence-filter (createGeofenceClick)="handleCreateGeofenceClick($event)" />
+    <app-geofence-filter (createGeofenceClick)="handleGeofenceActionClick($event)" />
    </div>
-    <app-geofence-list [isLoading]="isLoading$ | async" [geofences]="geofences$ | async" />
+    <app-geofence-list [isLoading]="isLoading$ | async" [geofences]="geofences$ | async" (editGeofenceClick)="handleGeofenceActionClick($event)" />
 
         <ng-template #createUpdateGeofence>
-          <app-geofence-crud />
+          <app-geofence-crud  [editGeofence]="selectedGeofence$ | async"  />
         </ng-template>
   `,
   styles: ``
@@ -32,11 +32,11 @@ export class GeofenceComponent implements OnDestroy {
   private uiService = inject(UiService);
   private destroy$ = new Subject<void>();
 
+  selectedGeofence$ = this.store.select(selectSelectedGeofence);
   geofences$: Observable<any[]> = this.store.select(selectGeofences);
   isLoading$: Observable<boolean> = this.store.select(selectGeofenceLoading);
 
-  handleCreateGeofenceClick(event: any) {
-    const {actionType} = event;
+  handleGeofenceActionClick(event: any) {
     this.uiService.openDrawer(this.createUpdateGeofence,' ','!w-[80vw] md:!w-[80vw] lg:!w-[80vw]',true)
   }
 
@@ -45,6 +45,6 @@ export class GeofenceComponent implements OnDestroy {
       this.destroy$.next();
       this.destroy$.complete();
       this.store.dispatch(selectGeofence({ geofence: null }));
-    }
+  }
 
 }

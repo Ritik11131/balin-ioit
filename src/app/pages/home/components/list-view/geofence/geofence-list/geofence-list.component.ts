@@ -1,4 +1,4 @@
-import { Component, inject, Input, ViewChild } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 import { GeofenceCardComponent } from "./geofence-card/geofence-card.component";
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { Observable } from 'rxjs';
@@ -26,7 +26,7 @@ import { GeofenceService } from '../../../../../service/geofence.service';
                         }
                     </div>
                 } @else {
-                    <cdk-virtual-scroll-viewport itemSize="124" class="scrollbar-hide" style="height: calc(100vh - 280px);">
+                    <cdk-virtual-scroll-viewport itemSize="20" class="scrollbar-hide" style="height: calc(100vh - 280px);">
                         <div *cdkVirtualFor="let geofence of geofences; let last = last; trackBy: trackByGeofenceId" [class.mb-4]="!last" class="px-2">
                             <app-geofence-card [geofence]="geofence" [isSelected]="(selectedGeofence$ | async) === geofence" (cardSelected)="onGeofenceSelected($event)" />
                         </div>
@@ -47,6 +47,8 @@ export class GeofenceListComponent {
     @Input() geofences: any = [];
     @Input() isLoading: any = false;
 
+    @Output() editGeofenceClick = new EventEmitter<any>();
+
     private store = inject(Store);
     private geofenceService = inject(GeofenceService);
     private uiService = inject(UiService);
@@ -57,8 +59,12 @@ export class GeofenceListComponent {
     async onGeofenceSelected(geofence: any): Promise<void> {
         try {
             this.store.dispatch(selectGeofence({ geofence }));
-            const vehicles = await this.geofenceService.fetchGeofenceLinkedVehicles(geofence.id);
-            this.geofenceLinkedVehicles = vehicles ?? [];
+            try {
+                const vehicles = await this.geofenceService.fetchGeofenceLinkedVehicles(geofence.id);
+                this.geofenceLinkedVehicles = vehicles ?? [];
+            } catch (error) {
+                this.geofenceLinkedVehicles = [];
+            }
             this.uiService.openDrawer(this.geofenceDetailsTemplate);
             console.log('Linked vehicles:', this.geofenceLinkedVehicles);
         } catch (error) {
@@ -86,7 +92,7 @@ export class GeofenceListComponent {
     }
 
     handleGeofenceEdit() {
-
+        this.editGeofenceClick.emit({actionType: 'edit'})
     }
 
     handleGeofenceDelete() {

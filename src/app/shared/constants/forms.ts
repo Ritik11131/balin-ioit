@@ -650,6 +650,29 @@ export const CREATE_GEOFENCE_FORM_FIELDS: FormConfig = {
      gridCol: 1
    },
   ]
+};
+
+export const UPDATE_GEOFENCE_FORM_FIELDS: FormConfig = {
+  formTitle: 'Create Geofence',
+  columns: 1,
+  isEditMode: false,
+  fields: [
+      {
+      key: 'geometryName',
+      label: 'Geometry Name',
+      type: 'text',
+      required: true,
+      placeholder: 'Enter geometry name',
+      gridCol: 1
+    },
+     {
+     key: 'color',
+     label: 'Geometry Color',
+     type: 'colorpicker',
+     required: true,
+     gridCol: 1
+   },
+  ]
 }
 
 

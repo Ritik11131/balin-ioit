@@ -27,7 +27,7 @@
     </div>
 
     <!-- Form Section -->
-    <div class="w-[430px] px-4 border-l border-gray-200 bg-white overflow-y-auto">
+    <div class="w-[300px] px-4 border-l border-gray-200 bg-white overflow-y-auto">
         <app-generic-form-generator
             [config]="formFields"
             [initialData]="formFields.isEditMode ? editData : null"
@@ -35,13 +35,5 @@
             (formCancel)="onFormCancel()"
             (formValueChanges)="onFormValueChange($event)">
         </app-generic-form-generator>
-        
-        <!-- Loading State -->
-        <div *ngIf="isSaving" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-            <div class="flex items-center gap-2">
-                <i class="pi pi-spin pi-spinner"></i>
-                <span>Saving...</span>
-            </div>
-        </div>
     </div>
 </div>
