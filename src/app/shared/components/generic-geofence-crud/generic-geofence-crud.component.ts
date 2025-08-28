@@ -8,6 +8,7 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { UiService } from '../../../layout/service/ui.service';
 import * as L from 'leaflet';
+import 'leaflet-draw';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { LeafletDrawModule } from '@bluehalo/ngx-leaflet-draw';
 import { GeofenceService } from '../../../pages/service/geofence.service';
@@ -18,26 +19,7 @@ import { Subscription } from 'rxjs';
 import { loadGeofences } from '../../../store/geofence/geofence.actions';
 import { Store } from '@ngrx/store';
 
-// Patch buggy _resize
-(L.Edit.Circle.prototype as any)._resize = function (t: L.LatLng) {
-    const e = this._moveMarker.getLatLng();
-    let radius;
-    if ((L as any).GeometryUtil.isVersion07x()) {
-        radius = e.distanceTo(t);
-    } else {
-        radius = this._map.distance(e, t);
-    }
-    this._shape.setRadius(radius);
 
-    if (this._map.editTooltip) {
-        this._map._editTooltip.updateContent({
-            text: L.drawLocal.edit.handlers.edit.tooltip.subtext + '<br />' + L.drawLocal.edit.handlers.edit.tooltip.text,
-            subtext: L.drawLocal.draw.handlers.circle.radius + ': ' + (L as any).GeometryUtil.readableDistance(radius, true, this.options.feet, this.options.nautic)
-        });
-    }
-
-    this._map.fire(L.Draw.Event.EDITRESIZE, { layer: this._shape });
-};
 
 export interface GeofencePayload {
     id?: number;
@@ -202,6 +184,27 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         setTimeout(() => {
             this.map.invalidateSize();
         }, 100);
+
+        // Patch buggy _resize
+(L.Edit.Circle.prototype as any)._resize = function (t: L.LatLng) {
+    const e = this._moveMarker.getLatLng();
+    let radius;
+    if ((L as any).GeometryUtil.isVersion07x()) {
+        radius = e.distanceTo(t);
+    } else {
+        radius = this._map.distance(e, t);
+    }
+    this._shape.setRadius(radius);
+
+    if (this._map.editTooltip) {
+        this._map._editTooltip.updateContent({
+            text: L.drawLocal.edit.handlers.edit.tooltip.subtext + '<br />' + L.drawLocal.edit.handlers.edit.tooltip.text,
+            subtext: L.drawLocal.draw.handlers.circle.radius + ': ' + (L as any).GeometryUtil.readableDistance(radius, true, this.options.feet, this.options.nautic)
+        });
+    }
+
+    this._map.fire(L.Draw.Event.EDITRESIZE, { layer: this._shape });
+};
     }
 
     private bindDrawEvents() {
