@@ -6,19 +6,20 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { RippleModule } from 'primeng/ripple';
-import { AppFloatingConfigurator } from '../../layout/component/app.floatingconfigurator';
 import { UiService } from '../../layout/service/ui.service';
 import { AuthService } from '../service/auth.service';
 import { Store } from '@ngrx/store';
 import { StoreService } from '../service/store.service';
 import { WhitelabelThemeService } from '../service/whitelabel-theme.service';
 import { CommonModule } from '@angular/common';
+import { AppConfigurator } from "../../layout/component/app.configurator";
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, CommonModule],
+    imports: [ButtonModule, CheckboxModule, InputTextModule, PasswordModule, FormsModule, RouterModule, RippleModule, CommonModule, AppConfigurator],
     template: `
+    <app-configurator/>
             <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
       <div
         class="relative flex flex-col justify-center w-full h-screen dark:bg-gray-900 sm:p-0 lg:flex-row"
@@ -222,7 +223,10 @@ export class Login {
         private store: Store,
         private storeService: StoreService,
         public themeService: WhitelabelThemeService
-    ) { }
+    ) {
+      console.log(getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim());
+      
+     }
 
     async signIn(): Promise<any> {
         this.uiService.toggleLoader(true);
