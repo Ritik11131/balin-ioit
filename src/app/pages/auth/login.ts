@@ -198,7 +198,7 @@ import { CommonModule } from '@angular/common';
                 @if (themeService.theme$ | async; as theme) {
                   <img [src]="theme.logo" alt="Login Logo" class="w-[45px] h-[45px] block mb-4" />
               }
-              <p class="text-center text-gray-400 dark:text-white/60">
+              <p class="text-center text-white/60">
                Welcome
               </p>
             </div>

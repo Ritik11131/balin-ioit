@@ -5,6 +5,7 @@ import { VehicleService } from '../../pages/service/vehicle.service';
 import { catchError, map, switchMap, takeUntil, timer, mergeMap, startWith, from } from 'rxjs';
 import { of } from 'rxjs';
 import { AddressService } from '../../pages/service/address.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable()
 export class VehicleEffects {
@@ -40,7 +41,7 @@ pollSelectedVehicle$ = createEffect(() =>
   this.actions$.pipe(
     ofType(VehicleActions.startSingleVehiclePolling),
     switchMap(({ vehicleId }) =>
-      timer(0, 10000).pipe(
+      timer(0, environment.singleVehiclePollingInterval).pipe(
         switchMap(() =>
           this.vehicleService.fetchVehicleById(vehicleId).pipe(
             switchMap((vehicle: any) => {

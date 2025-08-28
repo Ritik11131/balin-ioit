@@ -18,112 +18,64 @@
     </div>
   </div>
 
-  <!-- Tabs Section -->
-  <div class="flex-1 overflow-hidden">
-    <!-- Scrollable content above iframe -->
-    <div class="text-sm pb-40"> <!-- add bottom padding to avoid overlap with iframe -->
-      <ng-container *ngIf="vehicle; else skeletonOverview">
+   <!-- Geofence Details -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        <ng-container *ngIf="vehicle; else skeletonOverview">
+            <!-- Radius Card -->
+            <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white col-span-2">
+               <p class="text-xs uppercase tracking-wide text-gray-500">Address</p>
+               <p class="mt-1 text-md font-semibold text-gray-800">
+                   {{ vehicle.location }}
+               </p>
+           </div>
 
-        <span class="text-lg font-semibold">
-          Overview / Sensors Details
-        </span>
+            <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+                <p class="text-xs uppercase tracking-wide text-gray-500">Updated</p>
+                <p class="mt-1 text-md font-semibold text-gray-800">
+                    {{ vehicle.lastUpdated | timeAgo }}
+                </p>
+            </div>
 
-        <!-- Updated -->
-        <div class="flex justify-between items-center py-3 border-b border-gray-100">
-          <span class="font-medium text-gray-500">Updated</span>
-          <span class="text-gray-800 font-semibold">{{ vehicle.lastUpdated | timeAgo }}</span>
-        </div>
 
-        <!-- Address -->
-        <div class="flex justify-between items-center py-3 border-b border-gray-100">
-          <span class="font-medium text-gray-500">Address</span>
-          <span class="text-gray-800 font-semibold">{{ vehicle.location || '—' }}</span>
-        </div>
+              <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+                <p class="text-xs uppercase tracking-wide text-gray-500">Odometer</p>
+                <p class="mt-1 text-md font-semibold text-gray-800">
+                     {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
+                </p>
+            </div>
 
-        <!-- Speed -->
-        <div class="flex justify-between items-center py-3 border-b border-gray-100">
-          <span class="font-medium text-gray-500">Speed</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">{{ vehicle?.apiObject?.position?.speed || 0 }}</span> km/h
-          </span>
-        </div>
+              <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+                <p class="text-xs uppercase tracking-wide text-gray-500">Battery (Internal / External)</p>
+                <p class="mt-1 text-md font-semibold text-gray-800">
+                    0.00 / 0.00
+                </p>
+            </div>
 
-        <!-- Odometer -->
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
 
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
+              <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+                <p class="text-xs uppercase tracking-wide text-gray-500">Odometer</p>
+                <p class="mt-1 text-md font-semibold text-gray-800">
+                     {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
+                </p>
+            </div>
 
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
+              <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+                <p class="text-xs uppercase tracking-wide text-gray-500">Updated</p>
+                <p class="mt-1 text-md font-semibold text-gray-800">
+                    {{ vehicle.lastUpdated | timeAgo }}
+                </p>
+            </div>
 
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
 
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
+              <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white">
+                <p class="text-xs uppercase tracking-wide text-gray-500">Odometer</p>
+                <p class="mt-1 text-md font-semibold text-gray-800">
+                     {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
+                </p>
+            </div>
+        </ng-container>
 
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
-
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
-
-        <div class="flex justify-between items-center py-3">
-          <span class="font-medium text-gray-500">Odometer</span>
-          <span class="text-gray-800">
-            <span class="font-semibold">
-              {{ ((vehicle?.apiObject?.device?.details?.lastOdometer) / 1000).toFixed(3) || 0 }}
-            </span> km
-          </span>
-        </div>
-       
-      </ng-container>
-
-      @if(iframeUrl) {
+         @if(iframeUrl) {
       <div class="fixed bottom-0 left-0 w-full max-w-4xl">
         <span class="text-lg font-semibold px-4 py-2">
           Live From Vehicle
@@ -149,7 +101,6 @@
   </div>
       }
     </div>
-  </div>
 
   <!-- Skeleton Loaders -->
   <ng-template #skeletonOverview>
