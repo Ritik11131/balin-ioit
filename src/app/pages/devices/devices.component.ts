@@ -86,7 +86,7 @@ export class DevicesComponent implements OnDestroy, OnInit {
             this.formConfigEnricher.enrichForms([CREATE_DEVICE_FORM_FIELDS]).subscribe(res => {
                 this.formFields = res[0];
             });
-            this.uiService.openDrawer(this.createUpdateDevice, ' ', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
+            this.uiService.openDrawer(this.createUpdateDevice, this.formFields.formTitle, '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
         }
     }
 
@@ -129,7 +129,7 @@ export class DevicesComponent implements OnDestroy, OnInit {
         this.formConfigEnricher.enrichForms([UPDATE_DEVICE_FORM_FIELDS]).subscribe(res => {
             this.formFields = res[0];
         });
-        this.uiService.openDrawer(this.createUpdateDevice, ' ', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
+        this.uiService.openDrawer(this.createUpdateDevice, this.formFields.formTitle, '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
         await Promise.all([
             this.loadDeviceObject(row?.id)
         ])

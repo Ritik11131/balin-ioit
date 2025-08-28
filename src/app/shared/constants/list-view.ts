@@ -5,7 +5,7 @@ import { VehiclesComponent } from "../../pages/home/components/list-view/vehicle
 export const listViewTabs = [
         { value: 0, title: 'Vehicles', key: 'vehicles', component: VehiclesComponent },
         { value: 1, title: 'Geofence', key: 'geofence', component: GeofenceComponent },
-        { value: 2, title: 'POI', key: 'poi', component: PoiComponent }
+        // { value: 2, title: 'POI', key: 'poi', component: PoiComponent }
     ];
 
 export const listViewFilters = [

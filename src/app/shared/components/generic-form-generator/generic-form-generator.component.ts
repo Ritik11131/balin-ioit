@@ -120,12 +120,12 @@ export interface FormConfig {
     template: `
         <div class="w-full">
             <!-- Form Title -->
-            @if (config.formTitle) {
+            <!-- @if (config.formTitle) {
                 <h2 class="text-xl font-semibold text-gray-800 mb-6">
                     {{ config.formTitle }}
                 </h2>
-            }
-            <form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" class="space-y-4">
+            } -->
+            <form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" class="space-y-4 mt-4">
                 <div
                     class="grid gap-4"
                     [ngClass]="{

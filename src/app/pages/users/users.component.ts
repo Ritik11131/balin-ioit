@@ -107,7 +107,7 @@ dataMap: Record<string, any[]> = {
   async handleToolBarActions(event: any): Promise<void> {
         if (event.key === 'create') {
           this.formFields = CREATE_USER_FORM_FIELDS;
-          this.uiService.openDrawer(this.createUpdateUser,' ','',true)
+          this.uiService.openDrawer(this.createUpdateUser,this.formFields.formTitle,'',true)
         }
   }
 
@@ -136,7 +136,7 @@ dataMap: Record<string, any[]> = {
 
   async editHandler(row: any): Promise<void> {
     this.formFields = UPDATE_USER_FORM_FIELDS;
-    this.uiService.openDrawer(this.createUpdateUser,' ','',true)
+    this.uiService.openDrawer(this.createUpdateUser,this.formFields.formTitle,'',true)
     await Promise.all([
       this.loadUserObject(row?.id)
     ])
