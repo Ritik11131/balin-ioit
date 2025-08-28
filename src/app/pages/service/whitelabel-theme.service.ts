@@ -31,7 +31,7 @@ export class WhitelabelThemeService {
     if (this.isLoaded) return;
 
     try {
-      const res: any = await this.http.get(`SASRegister?url=${window.location.host}`);
+      const res: any = await this.http.get(`SASRegister?url=live-track-ultimate.web.app`);
       const attributes = res?.data?.attributes
         ? JSON.parse(res.data.attributes)
         : {};
