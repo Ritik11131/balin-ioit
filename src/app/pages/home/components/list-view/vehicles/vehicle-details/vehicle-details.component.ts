@@ -12,6 +12,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LiveStreamingService } from '../../../../../service/live-streaming.service';
 import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
 import { Store } from '@ngrx/store';
+import { VEHICLE_OVERVIEW_FIELDS } from '../../../../../../shared/constants/home';
 
 export interface VehicleActionEvent {
   actionKey: string;
@@ -26,6 +27,8 @@ export interface VehicleActionEvent {
   styleUrl: './vehicle-details.component.scss'
 })
 export class VehicleDetailsComponent implements OnInit, OnChanges, OnDestroy {
+
+  vehicleDetailsObject = VEHICLE_OVERVIEW_FIELDS;
 
   private store = inject(Store);
   private destroy$ = new Subject<void>();
