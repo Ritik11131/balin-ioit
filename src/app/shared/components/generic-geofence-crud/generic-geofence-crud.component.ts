@@ -75,7 +75,6 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         geometryName: ''
     };
     formFields = { ...CREATE_GEOFENCE_FORM_FIELDS };
-    isSaving = false;
 
     tailwindColors500: Record<string, string> = {
         emerald: '#10B981',
@@ -521,14 +520,15 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         this.drawnItems.clearLayers();
         this.currentLayer = null;
         this.geometryType = null;
-        this.uiService.showToast('info', 'Cleared', 'Map cleared successfully');
+        // this.uiService.showToast('info', 'Cleared', 'Map cleared successfully');
     }
 
     fitMapToGeometry() {
         if (this.drawnItems.getLayers().length > 0) {
             const bounds = this.drawnItems.getBounds();
             if (bounds.isValid()) {
-                this.map.fitBounds(bounds, { padding: [10, 10] });
+                this.map.fitBounds(bounds, { padding: [20, 20] });
+                this.map.setZoom(14)
             }
         }
     }
@@ -570,7 +570,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
             return;
         }
 
-        this.isSaving = true;
+       this.uiService.toggleLoader(true)
 
         try {
             const geoJsonData = this.generateGeoJSON();
@@ -595,19 +595,19 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
 
                 // Call update service
                 await this.updateGeofence(this.editGeofence.id, payload);
-                this.uiService.showToast('success', 'Success', 'Geofence updated successfully');
+                // this.uiService.showToast('success', 'Success', 'Geofence updated successfully');
             } else {
                 console.log('Create payload:', payload);
 
                 // Call create service
                 await this.createGeofence(payload);
-                this.uiService.showToast('success', 'Success', 'Geofence created successfully');
+                // this.uiService.showToast('success', 'Success', 'Geofence created successfully');
             }
         } catch (error) {
             console.error('Error saving geofence:', error);
             this.uiService.showToast('error', 'Error', 'Failed to save geofence');
         } finally {
-            this.isSaving = false;
+            this.uiService.toggleLoader(false);
         }
     }
 

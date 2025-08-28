@@ -506,20 +506,20 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       gridCol: 1
     },
     {
-     key: 'themeColor',
-     label: 'Theme Color',
-     type: 'colorpicker',
-     required: true,
-     gridCol: 1
-   },
-    {
       key: 'baseUrl',
       label: 'Base URL',
       type: 'text',
       required: true,
       placeholder: 'e.g. https://mycompany.com',
-      gridCol: 2
+      gridCol: 1
     },
+    {
+     key: 'themeColor',
+     label: 'Theme Color',
+     type: 'colorpicker',
+     required: true,
+     gridCol: 2
+   },
     {
      key: 'logo',
      label: 'Logo',
@@ -581,21 +581,21 @@ export const UPDATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       placeholder: 'e.g. mycompany.com',
       gridCol: 1
     },
-        {
-     key: 'themeColor',
-     label: 'Theme Color',
-     type: 'colorpicker',
-     required: true,
-     gridCol: 1
-   },
     {
       key: 'baseUrl',
       label: 'Base URL',
       type: 'text',
       required: true,
       placeholder: 'e.g. https://mycompany.com',
-      gridCol: 2
+      gridCol: 1
     },
+        {
+     key: 'themeColor',
+     label: 'Theme Color',
+     type: 'colorpicker',
+     required: true,
+     gridCol: 2
+   },
     {
      key: 'logo',
      label: 'Logo',

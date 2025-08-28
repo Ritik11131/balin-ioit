@@ -94,7 +94,7 @@ import { CommonModule } from '@angular/common';
                       >
                         Email<span class="text-error-500">*</span>
                       </label>
-                            <input pInputText id="email1" type="text" placeholder="Email address" class="w-full h-11" [(ngModel)]="email" />
+                            <input name="email" pInputText id="email1" type="text" placeholder="Email address" class="w-full h-11" [(ngModel)]="email" />
 
                       <!-- <input
                         type="email"
@@ -112,7 +112,7 @@ import { CommonModule } from '@angular/common';
                         Password<span class="text-error-500">*</span>
                       </label>
                       <div class="relative">
-                            <p-password id="password1" [(ngModel)]="password" placeholder="Password" [toggleMask]="true" styleClass=" h-11" [fluid]="true" [feedback]="false"></p-password>
+                            <p-password name="password" id="password" [(ngModel)]="password" placeholder="Password" [toggleMask]="true" styleClass=" h-11" [fluid]="true" [feedback]="false"></p-password>
 
                         <!-- <input
                           :type="showPassword ? 'text' : 'password'"

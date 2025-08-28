@@ -37,7 +37,7 @@ export class GeofenceComponent implements OnDestroy {
   isLoading$: Observable<boolean> = this.store.select(selectGeofenceLoading);
 
   handleGeofenceActionClick(event: any) {
-    this.uiService.openDrawer(this.createUpdateGeofence,' ','!w-[80vw] md:!w-[80vw] lg:!w-[80vw]',true)
+    this.uiService.openDrawer(this.createUpdateGeofence,' ','!w-[100vw] md:!w-[100vw] lg:!w-[100vw]',true)
   }
 
 

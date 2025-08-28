@@ -218,7 +218,7 @@ export interface FormConfig {
                                                     [id]="field.key"
                                                     [style.background-color]="primaryColor?.name === 'noir' ? 'var(--text-color)' : primaryColor?.palette?.['500']"
                                                     [style.outline-color]="primaryColor.name === dynamicForm.get(field.key)?.value ? (primaryColor?.name === 'noir' ? 'var(--text-color)' : primaryColor?.palette?.['500']) : 'transparent'"
-                                                    class="border-none w-5 h-5 rounded-full p-0 cursor-pointer outline-none outline-offset-1"
+                                                    class="border-none w-8 h-8 rounded-full p-0 cursor-pointer outline-none outline-offset-1"
                                                     (click)="dynamicForm.get(field.key)?.setValue(primaryColor.name)"
                                                 ></button>
                                             }

@@ -46,7 +46,8 @@ export class WhitelabelThemeService {
       this.themeSubject.next(theme);
       this.titleService.appName = theme.title || 'App';
       this.applyFavicon(theme.favicon);
-      this.layoutService.layoutConfig.update((state) => ({ ...state, primary: theme.themeColor || 'emerald' }));
+      console.log(theme);
+      this.layoutService.layoutConfig.update((state) => ({ ...state, primary: theme.themeColor }));
       this.isLoaded = true;
     } catch (error) {
       console.error('Failed to load theme', error);

@@ -100,7 +100,6 @@ export class GeofenceListComponent {
     }
 
     ngOnDestroy(): void {
-
         console.log('GeofenceListComponent destroyed and cleaned up');
     }
 }
