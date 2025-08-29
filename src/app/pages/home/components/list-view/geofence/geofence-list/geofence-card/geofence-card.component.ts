@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 
 @Component({
     selector: 'app-geofence-card',
@@ -12,8 +12,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
             [style.opacity]="isSelected ? '0.7' : '1'"
             (click)="onCardClick()"
         >
-            <div class="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--primary-color)]">
-                <i class="pi pi-circle text-[16px] text-white"></i>
+            <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--primary-bg-10)]">
+                <img [src]="iconPath" alt="geofence icon" class="w-6 h-6" />
             </div>
 
             <!-- Right Content -->
@@ -21,7 +21,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
                 <div class="text-sm font-semibold text-gray-600 truncate">
                     {{ geofence.geometryName }}
                 </div>
-                <div class="text-xs text-gray-500 truncate">{{ geofence.linkedDevices }} Linked Devices</div>
+                <div class="text-xs text-gray-500 truncate">{{ geometryType | titlecase }}</div>
             </div>
         </div>
     `,
@@ -31,6 +31,9 @@ export class GeofenceCardComponent {
     @Input() geofence: any;
     @Input() isSelected: boolean = false;
     @Output() cardSelected = new EventEmitter<any>();
+
+    geometryType: string = '';
+    iconPath: string = ''; // default fallback
 
     get cardClasses() {
         return {
@@ -43,7 +46,27 @@ export class GeofenceCardComponent {
         };
     }
 
-    onCardClick() {        
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes['geofence'] || !this.geofence?.geojson) return;
+
+        try {
+            const geometryType = JSON.parse(this.geofence.geojson)?.features?.[0]?.geometry?.type?.toLowerCase();
+
+            const iconMap: Record<string, string> = {
+                polygon: 'images/home/geofence_hexagon.svg',
+                point: 'images/home/geofence_circle.svg'
+            };
+
+            this.geometryType = geometryType || '';
+            this.iconPath = iconMap[geometryType] || 'assets/images/home/geofence_hexagon.svg';
+        } catch (err) {
+            console.error('Error parsing geofence geojson:', err);
+            this.geometryType = '';
+            this.iconPath = 'assets/images/home/geofence_hexagon.svg';
+        }
+    }
+
+    onCardClick() {
         this.cardSelected.emit(this.geofence);
     }
 }
