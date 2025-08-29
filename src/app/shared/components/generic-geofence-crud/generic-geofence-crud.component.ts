@@ -157,13 +157,13 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         if (this.themeSubscription) {
             this.themeSubscription.unsubscribe();
         }
-
-        if (this.map) {
-            this.map.remove();
-        }
     }
 
     onMapReady(map: L.Map) {
+        if (this.map) {
+            this.map.remove();
+        }
+
         this.map = map;
 
         // Add zoom control to bottom right

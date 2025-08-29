@@ -12,9 +12,13 @@ import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/
             [style.opacity]="isSelected ? '0.7' : '1'"
             (click)="onCardClick()"
         >
-            <div class="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--primary-bg-10)]">
-                <img [src]="iconPath" alt="geofence icon" class="w-6 h-6" />
-            </div>
+            <div
+    class="w-9 h-9 rounded-full flex items-center justify-center"
+    [style.background-color]="'color-mix(in srgb, ' + (geofence.color || 'var(--primary-color)') + ' 10%, transparent)'"
+>
+    <img [src]="iconPath" alt="geofence icon" class="w-6 h-6" />
+</div>
+
 
             <!-- Right Content -->
             <div class="ml-4 flex flex-col overflow-hidden">
