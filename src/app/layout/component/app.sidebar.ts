@@ -16,12 +16,17 @@ import { WhitelabelThemeService } from '../../pages/service/whitelabel-theme.ser
     template: `
        <div class="fixed top-0 left-0 h-screen bg-white flex flex-col py-6 transition-all duration-300 ease-in-out z-50 border-r border-gray-200" [ngClass]="isExpanded ? 'w-[280px]' : 'w-[88px]'"
 >
-  <!-- 1. LOGO SECTION -->
-  <div class="flex flex-col items-center px-4">
-    @if (theme$ | async; as theme) {
-      <img [src]="theme.logo" alt="Logo" class="w-[45px] h-[45px]" />
-    }
-  </div>
+<!-- 1. LOGO SECTION -->
+<div class="flex flex-col items-center relative -mb-3 z-10">
+  @if (theme$ | async; as theme) {
+    <img
+      [src]="theme.logo"
+      alt="Logo"
+      class="w-[60px] h-[60px] rounded-full shadow-xl border-4 border-[var(--primary-color)] transform -translate-y-3 transition-transform duration-300 hover:scale-105"
+    />
+  }
+</div>
+
 
   <!-- 2. NAVIGATION ICONS -->
   <div class="flex-1 flex flex-col items-center mt-16 w-full px-7 space-y-4">
@@ -55,30 +60,9 @@ import { WhitelabelThemeService } from '../../pages/service/whitelabel-theme.ser
     }
   </div>
 
-  <!-- 3. SUPPORT + LOGOUT SECTION -->
+  <!--LOGOUT SECTION -->
   <div class="flex flex-col gap-4 mb-4 w-full" [ngClass]="isExpanded ? 'px-4' : 'items-center'">
-    <!-- Support Icon -->
-    <div
-      class="h-[48px] rounded-[12px] flex items-center cursor-pointer transition-all duration-200 relative overflow-hidden hover:bg-gray-50"
-      [ngClass]="{
-        'w-[48px] justify-center mx-auto': !isExpanded,
-        'w-full justify-start px-3': isExpanded
-      }"
-    >
-      <div class="w-[20px] h-[20px] flex items-center justify-center flex-shrink-0">
-        <img src="assets/icon_support.png" alt="Support" class="w-[20px] h-[20px]" />
-      </div>
-
-      <div
-        class="ml-3 whitespace-nowrap transition-all duration-200 ease-in-out"
-        [ngClass]="{
-          'opacity-0 w-0 overflow-hidden ml-0': !isExpanded,
-          'opacity-100 w-auto ml-3': isExpanded
-        }"
-      >
-        <span class="text-sm font-medium text-gray-700">Support</span>
-      </div>
-    </div>
+   
 
     <!-- Logout Icon -->
     <div
@@ -100,7 +84,7 @@ import { WhitelabelThemeService } from '../../pages/service/whitelabel-theme.ser
           'opacity-100 w-auto ml-3': isExpanded
         }"
       >
-        <span class="text-sm font-medium text-red-600">Logout</span>
+        <span class="text-md font-semibold text-red-600">Logout</span>
       </div>
     </div>
   </div>

@@ -20,10 +20,10 @@
         @if (vehicle) {
             <ng-container *ngFor="let card of vehicleDetailsObject">
                 <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white" [ngClass]="{ 'col-span-2': card.colSpan === 2 }">
-                    <p class="text-xs uppercase tracking-wide text-gray-500">
+                    <p class="text-xs mb-1 uppercase tracking-wide text-gray-500">
                         {{ card.label }}
                     </p>
-                    <p class="mt-1 text-md font-semibold text-gray-800">
+                    <p class="text-sm font-semibold text-gray-800">
                         <ng-container *ngIf="!card.pipe">
                             {{ card.value(vehicle) }}
                         </ng-container>
