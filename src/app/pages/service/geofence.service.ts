@@ -55,6 +55,17 @@ export class GeofenceService {
       }
     }
 
+    async unlinkVehicleFromGeofence(data: any): Promise<any> {
+      try {
+        const response = await this.http.post('v1/geofence/UnlinkDeviceGeofence', data);
+        return response;
+      } catch (error: any) {
+        this.uiService.showToast('error', 'Error', error?.error?.data);
+        console.error('Error fetching linked vehicles for geofence:', error);
+        throw error;
+      }
+    }
+
     async updateGeofence(id: any,data: any): Promise<any> {
     try {
       const response = await this.http.put('v1/geofence', id, data);

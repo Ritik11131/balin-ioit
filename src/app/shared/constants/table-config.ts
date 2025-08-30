@@ -88,3 +88,21 @@ export const WHITELABEL_TABLE_CONFIG = {
     globalFilterFields: [],
     dataKey: 'id'
 }
+
+export const LINKED_DEVICE_TABLE_CONFIG = {
+    title: '',
+    columns: [
+        { field: 'vehicleNo', header: 'Vehicle No' },
+    ],
+    showActionsColumn: {
+        enabled: true, actions: [
+            {
+                label: 'Unlink',
+                icon: 'pi pi-user-edit',
+            },
+        ]
+    },
+    rows:5,
+    globalFilterFields: [],
+    dataKey: 'id'
+};

@@ -12,9 +12,7 @@ import { ToolbarModule } from 'primeng/toolbar';
         <!-- Action buttons with varying widths -->
         <p-skeleton height="2.5rem" width="5rem" borderRadius="6px" styleClass="animate-pulse"></p-skeleton>
         <p-skeleton height="2.5rem" width="7rem" borderRadius="6px" styleClass="animate-pulse"></p-skeleton>
-        <p-skeleton height="2.5rem" width="6rem" borderRadius="6px" styleClass="animate-pulse"></p-skeleton>
-        <!-- Split button -->
-        <p-skeleton height="2.5rem" width="8rem" borderRadius="6px" styleClass="animate-pulse"></p-skeleton>
+        
       </div>
     </ng-template>
     

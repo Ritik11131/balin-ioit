@@ -1,3 +1,4 @@
+import { loadGeofences } from './../../../../../../store/geofence/geofence.actions';
 import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 import { GeofenceCardComponent } from "./geofence-card/geofence-card.component";
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -80,6 +81,9 @@ export class GeofenceListComponent {
             case 'delete':
                 this.handleGeofenceDelete();
                 break;
+            case 'unlink':
+                this.handleUnlinkGeofence(event?.data);
+                break
             // Add more cases as needed
             default:
                 console.log('Unhandled action:', event);
@@ -92,6 +96,20 @@ export class GeofenceListComponent {
 
     handleGeofenceDelete() {
 
+    }
+
+    async handleUnlinkGeofence(data: any): Promise<void> {
+        this.uiService.toggleLoader(true);
+        try {
+            await this.geofenceService.unlinkVehicleFromGeofence(data);
+            this.uiService.closeDrawer();
+            this.store.dispatch(loadGeofences());
+            this.store.dispatch(selectGeofence({ geofence: null }));
+        } catch (error) {
+
+        } finally {
+            this.uiService.toggleLoader(false);
+        }
     }
 
     ngOnDestroy(): void {

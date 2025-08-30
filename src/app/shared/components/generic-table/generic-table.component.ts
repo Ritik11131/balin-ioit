@@ -37,7 +37,9 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
     template: `
         @if (isLoading) {
             <div class="w-full">
-                <app-toolbar-skeleton />
+                  @if(toolBarStartActions.length) {
+                      <app-toolbar-skeleton />
+                  }
                 <app-table-skeleton />
             </div>
         } @else {
@@ -79,14 +81,14 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                 [rowHover]="true"
                 [stripedRows]="true"
                 [paginator]="true"
-                [rows]="10"
+                [rows]="tableConfig.rows || 10"
                 [(selection)]="selectedItems"
                 (selectionChange)="handleSelectionChange($event)"
-                [rowsPerPageOptions]="[10, 20, 50]"
+                [rowsPerPageOptions]="[5, 10, 20, 50]"
                 [showCurrentPageReport]="true"
                 [showGridlines]="true"
                 responsiveLayout="scroll"
-                [tableStyle]="{ 'min-width': '75rem' }"
+                
                 [globalFilterFields]="tableConfig.globalFilterFields"
             >
                 <ng-template #caption>
@@ -105,7 +107,9 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
 
                 <ng-template #header let-columns>
                     <tr>
-                        <th style="width: 4rem"><p-tableHeaderCheckbox /></th>
+                        @if(tableConfig.multiSelect) {
+                            <th style="width: 4rem"><p-tableHeaderCheckbox /></th>
+                        }
                         @for (col of columns; track $index) {
                             <th [style.min-width]="col.minWidth || '5rem'">
                                 <div class="flex items-center">
@@ -123,9 +127,11 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                 </ng-template>
                 <ng-template #body let-rowData let-columns="columns">
                     <tr>
-                        <td>
-                            <p-tableCheckbox [value]="rowData" />
-                        </td>
+                         @if(tableConfig.multiSelect) {
+                             <td>
+                                 <p-tableCheckbox [value]="rowData" />
+                                </td>
+                            }
                         @for (col of columns; track $index) {
                             <td>
                                 @if (col.hyperlink) {

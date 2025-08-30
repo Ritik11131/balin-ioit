@@ -14,7 +14,7 @@ import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/
         >
             <div
     class="w-9 h-9 rounded-full flex items-center justify-center"
-    [style.background-color]="'color-mix(in srgb, ' + (geofence.geofence.color || 'var(--primary-color)') + ' 10%, transparent)'"
+    [style.background-color]="'color-mix(in srgb, ' + (geofence.geofence.color || 'var(--primary-color)') + ' 80%, transparent)'"
 >
     <img [src]="iconPath" alt="geofence icon" class="w-6 h-6" />
 </div>
@@ -25,7 +25,7 @@ import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/
                 <div class="text-sm font-semibold text-gray-600 truncate">
                     {{ geofence.geofence.geometryName }}
                 </div>
-                <div class="text-xs text-gray-500 truncate">{{ geofence?.devices?.length }} Linked Devices</div>
+                <div class="text-xs text-gray-500 truncate"><span class="font-semibold">{{ geofence?.devices?.length }}</span> Linked Devices</div>
             </div>
         </div>
     `,

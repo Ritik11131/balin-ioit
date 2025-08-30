@@ -41,16 +41,10 @@
     <!-- Linked Vehicles -->
     <div class="mt-6">
         <h3 class="text-sm font-semibold text-gray-600 mb-3">Linked Vehicles</h3>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            @for (linkedVehicle of geofence?.devices; track $index) {
-            <div class="p-4 rounded-xl border border-gray-200 shadow-sm bg-white hover:shadow-md transition">
-                <p class="text-sm font-medium text-gray-800">
-                    {{ linkedVehicle?.vehicleNo }}
-                </p>
-            </div>
-            }
-        </div>
+        <app-generic-table
+            [toolBarStartActions]="[]"
+            [tableConfig]="tableConfig" [tableData]="geofence?.devices" [isLoading]="geofence?.devices?.length === 0" (onActionClick)="handleInTableActions($event)"
+        />
     </div>
 
 
