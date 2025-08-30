@@ -25,7 +25,7 @@ import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/
                     <span>
                         <span class="font-semibold">{{ geofence?.devices?.length }}</span> Linked Devices | 
                     </span>
-                    <span class="ml-1 text-gray-400">{{geofence.type}}</span>
+                    <span class="ml-1 font-semibold">{{geofence.type}}</span>
                 </div>
             </div>
         </div>

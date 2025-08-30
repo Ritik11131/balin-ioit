@@ -64,7 +64,7 @@ export const CREATE_USER_FORM_FIELDS: FormConfig = {
       type: 'textarea',
       placeholder: 'Tell us your Address',
       rows: 4,
-      required: true,
+      required: false,
       maxLength: 500,
       gridCol: 1
     }
@@ -135,7 +135,7 @@ export const UPDATE_USER_FORM_FIELDS: FormConfig = {
       type: 'textarea',
       placeholder: 'Tell us your Address',
       rows: 4,
-      required: true,
+      required: false,
       maxLength: 500,
       gridCol: 1
     }

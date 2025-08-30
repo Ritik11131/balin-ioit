@@ -95,7 +95,7 @@ export class GeofenceListComponent {
     }
 
     handleGeofenceDelete() {
-
+        
     }
 
     async handleUnlinkGeofence(data: any): Promise<void> {
