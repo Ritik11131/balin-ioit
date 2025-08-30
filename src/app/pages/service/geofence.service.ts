@@ -12,7 +12,7 @@ export class GeofenceService {
 
 
   fetchGeofences(): Observable<any[]> {
-      return this.http.get$<any>('Geofence/v1').pipe(
+      return this.http.get$<any>('v1/geofence').pipe(
         map((response) => {
           // Handle different response structures
           if (response && response.data) {
@@ -33,6 +33,16 @@ export class GeofenceService {
       );
     }
 
+    async fetchGeofenceById(geofenceId: string): Promise<any> {
+      try {
+        const response = await this.http.get<any>('v1/geofence', {}, geofenceId);
+        return response?.data || [];
+      } catch (error: any) {
+        this.uiService.showToast('error', 'Error', error?.error?.data);
+        console.error('Error fetching linked vehicles for geofence:', error);
+        throw error;
+      }
+    }
 
     async fetchGeofenceLinkedVehicles(geofenceId: string): Promise<any> {
       try {
@@ -45,9 +55,9 @@ export class GeofenceService {
       }
     }
 
-      async updateGeofence(id: any,data: any): Promise<any> {
+    async updateGeofence(id: any,data: any): Promise<any> {
     try {
-      const response = await this.http.put('Geofence', id, data);
+      const response = await this.http.put('v1/geofence', id, data);
       return response;
     } catch (error: any) {
       this.uiService.showToast('error', 'Error', error?.error?.data);
@@ -58,7 +68,7 @@ export class GeofenceService {
 
   async createGeofence(data: any): Promise<any> {
     try {
-      const response = await this.http.post('Geofence', data);
+      const response = await this.http.post('v1/geofence', data);
       return response;
     } catch (error: any) {
       this.uiService.showToast('error', 'Error', error?.error?.data);

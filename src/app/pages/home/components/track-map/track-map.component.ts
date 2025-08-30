@@ -317,7 +317,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
       .subscribe((geofences) => {
         if (this.map) {
           console.log(geofences);
-          this.updateMapGeofences(geofences);
+          this.updateMapGeofences([]);
         }
       });
 
@@ -325,8 +325,8 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
       .pipe(takeUntil(this.destroy$))
       .subscribe((geofence) => {
         if (this.map && geofence) {
-          console.log(geofence);
-        this.updateMapGeofences([geofence]);
+          console.log(geofence.geofence);
+        this.updateMapGeofences([geofence.geofence]);
         }
       });
   }

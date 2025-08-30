@@ -28,7 +28,7 @@ import { GeofenceService } from '../../../../../service/geofence.service';
                 } @else {
                     <cdk-virtual-scroll-viewport itemSize="20" class="scrollbar-hide" style="height: calc(100vh - 280px);">
                         <div *cdkVirtualFor="let geofence of geofences; let last = last; trackBy: trackByGeofenceId" [class.mb-4]="!last" class="px-2">
-                            <app-geofence-card [geofence]="geofence" [isSelected]="(selectedGeofence$ | async) === geofence" (cardSelected)="onGeofenceSelected($event)" />
+                            <app-geofence-card [geofence]="geofence" [isSelected]="(selectedGeofence$ | async)?.geofence?.id === geofence?.geofence?.id" (cardSelected)="onGeofenceSelected($event)" />
                         </div>
                     </cdk-virtual-scroll-viewport>
                 }
@@ -37,7 +37,7 @@ import { GeofenceService } from '../../../../../service/geofence.service';
 
 
          <ng-template #geofenceDetailsTemplate>
-            <app-geofence-details [geofence]="selectedGeofence$ | async" [geofenceLinkedVehicles]="geofenceLinkedVehicles" (actionExecuted)="onActionExecuted($event)" />
+            <app-geofence-details [geofence]="selectedGeofence$ | async" (actionExecuted)="onActionExecuted($event)" />
         </ng-template>
     `,
     styles: ``
@@ -54,22 +54,17 @@ export class GeofenceListComponent {
     private uiService = inject(UiService);
 
     selectedGeofence$: Observable<any> = this.store.select(selectSelectedGeofence);
-    geofenceLinkedVehicles = []
 
     async onGeofenceSelected(geofence: any): Promise<void> {
         try {
-            this.store.dispatch(selectGeofence({ geofence }));
             try {
-                const vehicles = await this.geofenceService.fetchGeofenceLinkedVehicles(geofence.id);
-                this.geofenceLinkedVehicles = vehicles ?? [];
+                const response: any = await this.geofenceService.fetchGeofenceById(geofence?.geofence?.id);                                
+                this.store.dispatch(selectGeofence({ geofence: response }));
             } catch (error) {
-                this.geofenceLinkedVehicles = [];
             }
             this.uiService.openDrawer(this.geofenceDetailsTemplate);
-            console.log('Linked vehicles:', this.geofenceLinkedVehicles);
         } catch (error) {
             console.error('Error fetching geofence linked vehicles:', error);
-            this.geofenceLinkedVehicles = [];
         }
     }
 

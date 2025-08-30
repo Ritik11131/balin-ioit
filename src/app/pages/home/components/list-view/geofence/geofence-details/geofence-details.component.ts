@@ -14,7 +14,6 @@ import { TieredMenuModule } from 'primeng/tieredmenu';
 export class GeofenceDetailsComponent {
 
   @Input() geofence: any;
-  @Input() geofenceLinkedVehicles: any[] = [];
 
   @Output() actionExecuted = new EventEmitter<any>();
 

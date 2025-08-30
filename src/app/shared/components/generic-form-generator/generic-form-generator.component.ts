@@ -115,7 +115,8 @@ export interface FormConfig {
         CardModule,
         FloatLabelModule,
         FileUploadModule,
-        FileSizePipe
+        FileSizePipe,
+        MultiSelectModule
     ],
     template: `
         <div class="w-full">
@@ -200,10 +201,40 @@ export interface FormConfig {
                                     </ng-template>
                                 }
 
+                                @case ('multiselect') {
+                                    <ng-container *ngTemplateOutlet="fieldWrapper; context: { field: field, input: multiSelectInput }"></ng-container>
+                                    <ng-template #multiSelectInput>
+                                        <p-multiselect
+                                            [id]="field.key"
+                                            [formControlName]="field.key"
+                                            [placeholder]="field.placeholder || ''"
+                                            [options]="field.options || []"
+                                            [filter]="true"
+                                            [showToggleAll]="true"
+                                            optionLabel="label"
+                                            [virtualScroll]="true"
+                                            [virtualScrollItemSize]="43"
+                                            placeholder="Select Cities"
+                                            [maxSelectedLabels]="3"
+                                            class="w-full"
+                                        ></p-multiselect>
+                                    </ng-template>
+                                }
+
                                 @case ('date') {
                                     <ng-container *ngTemplateOutlet="fieldWrapper; context: { field: field, input: dateInput }"></ng-container>
                                     <ng-template #dateInput>
-                                        <p-datepicker styleClass="w-full" [id]="field.key" [placeholder]="field.placeholder" [formControlName]="field.key" [showIcon]="true" [selectionMode]="field?.selectionMode" [readonlyInput]="true" inputId="buttondisplay" [showOnFocus]="false" />
+                                        <p-datepicker
+                                            styleClass="w-full"
+                                            [id]="field.key"
+                                            [placeholder]="field.placeholder"
+                                            [formControlName]="field.key"
+                                            [showIcon]="true"
+                                            [selectionMode]="field?.selectionMode"
+                                            [readonlyInput]="true"
+                                            inputId="buttondisplay"
+                                            [showOnFocus]="false"
+                                        />
                                     </ng-template>
                                 }
 

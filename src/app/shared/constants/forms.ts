@@ -649,13 +649,23 @@ export const CREATE_GEOFENCE_FORM_FIELDS: FormConfig = {
      required: true,
      gridCol: 1
    },
+     {
+      key: 'linkedDevices',
+      label: 'Link Vehicles',
+      type: 'multiselect',
+      placeholder: 'Select vehicles to link',
+      gridCol: 1,
+      required: true,
+      options: [],
+      dataSource: 'vehicles'
+    },
   ]
 };
 
 export const UPDATE_GEOFENCE_FORM_FIELDS: FormConfig = {
   formTitle: 'Create Geofence',
   columns: 1,
-  isEditMode: false,
+  isEditMode: true,
   fields: [
       {
       key: 'geometryName',
@@ -672,6 +682,16 @@ export const UPDATE_GEOFENCE_FORM_FIELDS: FormConfig = {
      required: true,
      gridCol: 1
    },
+    {
+      key: 'linkedDevices',
+      label: 'Link Vehicles',
+      type: 'multiselect',
+      placeholder: 'Select vehicles to link',
+      gridCol: 1,
+      required: true,
+      options: [],
+      dataSource: 'vehicles'
+    },
   ]
 }
 

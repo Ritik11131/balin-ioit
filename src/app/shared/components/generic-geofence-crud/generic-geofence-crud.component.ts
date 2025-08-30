@@ -13,22 +13,28 @@ import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { LeafletDrawModule } from '@bluehalo/ngx-leaflet-draw';
 import { GeofenceService } from '../../../pages/service/geofence.service';
 import { GenericFormGeneratorComponent } from '../generic-form-generator/generic-form-generator.component';
-import { CREATE_GEOFENCE_FORM_FIELDS } from '../../constants/forms';
+import { CREATE_GEOFENCE_FORM_FIELDS, UPDATE_GEOFENCE_FORM_FIELDS } from '../../constants/forms';
 import { WhitelabelThemeService } from '../../../pages/service/whitelabel-theme.service';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { loadGeofences } from '../../../store/geofence/geofence.actions';
 import { Store } from '@ngrx/store';
+import { FormEnricherService } from '../../../pages/service/form-enricher.service';
 
 
 
 export interface GeofencePayload {
-    id?: number;
-    fkCustomerUserId?: number;
-    color: string;
-    radius?: number;
-    geometryName: string;
-    geojson?: string;
-    geofenceGeometry?: any;
+    geofence: {
+        id?: number;
+        fkCustomerUserId?: number;
+        color: string;
+        radius?: number;
+        geometryName: string;
+        geojson?: string;
+        geofenceGeometry?: any;
+    },
+    devices: [],
+    type?: string;
+
 }
 
 @Component({
@@ -44,6 +50,8 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
     private themeService = inject(WhitelabelThemeService);
     private store = inject(Store);
     private themeSubscription?: Subscription;
+    private destroy$ = new Subject<void>();
+    
 
     private map!: L.Map;
     private drawnItems!: L.FeatureGroup;
@@ -51,18 +59,11 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
     public currentLayer: L.Layer | null = null;
     public geometryType: 'circle' | 'polygon' | null = null;
 
-    formData: any = {
-        color: '#3B82F6', // Default blue color
-        radius: 0,
-        geometryName: ''
-    };
-    formFields = { ...CREATE_GEOFENCE_FORM_FIELDS };
-
     tailwindColors500: Record<string, string> = {
-        emerald: '#10B981',
-        green: '#22C55E',
+        emerald: '#10b981',
+        green: '#22c55e',
         lime: '#84CC16',
-        orange: '#F97316',
+        orange: '#f97316',
         amber: '#F59E0B',
         yellow: '#EAB308',
         teal: '#14B8A6',
@@ -129,14 +130,19 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         }
     };
 
+    formData: any = {
+        color: '#3B82F6', radius: 0, geometryName: ''
+    };
+    formFields = { ...CREATE_GEOFENCE_FORM_FIELDS };
+
     constructor(
         private uiService: UiService,
-        private geofenceService: GeofenceService
+        private geofenceService: GeofenceService,
+        private formConfigEnricher: FormEnricherService
     ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['editGeofence'] && changes['editGeofence'].currentValue) {
-            // Only run when editGeofence changes and has a value
             this.loadEditData();
             if (this.editGeofence) {
                 setTimeout(() => this.loadGeometry(), 100);
@@ -151,12 +157,22 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
                 this.updateDrawControlColors(theme.themeColor);
             }
         });
+
+        // If not editing, load create form
+        if (!this.editData) {
+            this.formConfigEnricher.enrichForms([CREATE_GEOFENCE_FORM_FIELDS]).pipe(takeUntil(this.destroy$)).subscribe(res => {
+                this.formFields = res[0];
+            });
+        }
     }
 
     ngOnDestroy() {
         if (this.themeSubscription) {
             this.themeSubscription.unsubscribe();
         }
+
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     onMapReady(map: L.Map) {
@@ -383,32 +399,31 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
 
     private loadEditData() {
         if (!this.editGeofence) return;
-
+        
         this.formData = {
-            geometryName: this.editGeofence.geometryName || '',
-            color: this.editGeofence.color || '#3B82F6',
-            radius: this.editGeofence.radius || 1000
+            geometryName: this.editGeofence?.geofence?.geometryName || '',
+            color: this.editGeofence?.geofence?.color || '#3B82F6',
+            radius: this.editGeofence?.geofence?.radius || 1000
         };
-
+        
         // Set edit data for the form
-        this.editData = { ...this.formData };
-
+        this.editData = { ...this.formData };        
+        
         // Mark form as edit mode
-        this.formFields = {
-            ...CREATE_GEOFENCE_FORM_FIELDS,
-            isEditMode: true
-        };
+        this.formConfigEnricher.enrichForms([UPDATE_GEOFENCE_FORM_FIELDS]).pipe(takeUntil(this.destroy$)).subscribe(res => {
+            this.formFields = res[0];
+        });
     }
 
     private loadGeometry() {
-        if (!this.editGeofence?.geojson) return;
+        if (!this.editGeofence?.geofence?.geojson) return;
 
         try {
-            const geoJson = JSON.parse(this.editGeofence.geojson);
+            const geoJson = JSON.parse(this.editGeofence?.geofence?.geojson);
 
             const geoLayer = L.geoJSON(geoJson, {
                 style: () => ({
-                    color: this.editGeofence!.color,
+                    color: this.editGeofence!.geofence.color,
                     weight: 3,
                     fillOpacity: 0.2
                 }),
@@ -416,7 +431,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
                     if (feature.properties?.radius) {
                         const circle = L.circle(latlng, {
                             radius: feature.properties.radius,
-                            color: this.editGeofence!.color,
+                            color: this.editGeofence!.geofence.color,
                             weight: 3,
                             fillOpacity: 0.2
                         });
@@ -580,24 +595,30 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
             const selectedColor = this.tailwindColors500[this.formData.color] || this.formData.color;
 
             const payload: GeofencePayload = {
-                geometryName: this.formData.geometryName.trim(),
-                color: selectedColor,
-                geojson: JSON.stringify(geoJsonData),
-                radius: this.formData.radius
+                geofence: {
+                    geometryName: this.formData.geometryName.trim(),
+                    color: selectedColor,
+                    geojson: JSON.stringify(geoJsonData),
+                    radius: this.formData.radius
+                },
+                devices: this.formData.linkedDevices.map((linkedVehicle: any) => ({
+                    vehicleNo: linkedVehicle?.label,
+                    id: linkedVehicle?.value
+                }))
             };
 
             // Add radius for circles
             if (this.geometryType === 'circle') {
-                payload.radius = this.formData.radius;
+                payload.geofence.radius = this.formData.radius;
             }
 
-            if (isEditMode && this.editGeofence?.id) {
-                payload.id = this.editGeofence.id;
-                payload.fkCustomerUserId = this.editGeofence.fkCustomerUserId;
+            if (isEditMode && this.editGeofence?.geofence?.id) {
+                payload.geofence.id = this.editGeofence?.geofence?.id;
+                payload.geofence.fkCustomerUserId = this.editGeofence?.geofence?.fkCustomerUserId;
                 console.log('Update payload:', payload);
 
                 // Call update service
-                await this.updateGeofence(this.editGeofence.id, payload);
+                await this.updateGeofence(this.editGeofence?.geofence?.id, payload);
                 // this.uiService.showToast('success', 'Success', 'Geofence updated successfully');
             } else {
                 console.log('Create payload:', payload);
