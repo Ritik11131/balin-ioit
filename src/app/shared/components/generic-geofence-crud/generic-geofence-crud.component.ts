@@ -19,6 +19,7 @@ import { Subject, Subscription, takeUntil } from 'rxjs';
 import { loadGeofences } from '../../../store/geofence/geofence.actions';
 import { Store } from '@ngrx/store';
 import { FormEnricherService } from '../../../pages/service/form-enricher.service';
+import { tailwindColors500, tailwindColors500Reverse } from '../../utils/helper_functions';
 
 
 
@@ -58,25 +59,6 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
     private drawControl!: L.Control.Draw;
     public currentLayer: L.Layer | null = null;
     public geometryType: 'circle' | 'polygon' | null = null;
-
-    tailwindColors500: Record<string, string> = {
-        emerald: '#10b981',
-        green: '#22c55e',
-        lime: '#84CC16',
-        orange: '#f97316',
-        amber: '#F59E0B',
-        yellow: '#EAB308',
-        teal: '#14B8A6',
-        cyan: '#06B6D4',
-        sky: '#0EA5E9',
-        blue: '#3B82F6',
-        indigo: '#6366F1',
-        violet: '#8B5CF6',
-        purple: '#A855F7',
-        fuchsia: '#D946EF',
-        pink: '#EC4899',
-        rose: '#F43F5E'
-    };
 
     mapLayers = {
         street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -158,11 +140,10 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
             }
         });
 
-        // If not editing, load create form
-        if (!this.editData) {
-            this.formConfigEnricher.enrichForms([CREATE_GEOFENCE_FORM_FIELDS]).pipe(takeUntil(this.destroy$)).subscribe(res => {
-                this.formFields = res[0];
-            });
+        if (!this.formFields.isEditMode) {
+        this.formConfigEnricher.enrichForms([CREATE_GEOFENCE_FORM_FIELDS]).pipe(takeUntil(this.destroy$)).subscribe(res => {
+            this.formFields = res[0];
+        });
         }
     }
 
@@ -399,11 +380,16 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
 
     private loadEditData() {
         if (!this.editGeofence) return;
+        console.log(this.editGeofence);
         
         this.formData = {
             geometryName: this.editGeofence?.geofence?.geometryName || '',
-            color: this.editGeofence?.geofence?.color || '#3B82F6',
-            radius: this.editGeofence?.geofence?.radius || 1000
+            color: tailwindColors500Reverse[this.editGeofence?.geofence?.color],
+            radius: this.editGeofence?.geofence?.radius || 1000,
+            linkedDevices: this.editGeofence?.devices?.map((linkedVehicle: any) => ({
+                    label: linkedVehicle?.vehicleNo,
+                    value: linkedVehicle?.id
+            }))
         };
         
         // Set edit data for the form
@@ -592,7 +578,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
 
         try {
             const geoJsonData = this.generateGeoJSON();
-            const selectedColor = this.tailwindColors500[this.formData.color] || this.formData.color;
+            const selectedColor = tailwindColors500[this.formData.color] || this.formData.color;
 
             const payload: GeofencePayload = {
                 geofence: {
