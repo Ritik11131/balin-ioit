@@ -12,20 +12,21 @@ import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/
             [style.opacity]="isSelected ? '0.7' : '1'"
             (click)="onCardClick()"
         >
-            <div
-    class="w-9 h-9 rounded-full flex items-center justify-center"
-    [style.background-color]="'color-mix(in srgb, ' + (geofence.geofence.color || 'var(--primary-color)') + ' 80%, transparent)'"
->
-    <img [src]="iconPath" alt="geofence icon" class="w-6 h-6" />
-</div>
-
+            <div class="w-9 h-9 rounded-full flex items-center justify-center" [style.background-color]="'color-mix(in srgb, ' + (geofence.geofence.color || 'var(--primary-color)') + ' 50%, transparent)'">
+                <img [src]="iconPath" alt="geofence icon" class="w-6 h-6" />
+            </div>
 
             <!-- Right Content -->
             <div class="ml-4 flex flex-col overflow-hidden">
                 <div class="text-sm font-semibold text-gray-600 truncate">
                     {{ geofence.geofence.geometryName }}
                 </div>
-                <div class="text-xs text-gray-500 truncate"><span class="font-semibold">{{ geofence?.devices?.length }}</span> Linked Devices</div>
+                <div class="text-xs text-gray-500 flex justify-between items-center">
+                    <span>
+                        <span class="font-semibold">{{ geofence?.devices?.length }}</span> Linked Devices | 
+                    </span>
+                    <span class="ml-1 text-gray-400">{{geofence.type}}</span>
+                </div>
             </div>
         </div>
     `,
