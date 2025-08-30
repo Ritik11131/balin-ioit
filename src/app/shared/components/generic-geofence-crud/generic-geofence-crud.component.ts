@@ -1,3 +1,4 @@
+import 'leaflet-draw';
 import { Component, OnInit, OnDestroy, Input, inject, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -8,7 +9,6 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { UiService } from '../../../layout/service/ui.service';
 import * as L from 'leaflet';
-import 'leaflet-draw';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { LeafletDrawModule } from '@bluehalo/ngx-leaflet-draw';
 import { GeofenceService } from '../../../pages/service/geofence.service';
