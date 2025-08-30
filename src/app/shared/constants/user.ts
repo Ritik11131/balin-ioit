@@ -10,7 +10,7 @@ export const USER_DETAILS_TABS = [
             { label: 'Email', key: 'email' },
             { label: 'Mobile No.', key: 'mobileNo' },
             { label: 'Role', key: 'role', chip: true },
-            { label: 'Created', key: 'createdAt', date: true },
+            { label: 'Created', key: 'creationTime', date: true },
         ]
     },
     {
