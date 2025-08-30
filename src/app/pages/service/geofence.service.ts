@@ -90,7 +90,7 @@ export class GeofenceService {
 
   async deleteGeofence(data: any): Promise<any> {
     try {
-      const response = await this.http.delete('Geofence', data?.id);
+      const response = await this.http.delete('v1/geofence/DeleteGeofence', data?.id);
       return response;
     } catch (error: any) {
       this.uiService.showToast('error', 'Error', error?.error?.data);

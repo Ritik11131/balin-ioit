@@ -39,7 +39,7 @@ export class GeofenceDetailsComponent {
   ];
     tableConfig = LINKED_DEVICE_TABLE_CONFIG;
 
-    constructor(private geofenceService: GeofenceService, private uiService: UiService) {}
+    constructor() {}
   
 
   handleCommand(actionKey: string, actionType: string) {

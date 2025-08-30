@@ -2,7 +2,7 @@ import { loadGeofences } from './../../../../../../store/geofence/geofence.actio
 import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 import { GeofenceCardComponent } from "./geofence-card/geofence-card.component";
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { selectSelectedGeofence } from '../../../../../../store/geofence/geofence.selectors';
 import { Store } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
@@ -11,6 +11,7 @@ import { selectGeofence } from '../../../../../../store/geofence/geofence.action
 import { UiService } from '../../../../../../layout/service/ui.service';
 import { GeofenceDetailsComponent } from "../geofence-details/geofence-details.component";
 import { GeofenceService } from '../../../../../service/geofence.service';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
     selector: 'app-geofence-list',
@@ -53,6 +54,8 @@ export class GeofenceListComponent {
     private store = inject(Store);
     private geofenceService = inject(GeofenceService);
     private uiService = inject(UiService);
+    private confirmationService = inject(ConfirmationService);
+    
 
     selectedGeofence$: Observable<any> = this.store.select(selectSelectedGeofence);
 
@@ -95,8 +98,31 @@ export class GeofenceListComponent {
     }
 
     handleGeofenceDelete() {
-        
-    }
+  this.selectedGeofence$.pipe(take(1)).subscribe((geofence) => {
+    if (!geofence) return;
+
+    this.confirmationService.confirm({
+      target: geofence,
+      message: `Are you sure that you want to delete ${geofence.geofence.geometryName}?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Delete',
+        severity: 'danger',
+      },
+      accept: async () => {
+        this.uiService.closeDrawer();
+        await this.deleteGeofence(geofence.geofence);
+      },
+    });
+  });
+}
+
 
     async handleUnlinkGeofence(data: any): Promise<void> {
         this.uiService.toggleLoader(true);
@@ -111,6 +137,12 @@ export class GeofenceListComponent {
             this.uiService.toggleLoader(false);
         }
     }
+
+      private async deleteGeofence(data: any): Promise<void> {
+        const res = await this.geofenceService.deleteGeofence(data);
+        this.uiService.showToast('success','Success', res?.data);
+        this.store.dispatch(loadGeofences());
+      }
 
     ngOnDestroy(): void {
         console.log('GeofenceListComponent destroyed and cleaned up');

@@ -16,7 +16,7 @@ import { GenericFormGeneratorComponent } from '../generic-form-generator/generic
 import { CREATE_GEOFENCE_FORM_FIELDS, UPDATE_GEOFENCE_FORM_FIELDS } from '../../constants/forms';
 import { WhitelabelThemeService } from '../../../pages/service/whitelabel-theme.service';
 import { Subject, Subscription, takeUntil } from 'rxjs';
-import { loadGeofences } from '../../../store/geofence/geofence.actions';
+import { loadGeofences, selectGeofence } from '../../../store/geofence/geofence.actions';
 import { Store } from '@ngrx/store';
 import { FormEnricherService } from '../../../pages/service/form-enricher.service';
 import { tailwindColors500, tailwindColors500Reverse } from '../../utils/helper_functions';
@@ -233,7 +233,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         const layer = e.layer;
 
         // Clear existing layers (only allow one geometry at a time)
-        // this.drawnItems.clearLayers();
+        this.drawnItems.clearLayers();
         this.drawnItems.addLayer(layer);
         this.currentLayer = layer;
 
@@ -632,6 +632,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         this.uiService.closeDrawer();
         this.uiService.showToast('success', 'Success', res?.data);
         this.store.dispatch(loadGeofences());
+        this.store.dispatch(selectGeofence({ geofence: null }));
     }
 
     private async updateGeofence(id: any, data: any): Promise<void> {
@@ -639,5 +640,7 @@ export class GeofenceCrudComponent implements OnInit, OnDestroy, OnChanges {
         this.uiService.closeDrawer();
         this.uiService.showToast('success', 'Success', res?.data);
         this.store.dispatch(loadGeofences());
+        this.store.dispatch(selectGeofence({ geofence: null }));
+        
     }
 }
