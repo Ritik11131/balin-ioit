@@ -126,6 +126,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   private pathReplayService = inject(PathReplayService);
   private vehicleMarkerService = inject(VehicleMarkerService);
   private destroy$ = new Subject<void>();
+  private firstCombineVehicleUpdateForPolling = true;
 
   public clusteringEnabled = true;
   public searchTerm = '';
@@ -252,24 +253,36 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
     }
   });
 
-    // this.selectedVehicle$.pipe(
-    //   takeUntil(this.destroy$)).subscribe((vehicle) => {
-    //     if (this.map && vehicle) {
-    //         // this.cleanupAnimatedMarker();
-    //     }
-    //   })
-
-    combineLatest([
-      this.selectedVehicle$.pipe(startWith(null)),
-      this.polling$
-    ])
+    combineLatest([this.selectedVehicle$, this.polling$])
       .pipe(
         takeUntil(this.destroy$),
         filter(([vehicle, polling]) => !!vehicle && polling),
         map(([vehicle]) => vehicle ? { ...vehicle, apiObject: { ...vehicle.apiObject } } : null),
         pairwise(),
-        filter(([prev, curr]) => prev?.apiObject?.position?.latitude !== curr?.apiObject?.position?.latitude ||
-          prev?.apiObject?.position?.longitude !== curr?.apiObject?.position?.longitude)
+        filter(([prev, curr]) => {
+          // Reset firstCombineVehicleUpdateForPolling if vehicle id changed
+          if (!prev || prev.id !== curr?.id) {
+            this.firstCombineVehicleUpdateForPolling = true;
+            return true; // always emit for new vehicle
+          }
+
+          // Emit if first time update for this vehicle
+          if (this.firstCombineVehicleUpdateForPolling) return true;
+
+          // Otherwise, emit only if lat/lng changed
+          const prevPos = prev.apiObject?.position;
+          const currPos = curr.apiObject?.position;
+
+          const prevStatus = prev.status;
+          const currStatus = curr.status;
+
+          const prevLastUpdate = prev.lastUpdate;
+          const currLastUpdate = curr.lastUpdate;
+          return prevPos?.latitude !== currPos?.latitude ||
+            prevPos?.longitude !== currPos?.longitude ||
+            prevStatus !== currStatus ||
+            prevLastUpdate !== currLastUpdate;;
+        })
       )
       .subscribe(([previousVehicle, currentVehicle]) => {
         const prevPos = previousVehicle?.apiObject?.position;
@@ -277,7 +290,14 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
         console.log('Previous Lat/Lng:', prevPos?.latitude, prevPos?.longitude);
         console.log('Current Lat/Lng:', currPos?.latitude, currPos?.longitude);
-        
+
+        // Fly to first vehicle update
+        if (this.firstCombineVehicleUpdateForPolling && currPos) {
+          this.map.flyTo([currPos.latitude, currPos.longitude], 14, { animate: true, duration: 3 });
+          this.firstCombineVehicleUpdateForPolling = false;
+        }
+
+        // Update marker
         this.updateMapMarkers([currentVehicle], true, previousVehicle);
       });
 
@@ -388,67 +408,80 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   }
 
-private updateMapMarkers(
-  vehicles: VehicleData[],
-  isSingleSubscribed?: boolean,
-  singleSubscribePreviousData?: any): void {
-  // 🧹 Clear geofences when showing vehicles
-  if (this.geofenceLayer) {
-    this.geofenceLayer.clearLayers();
-  }
+  private updateMapMarkers(
+    vehicles: VehicleData[],
+    isSingleSubscribed?: boolean,
+    singleSubscribePreviousData?: any): void {
 
-  // Clear existing markers
-  if (this.clusteringEnabled && this.clusterGroup) {
-    this.clusterGroup.clearLayers();
-  } else if (this.vehicleLayer) {
-    this.vehicleLayer.clearLayers();
-  }
+    // 🧹 Clear geofences when showing vehicles
+    if (this.geofenceLayer) {
+      this.geofenceLayer.clearLayers();
+    }
 
-  if (!vehicles || vehicles.length === 0) {
-    console.log('No vehicles to display on map');
-    return;
-  }
-
-  const validVehicles = vehicles.filter(vehicle =>
-    vehicle.apiObject?.position?.latitude &&
-    vehicle.apiObject?.position?.longitude &&
-    !isNaN(vehicle.apiObject.position.latitude) &&
-    !isNaN(vehicle.apiObject.position.longitude)
-  );
-
-  console.log(`Displaying ${validVehicles.length} vehicles on map`);
-  console.log('isSingleSubscribed:', isSingleSubscribed);
-
-  if (isSingleSubscribed) {
-    const vehicle = vehicles[0];
-    if (!vehicle) return;
-
-    
-
-  } else {
-    // Multi-vehicle case
-    const markers: L.Marker[] = [];
-
-    validVehicles.forEach(vehicle => {
-      const vehicleMarker = this.vehicleMarkerService.createVehicleMarker(vehicle);
-      if (vehicleMarker) {
-        markers.push(vehicleMarker);
-      }
-    });
-
-    // Add markers to appropriate layer
+    // Clear existing markers
     if (this.clusteringEnabled && this.clusterGroup) {
-      this.clusterGroup.addLayers(markers);
+      this.clusterGroup.clearLayers();
     } else if (this.vehicleLayer) {
-      markers.forEach(marker => this.vehicleLayer.addLayer(marker));
+      this.vehicleLayer.clearLayers();
     }
 
-    // Fit map bounds to show all markers
-    if (validVehicles.length > 0) {
-      setTimeout(() => this.fitMapToMarkers(validVehicles), 100);
+    if (!vehicles || vehicles.length === 0) {
+      console.log('No vehicles to display on map');
+      return;
+    }
+
+    const validVehicles = vehicles.filter(vehicle =>
+      vehicle.apiObject?.position?.latitude &&
+      vehicle.apiObject?.position?.longitude &&
+      !isNaN(vehicle.apiObject.position.latitude) &&
+      !isNaN(vehicle.apiObject.position.longitude)
+    );
+
+    console.log(`Displaying ${validVehicles.length} vehicles on map`);
+    console.log('isSingleSubscribed:', isSingleSubscribed);
+
+    if (isSingleSubscribed) {
+      const vehicle = vehicles[0];
+      if (!vehicle) return;
+      // latest vehcile heading applied
+      const vehicleIcon = this.vehicleMarkerService.getVehicleIcon(vehicle?.apiObject.device?.vehicleType, vehicle?.apiObject?.position.status.status, vehicle?.apiObject?.position.heading);
+      // but the powitiion is still previous one
+      const vehicleMarker: L.Marker = marker([singleSubscribePreviousData?.apiObject?.position.latitude, singleSubscribePreviousData?.apiObject?.position.longitude], {
+        icon: vehicleIcon,
+        title: vehicle.name
+      });
+
+      vehicleMarker.setLatLng([vehicle?.apiObject?.position.latitude, vehicle?.apiObject?.position.longitude]);
+
+      if (this.clusteringEnabled && this.clusterGroup) {
+        this.clusterGroup.addLayer(vehicleMarker);
+      } else if (this.vehicleLayer) {
+        this.vehicleLayer.addLayer(vehicleMarker);
+      }
+    } else {
+      // Multi-vehicle case
+      const markers: L.Marker[] = [];
+
+      validVehicles.forEach(vehicle => {
+        const vehicleMarker = this.vehicleMarkerService.createVehicleMarker(vehicle);
+        if (vehicleMarker) {
+          markers.push(vehicleMarker);
+        }
+      });
+
+      // Add markers to appropriate layer
+      if (this.clusteringEnabled && this.clusterGroup) {
+        this.clusterGroup.addLayers(markers);
+      } else if (this.vehicleLayer) {
+        markers.forEach(marker => this.vehicleLayer.addLayer(marker));
+      }
+
+      // Fit map bounds to show all markers
+      if (validVehicles.length > 0) {
+        setTimeout(() => this.fitMapToMarkers(validVehicles), 100);
+      }
     }
   }
-}
 
 
 
