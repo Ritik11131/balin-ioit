@@ -12,6 +12,8 @@ export class VehicleMarkerService {
   private loaded = false;
   vehicleTypes$ = this.store.select(selectVehicleTypes);
 
+  public singleVehicleMarker:any;
+
   constructor() {
     // Only subscribe once
     this.vehicleTypes$.pipe(filter(types => !!types)).subscribe((types: any) => {

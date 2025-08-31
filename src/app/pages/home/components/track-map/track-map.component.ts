@@ -1,5 +1,4 @@
 import 'leaflet-trackplayer';
-
 import { Component, AfterViewInit, OnDestroy, inject, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +20,7 @@ import {
   control
 } from 'leaflet';
 import 'leaflet.markercluster';
-import { Observable, Subject, takeUntil, combineLatest, debounceTime, distinctUntilChanged, withLatestFrom } from 'rxjs';
+import { Observable, Subject, takeUntil, withLatestFrom, filter, combineLatest, distinctUntilChanged, startWith, map, pairwise } from 'rxjs';
 import { 
   selectVehicleLoading, 
   selectVehiclePolling, 
@@ -244,19 +243,45 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
      if (!this.map || !this.filteredVehicles$ || !this.selectedVehicle$ || !this.pathReplayService) return;
 
     this.filteredVehicles$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe((vehicles) => {
-      if (this.map) {
-        this.updateMapMarkers(vehicles);
-      }
-    });
+    takeUntil(this.destroy$),
+    withLatestFrom(this.polling$),
+    filter(([vehicles, polling]) => !polling)).subscribe(([vehicles, _polling]) => {
+    if (this.map) {
+      console.log('filtered, polling not running');
+      this.updateMapMarkers(vehicles);
+    }
+  });
 
-    this.selectedVehicle$.pipe(
-      takeUntil(this.destroy$)).subscribe((vehicle) => {
-        if (this.map && vehicle) {
-          this.updateMapMarkers([vehicle], true);
-        }
-      })
+    // this.selectedVehicle$.pipe(
+    //   takeUntil(this.destroy$)).subscribe((vehicle) => {
+    //     if (this.map && vehicle) {
+    //         // this.cleanupAnimatedMarker();
+    //     }
+    //   })
+
+    combineLatest([
+      this.selectedVehicle$.pipe(startWith(null)),
+      this.polling$
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        filter(([vehicle, polling]) => !!vehicle && polling),
+        map(([vehicle]) => vehicle ? { ...vehicle, apiObject: { ...vehicle.apiObject } } : null),
+        pairwise(),
+        filter(([prev, curr]) => prev?.apiObject?.position?.latitude !== curr?.apiObject?.position?.latitude ||
+          prev?.apiObject?.position?.longitude !== curr?.apiObject?.position?.longitude)
+      )
+      .subscribe(([previousVehicle, currentVehicle]) => {
+        const prevPos = previousVehicle?.apiObject?.position;
+        const currPos = currentVehicle?.apiObject?.position;
+
+        console.log('Previous Lat/Lng:', prevPos?.latitude, prevPos?.longitude);
+        console.log('Current Lat/Lng:', currPos?.latitude, currPos?.longitude);
+        
+        this.updateMapMarkers([currentVehicle], true, previousVehicle);
+      });
+
+
 
     this.pathReplayService.replayActive$
       .pipe(takeUntil(this.destroy$))
@@ -363,34 +388,47 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   }
 
-  private updateMapMarkers(vehicles: VehicleData[], isSingleSubscribed?:boolean): void {
-    // 🧹 Clear geofences when showing vehicles
-    if (this.geofenceLayer) {
-      this.geofenceLayer.clearLayers();
-    }
-    // Clear existing markers
-    if (this.clusteringEnabled && this.clusterGroup) {
-      this.clusterGroup.clearLayers();
-    } else if (this.vehicleLayer) {
-      this.vehicleLayer.clearLayers();
-    }
+private updateMapMarkers(
+  vehicles: VehicleData[],
+  isSingleSubscribed?: boolean,
+  singleSubscribePreviousData?: any): void {
+  // 🧹 Clear geofences when showing vehicles
+  if (this.geofenceLayer) {
+    this.geofenceLayer.clearLayers();
+  }
 
-    if (!vehicles || vehicles.length === 0) {
-      console.log('No vehicles to display on map');
-      return;
-    }
+  // Clear existing markers
+  if (this.clusteringEnabled && this.clusterGroup) {
+    this.clusterGroup.clearLayers();
+  } else if (this.vehicleLayer) {
+    this.vehicleLayer.clearLayers();
+  }
 
-    const validVehicles = vehicles.filter(vehicle => 
-      vehicle.apiObject?.position?.latitude && 
-      vehicle.apiObject?.position?.longitude && 
-      !isNaN(vehicle.apiObject.position.latitude) && 
-      !isNaN(vehicle.apiObject.position.longitude)
-    );
+  if (!vehicles || vehicles.length === 0) {
+    console.log('No vehicles to display on map');
+    return;
+  }
 
-    console.log(`Displaying ${validVehicles.length} vehicles on map`);
+  const validVehicles = vehicles.filter(vehicle =>
+    vehicle.apiObject?.position?.latitude &&
+    vehicle.apiObject?.position?.longitude &&
+    !isNaN(vehicle.apiObject.position.latitude) &&
+    !isNaN(vehicle.apiObject.position.longitude)
+  );
 
-    // Create markers for each vehicle
-    const markers: Marker[] = [];
+  console.log(`Displaying ${validVehicles.length} vehicles on map`);
+  console.log('isSingleSubscribed:', isSingleSubscribed);
+
+  if (isSingleSubscribed) {
+    const vehicle = vehicles[0];
+    if (!vehicle) return;
+
+    
+
+  } else {
+    // Multi-vehicle case
+    const markers: L.Marker[] = [];
+
     validVehicles.forEach(vehicle => {
       const vehicleMarker = this.vehicleMarkerService.createVehicleMarker(vehicle);
       if (vehicleMarker) {
@@ -405,11 +443,13 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
       markers.forEach(marker => this.vehicleLayer.addLayer(marker));
     }
 
-    // Fit map bounds to show all markers if there are vehicles
+    // Fit map bounds to show all markers
     if (validVehicles.length > 0) {
-      setTimeout(() => this.fitMapToMarkers(validVehicles, isSingleSubscribed), 100);
+      setTimeout(() => this.fitMapToMarkers(validVehicles), 100);
     }
   }
+}
+
 
 
   private createGeofenceLayer(geofence: any): L.Layer {
@@ -457,14 +497,9 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 }
 
-  private fitMapToMarkers(vehicles: VehicleData[], isSingleSubscribed?:boolean): void {
-    if (vehicles.length === 1) {
-      const pos = vehicles[0].apiObject.position;
-      this.map.setView([pos.latitude, pos.longitude], !isSingleSubscribed ? 12 : 18);
-    } else if (vehicles.length > 1) {
+  private fitMapToMarkers(vehicles: VehicleData[]): void {
       const bounds = vehicles.map(v => [v.apiObject.position.latitude, v.apiObject.position.longitude] as [number, number]);
       this.map.fitBounds(bounds, { padding: [20, 20] });
-    }
   }
 
   private setupMapEventHandlers(): void {
