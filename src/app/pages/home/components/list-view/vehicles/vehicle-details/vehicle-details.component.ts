@@ -61,7 +61,7 @@ export class VehicleDetailsComponent implements OnInit, OnChanges, OnDestroy {
       (actionKey) => this.handleNavigation(actionKey)
     );
 
-    this.selectedVehicle$.pipe(filter(vehicle => !!vehicle),take(1),takeUntil(this.destroy$)).subscribe((vehicle) => {      
+    this.selectedVehicle$.pipe(filter(vehicle => !!vehicle),takeUntil(this.destroy$)).subscribe((vehicle) => {      
       this.iframeUrl = this.liveStreamingService.getStreamingUrl({
         protocol: vehicle?.apiObject?.position?.protocol,
         uniqueId: vehicle?.apiObject?.device?.deviceId,
