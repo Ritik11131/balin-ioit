@@ -10,11 +10,11 @@ import { RippleModule } from 'primeng/ripple';
   template: `
     <div class="bg-gray-50 dark:bg-gray-900 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
       <div class="flex flex-col items-center justify-center">
-        <div class="rounded-3xl p-1 bg-gradient-to-b from-pink-300/40 to-blue-300/10">
+        <div class="rounded-3xl p-1 bg-gradient-to-b from-red-300/40 to-blue-300/10">
           <div class="bg-white dark:bg-gray-800 py-20 px-8 sm:px-20 rounded-3xl flex flex-col items-center shadow-lg">
             <!-- Icon -->
-            <div class="flex justify-center items-center border-2 border-pink-500 rounded-full h-16 w-16 mb-4">
-              <i class="pi pi-fw pi-wifi-off text-pink-500 text-3xl"></i>
+            <div class="flex justify-center items-center border-2 border-red-500 rounded-full h-16 w-16 mb-4">
+              <i class="pi pi-fw pi-wifi-off text-red-500 text-3xl"></i>
             </div>
 
             <!-- Title -->
@@ -32,7 +32,7 @@ import { RippleModule } from 'primeng/ripple';
 
             <!-- Button -->
             <div class="text-center">
-              <p-button label="Retry" (click)="retry()" icon="pi pi-refresh" class="p-button-rounded p-button-lg"></p-button>
+              <p-button severity="secondary" label="Retry" (click)="retry()" icon="pi pi-refresh" class="p-button-rounded p-button-lg"></p-button>
             </div>
           </div>
         </div>

@@ -8,6 +8,7 @@ import {
 } from 'leaflet';
 import { VehicleData } from '../../shared/interfaces/vehicle';
 
+// Extend the Leaflet namespace to include MarkerClusterGroup
 declare global {
   namespace L {
     function markerClusterGroup(options?: any): MarkerClusterGroup;
@@ -22,7 +23,10 @@ export class TrackMapService {
   private vehicleLayer!: LayerGroup;
   private geofenceLayer!: L.FeatureGroup;
   private clusterGroup!: MarkerClusterGroup;
+  private vehicleTrailLayer!: LayerGroup;
   private clusteringEnabled = true;
+  private currentTrailVehicleId: string | null = null;
+  private trailCoordinates: L.LatLng[] = [];
 
   initializeMap(map: L.Map, clusteringEnabled: boolean = true): void {
     this.map = map;
@@ -40,6 +44,8 @@ export class TrackMapService {
     this.initializeClusterGroup();
     this.vehicleLayer = new LayerGroup();
     this.geofenceLayer = L.featureGroup();
+    this.vehicleTrailLayer = new LayerGroup();
+    this.vehicleTrailLayer.addTo(this.map);
   }
 
   private initializeClusterGroup(): void {
@@ -115,7 +121,136 @@ export class TrackMapService {
     this.geofenceLayer.addTo(this.map);
   }
 
-  // Clearing Operations
+  getVehicleTrailLayer(): LayerGroup {
+    return this.vehicleTrailLayer;
+  }
+
+  getCurrentTrailVehicleId(): string | null {
+    return this.currentTrailVehicleId;
+  }
+
+  // Vehicle Trail Management
+  addToVehicleTrail(vehicleId: string, lat: number, lng: number, heading: number): void {
+    // If different vehicle selected, clear previous trail
+    if (this.currentTrailVehicleId && this.currentTrailVehicleId !== vehicleId) {
+      this.clearVehicleTrail();
+    }
+
+    this.currentTrailVehicleId = vehicleId;
+    const newPoint = L.latLng(lat, lng);
+    
+    // Avoid duplicate points (if vehicle hasn't moved much)
+    if (this.trailCoordinates.length === 0 || 
+        this.getDistanceFromLastPoint(newPoint) > 10) { // 10 meters threshold
+      this.trailCoordinates.push(newPoint);
+      this.updateTrailPolyline(heading);
+    }
+  }
+
+  private getDistanceFromLastPoint(newPoint: L.LatLng): number {
+    if (this.trailCoordinates.length === 0) return Infinity;
+    
+    const lastPoint = this.trailCoordinates[this.trailCoordinates.length - 1];
+    return newPoint.distanceTo(lastPoint);
+  }
+
+  private updateTrailPolyline(heading: number): void {
+    // Clear existing trail polyline
+    this.vehicleTrailLayer.clearLayers();
+
+    if (this.trailCoordinates.length < 2) return;  
+
+    // Create polyline with gradient effect
+    const polyline = L.polyline(this.trailCoordinates, {
+      color: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+      weight: 4,
+      opacity: 0.8,
+      smoothFactor: 1,
+      className: 'vehicle-trail'
+    });
+
+    // Add fade effect by creating multiple segments with different opacities
+    this.createFadingTrailSegments();
+    
+    // Add main polyline
+    this.vehicleTrailLayer.addLayer(polyline);
+
+    // Add direction arrows along the trail
+    // this.addTrailDirectionArrows(heading);
+  }
+
+  private createFadingTrailSegments(): void {
+    const segmentCount = Math.min(this.trailCoordinates.length - 1, 20); // Max 20 segments
+    const startIndex = Math.max(0, this.trailCoordinates.length - segmentCount - 1);
+
+    for (let i = startIndex; i < this.trailCoordinates.length - 1; i++) {
+      const segmentIndex = i - startIndex;
+      const opacity = 0.3 + (segmentIndex / segmentCount) * 0.5; // 0.3 to 0.8 opacity
+      
+      const segment = L.polyline(
+        [this.trailCoordinates[i], this.trailCoordinates[i + 1]], 
+        {
+          color: '#3b82f6',
+          weight: 3,
+          opacity: opacity,
+          className: 'vehicle-trail-segment'
+        }
+      );
+      
+      this.vehicleTrailLayer.addLayer(segment);
+    }
+  }
+
+  private addTrailDirectionArrows(heading: number): void {
+    if (this.trailCoordinates.length < 2) return;
+
+    // Add arrows every few points to show direction
+    const arrowInterval = Math.max(1, Math.floor(this.trailCoordinates.length / 5));
+    
+    for (let i = arrowInterval; i < this.trailCoordinates.length; i += arrowInterval) {
+      const currentPoint = this.trailCoordinates[i];
+      const previousPoint = this.trailCoordinates[i - 1];
+      
+      // const bearing = this.calculateBearing(previousPoint, currentPoint);
+      const arrowMarker = this.createArrowMarker(currentPoint, heading);
+      
+      this.vehicleTrailLayer.addLayer(arrowMarker);
+    }
+  }
+
+  private createArrowMarker(position: L.LatLng, bearing: number): L.Marker {
+    const arrowIcon = L.divIcon({
+      className: 'trail-arrow',
+      html: `<div style="transform: rotate(${bearing}deg); color: #3b82f6; font-size: 12px;">➤</div>`,
+      iconSize: [12, 12],
+      iconAnchor: [6, 6]
+    });
+
+    return L.marker(position, { icon: arrowIcon });
+  }
+
+  private calculateBearing(from: L.LatLng, to: L.LatLng): number {
+    const fromLat = from.lat * Math.PI / 180;
+    const fromLng = from.lng * Math.PI / 180;
+    const toLat = to.lat * Math.PI / 180;
+    const toLng = to.lng * Math.PI / 180;
+
+    const deltaLng = toLng - fromLng;
+    
+    const x = Math.sin(deltaLng) * Math.cos(toLat);
+    const y = Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(deltaLng);
+    
+    const bearing = Math.atan2(x, y) * 180 / Math.PI;
+    return (bearing + 360) % 360;
+  }
+
+  clearVehicleTrail(): void {
+    this.vehicleTrailLayer.clearLayers();
+    this.trailCoordinates = [];
+    this.currentTrailVehicleId = null;
+  }
+
+  // Enhanced clearing operations
   clearVehicleLayers(): void {
     this.clusterGroup?.clearLayers();
     this.vehicleLayer?.clearLayers();
@@ -128,6 +263,7 @@ export class TrackMapService {
   clearAllLayers(): void {
     this.clearVehicleLayers();
     this.clearGeofenceLayers();
+    this.clearVehicleTrail();
   }
 
   // Map View Operations
@@ -185,18 +321,6 @@ export class TrackMapService {
     this.fitMapToGeofences();
   }
 
-  private processGeofenceFeatures(features: any[], color: string, geofenceGroup: L.FeatureGroup, geofence: any): void {
-    features.forEach((feature: any) => {
-      const { geometry, properties } = feature;
-
-      if (geometry.type === 'Polygon') {
-        this.createPolygonGeofence(geometry, color, geofenceGroup);
-      } else if (geometry.type === 'Point') {
-        this.createCircleGeofence(geometry, properties, color, geofenceGroup, geofence);
-      }
-    });
-  }
-
   createGeofenceLayer(geofence: any): L.Layer {
     try {
       const parsedGeometry = JSON.parse(geofence.geojson);
@@ -222,6 +346,18 @@ export class TrackMapService {
       fillOpacity: 0.3
     });
     geofenceGroup.addLayer(polygon);
+  }
+
+  private processGeofenceFeatures(features: any[], color: string, geofenceGroup: L.FeatureGroup, geofence: any): void {
+    features.forEach((feature: any) => {
+      const { geometry, properties } = feature;
+
+      if (geometry.type === 'Polygon') {
+        this.createPolygonGeofence(geometry, color, geofenceGroup);
+      } else if (geometry.type === 'Point') {
+        this.createCircleGeofence(geometry, properties, color, geofenceGroup, geofence);
+      }
+    });
   }
 
   private createCircleGeofence(geometry: any, properties: any, color: string, geofenceGroup: L.FeatureGroup, geofence: any): void {

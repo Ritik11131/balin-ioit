@@ -140,6 +140,10 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
 
   private shouldUpdateVehicle(prev: VehicleData | null, curr: VehicleData | null): boolean {
     if (!prev || prev.id !== curr?.id) {
+      // Clear trail when vehicle changes
+      if (prev && curr && prev.id !== curr.id) {
+        this.trackMapService.clearVehicleTrail();
+      }
       this.firstVehicleUpdate = true;
       return true;
     }
@@ -193,7 +197,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
 
     if (active.value && !active.formObj) {
       this.store.dispatch(stopSingleVehiclePolling());
-      this.trackMapService.clearAllLayers();
+      this.trackMapService.clearAllLayers(); // This will also clear trails
       console.log("Replay mode enabled 🚀");
     }
 
@@ -249,6 +253,17 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   private updateSingleVehicleMarker(currentVehicle: VehicleData, previousVehicle?: VehicleData): void {
     this.trackMapService.clearVehicleLayers();
     this.trackMapService.clearGeofenceLayers();
+
+    // Add current position to vehicle trail
+    const currentPos = currentVehicle.apiObject?.position;
+    if (currentPos) {
+      this.trackMapService.addToVehicleTrail(
+        currentVehicle.id.toString(), 
+        currentPos.latitude, 
+        currentPos.longitude,
+        currentPos.heading
+      );
+    }
 
     const vehicleMarker = this.vehicleMarkerService.createAnimatedVehicleMarker(currentVehicle, previousVehicle);
     
@@ -394,5 +409,25 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
       .subscribe(vehicles => {
         this.trackMapService.centerOnVehicle(vehicleId, vehicles);
       });
+  }
+
+  // Trail Management Methods
+  clearVehicleTrail(): void {
+    this.trackMapService.clearVehicleTrail();
+  }
+
+  toggleTrailVisibility(visible: boolean): void {
+    const trailLayer = this.trackMapService.getVehicleTrailLayer();
+    const mapInstance = this.trackMapService.getMapInstance();
+    
+    if (visible) {
+      trailLayer.addTo(mapInstance);
+    } else {
+      mapInstance.removeLayer(trailLayer);
+    }
+  }
+
+  getCurrentTrackedVehicleId(): string | null {
+    return this.trackMapService.getCurrentTrailVehicleId();
   }
 }
