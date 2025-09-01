@@ -35,76 +35,13 @@ import { Store } from '@ngrx/store';
 import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
 import { PathReplayService } from '../../../service/path-replay.service';
 import { VehicleMarkerService } from '../../../service/vehicle-marker.service';
+import { VehicleData } from '../../../../shared/interfaces/vehicle';
 
 // Extend the Leaflet namespace to include MarkerClusterGroup
 declare global {
   namespace L {
     function markerClusterGroup(options?: any): MarkerClusterGroup;
   }
-}
-
-export interface VehicleData {
-  id: number;
-  name: string;
-  lastUpdated: string;
-  location: string;
-  status: string;
-  apiObject: {
-    device: {
-      deviceId: string;
-      vehicleNo: string;
-      vehicleType: number;
-      deviceType: number;
-      id: number;
-      details: {
-        lastOdometer: number;
-        lastEngineHours: number;
-      };
-    };
-    parking: any;
-    position: {
-      status: {
-        status: string;
-        duration: string;
-      };
-      protocol: string;
-      servertime: string;
-      deviceTime: string;
-      valid: number;
-      latitude: number;
-      longitude: number;
-      speed: number;
-      heading: number;
-      altitude: number;
-      accuracy: number;
-      details: {
-        adc: number;
-        armed: boolean;
-        battPer:number
-        bmsSOC: number;
-        charge: boolean;
-        distance: number;
-        door: boolean;
-        engHours: number;
-        extVolt: number;
-        ign: boolean;
-        intVolt: number;
-        motion: boolean;
-        rssi: number;
-        sat: number;
-        temp: number;
-        totalDistance: number;
-        vDuration: number;
-        vStatus: string;
-        versionFw: string;
-      };
-    };
-    validity: {
-      installationOn: string;
-      nextRechargeDate: string;
-      customerRechargeDate: string;
-    };
-  };
 }
 
 @Component({
@@ -114,7 +51,7 @@ export interface VehicleData {
  templateUrl:'./track-map.component.html',
  styleUrl:'./track-map.component.scss'
 })
-export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class TrackMapComponent implements OnDestroy, OnChanges {
   @Input() activeTab: 'vehicles' | 'geofences' = 'vehicles';
   
   private map!: L.Map;
@@ -184,13 +121,6 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
       break;
   }
 }
-
-
-
-  ngAfterViewInit(): void {
-    // Subscribe to filtered vehicles to update map markers
-    // this.subscribeToVehicleUpdates();
-  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -290,13 +220,6 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
         console.log('Previous Lat/Lng:', prevPos?.latitude, prevPos?.longitude);
         console.log('Current Lat/Lng:', currPos?.latitude, currPos?.longitude);
-
-        // Fly to first vehicle update
-        if (this.firstCombineVehicleUpdateForPolling && currPos) {
-          this.map.flyTo([currPos.latitude, currPos.longitude], 14, { animate: true, duration: 3 });
-          this.firstCombineVehicleUpdateForPolling = false;
-        }
-
         // Update marker
         this.updateMapMarkers([currentVehicle], true, previousVehicle);
       });
@@ -343,17 +266,17 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private clearLayers() {
-     if (this.clusteringEnabled && this.clusterGroup) {
-            this.clusterGroup.clearLayers();
-          }
-          if (this.vehicleLayer) {
-            this.vehicleLayer.clearLayers();
-          }
+    if (this.clusteringEnabled && this.clusterGroup) {
+      this.clusterGroup.clearLayers();
+    }
+    if (this.vehicleLayer) {
+      this.vehicleLayer.clearLayers();
+    }
 
-          // 🧹 Clear old geofences
-          if (this.geofenceLayer) {
-            this.geofenceLayer.clearLayers();
-          }
+    // 🧹 Clear old geofences
+    if (this.geofenceLayer) {
+      this.geofenceLayer.clearLayers();
+    }
   }
 
   private subscribeToGeofenceUpdates(): void {
@@ -377,18 +300,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private updateMapGeofences(geofences: any[]): void {
-    // 🧹 Clear vehicle markers when showing geofences
-    if (this.clusteringEnabled && this.clusterGroup) {
-      this.clusterGroup.clearLayers();
-    }
-    if (this.vehicleLayer) {
-      this.vehicleLayer.clearLayers();
-    }
-
-    // 🧹 Clear old geofences
-    if (this.geofenceLayer) {
-      this.geofenceLayer.clearLayers();
-    }
+   this.clearLayers();
 
     if(!geofences || geofences.length === 0) {
       console.log('No geofences to display on map');
@@ -442,6 +354,7 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
 
     if (isSingleSubscribed) {
       const vehicle = vehicles[0];
+      const currPos = vehicle?.apiObject?.position;
       if (!vehicle) return;
       // latest vehcile heading applied
       const vehicleIcon = this.vehicleMarkerService.getVehicleIcon(vehicle?.apiObject.device?.vehicleType, vehicle?.apiObject?.position.status.status, vehicle?.apiObject?.position.heading);
@@ -458,6 +371,12 @@ export class TrackMapComponent implements AfterViewInit, OnDestroy, OnChanges {
       } else if (this.vehicleLayer) {
         this.vehicleLayer.addLayer(vehicleMarker);
       }
+
+       // Fly to first vehicle update
+        if (this.firstCombineVehicleUpdateForPolling && currPos) {
+          this.map.flyTo([currPos.latitude, currPos.longitude], 14, { animate: true, duration: 3 });
+          this.firstCombineVehicleUpdateForPolling = false;
+        }
     } else {
       // Multi-vehicle case
       const markers: L.Marker[] = [];

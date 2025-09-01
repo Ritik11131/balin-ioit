@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Injectable, inject } from '@angular/core';
 import { filter, take } from 'rxjs/operators';
 import { selectVehicleTypes } from '../../store/vehicle-type/selectors';
-import { VehicleData } from '../home/components/track-map/track-map.component';
+import { VehicleData } from '../../shared/interfaces/vehicle';
 
 @Injectable({ providedIn: 'root' })
 export class VehicleMarkerService {
