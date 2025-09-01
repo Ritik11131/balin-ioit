@@ -25,7 +25,7 @@ import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-sta
                     </span>
                 </div>
                 <div class="flex gap-2">
-                    <img src="images/home/icon_share.svg" alt="Share" class="w-4 h-4 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 opacity-70 hover:opacity-100" />
+                    <i class="pi pi pi-video" style="color: var(--primary-color)"></i>
                 </div>
             </div>
 

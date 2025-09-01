@@ -1,3 +1,4 @@
+import { ButtonModule } from 'primeng/button';
 import 'leaflet-trackplayer';
 import 'leaflet-ant-path';
 import { Component, OnDestroy, inject, Input, SimpleChanges, OnChanges } from '@angular/core';
@@ -23,18 +24,22 @@ import {
   selectSelectedVehicle,
   selectVehicleLoading
 } from '../../../../store/vehicle/vehicle.selectors';
-import { searchVehicles, selectVehicle, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
+import { filterVehicles, loadVehicles, searchVehicles, selectVehicle, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
 import { Store } from '@ngrx/store';
 import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
 import { PathReplayService } from '../../../service/path-replay.service';
 import { VehicleMarkerService } from '../../../service/vehicle-marker.service';
-import { TrackMapService } from '../../../service/track-map.service';
+import { LiveTrackingControl, TrackMapService } from '../../../service/track-map.service';
 import { VehicleData } from '../../../../shared/interfaces/vehicle';
+import { VehicleStatusLabelPipe } from '../../../../shared/pipes/vehicle-status-label.pipe';
+import { VehicleStatusPipe } from '../../../../shared/pipes/vehicle-status.pipe';
+import { CdkDrag, CdkDragHandle } from "@angular/cdk/drag-drop";
+import { UiService } from '../../../../layout/service/ui.service';
 
 @Component({
   selector: 'app-track-map',
   standalone: true,
-  imports: [LeafletModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule],
+  imports: [ButtonModule, LeafletModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule, VehicleStatusLabelPipe, VehicleStatusPipe, CdkDrag, CdkDragHandle],
   templateUrl: './track-map.component.html',
   styleUrl: './track-map.component.scss'
 })
@@ -42,10 +47,11 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   @Input() activeTab: 'vehicles' | 'geofences' = 'vehicles';
   
   public userLocationMarker?: Marker;
+  private uiService = inject(UiService);
   private store = inject(Store);
   private pathReplayService = inject(PathReplayService);
   private vehicleMarkerService = inject(VehicleMarkerService);
-  private trackMapService = inject(TrackMapService);
+  public trackMapService = inject(TrackMapService);
   private destroy$ = new Subject<void>();
   private firstVehicleUpdate = true;
 
@@ -167,7 +173,14 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     console.log('Current Lat/Lng:', currPos?.latitude, currPos?.longitude);
 
     this.updateSingleVehicleMarker(currentVehicle, previousVehicle);
-
+    this.trackMapService.updateLiveTrackingControlObj(
+      {
+        status: currentVehicle.status, 
+        vehicleName: currentVehicle?.name,
+        vehicleSpeed: currentVehicle?.apiObject?.position?.speed + ' Km/hr',
+        vehicleTimestamp: currentVehicle.lastUpdated, 
+        visible: true 
+      } as LiveTrackingControl);
     if (this.firstVehicleUpdate && currPos) {
       this.trackMapService.flyToPosition(currPos.latitude, currPos.longitude, 16, 3);
       this.firstVehicleUpdate = false;
@@ -416,18 +429,28 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     this.trackMapService.clearVehicleTrail();
   }
 
-  toggleTrailVisibility(visible: boolean): void {
+  toggleTrailVisibility(): void {
     const trailLayer = this.trackMapService.getVehicleTrailLayer();
     const mapInstance = this.trackMapService.getMapInstance();
     
-    if (visible) {
-      trailLayer.addTo(mapInstance);
+    if(mapInstance.hasLayer(trailLayer)) {
+      mapInstance.removeLayer(trailLayer)
     } else {
-      mapInstance.removeLayer(trailLayer);
+      trailLayer.addTo(mapInstance);
     }
   }
 
   getCurrentTrackedVehicleId(): string | null {
     return this.trackMapService.getCurrentTrailVehicleId();
+  }
+
+  exitTracking() {
+    this.trackMapService.clearAllLayers();
+    this.uiService.closeDrawer();
+    this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl)
+    this.store.dispatch(stopSingleVehiclePolling());
+    this.store.dispatch(selectVehicle({ vehicle: null }));
+    this.store.dispatch(loadVehicles());
+
   }
 }

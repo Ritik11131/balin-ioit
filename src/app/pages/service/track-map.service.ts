@@ -16,6 +16,14 @@ declare global {
   }
 }
 
+export interface LiveTrackingControl {
+  status: string;
+  vehicleName: string;
+  vehicleSpeed?: string;
+  vehicleTimestamp?: string;
+  visible?: boolean; // to show/hide the panel
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,6 +36,17 @@ export class TrackMapService {
   private clusteringEnabled = true;
   private currentTrailVehicleId: string | null = null;
   private trailCoordinates: L.LatLng[] = [];
+  public liveTrackingControlObj: LiveTrackingControl = {
+    status: 'Live Tracking',
+    vehicleName: '',
+    vehicleSpeed: '0 Km/hr',
+    vehicleTimestamp: '',
+    visible: false
+  };
+
+  updateLiveTrackingControlObj(updatedObj : LiveTrackingControl) {
+    this.liveTrackingControlObj = updatedObj;
+  }
 
   initializeMap(map: L.Map, clusteringEnabled: boolean = true): void {
     this.map = map;
