@@ -5,6 +5,21 @@ import { filter, take } from 'rxjs/operators';
 import { selectVehicleTypes } from '../../store/vehicle-type/selectors';
 import { VehicleData } from '../../shared/interfaces/vehicle';
 
+export interface VehicleIconConfig {
+  vehicleTypeId: number;
+  status: string;
+  heading: number;
+  size?: [number, number];
+  className?: string;
+}
+
+export interface MarkerTooltipConfig {
+  vehicle: VehicleData;
+  className?: string;
+  direction?: 'top' | 'bottom' | 'left' | 'right';
+  permanent?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VehicleMarkerService {
   private store = inject(Store);
@@ -13,12 +28,13 @@ export class VehicleMarkerService {
   vehicleTypes$ = this.store.select(selectVehicleTypes);
 
   public singleVehicleMarker:any;
+  // Default icon configurations
+  private readonly defaultIconSize: [number, number] = [32, 32];
+  private readonly defaultIconAnchor: [number, number] = [16, 16];
 
   constructor() {
     // Only subscribe once
     this.vehicleTypes$.pipe(filter(types => !!types)).subscribe((types: any) => {
-      console.log(types, 'types');
-
       this.vehicleTypes = types || [];
       this.loaded = true;
     });
@@ -44,7 +60,14 @@ export class VehicleMarkerService {
     return vehicle?.name || 'default';
   }
 
-  public getVehicleIcon(vehicleTypeId: number, status: string, angle: number = 0): DivIcon {
+  public getVehicleIcon(config: VehicleIconConfig): DivIcon {
+     const {
+      vehicleTypeId,
+      status,
+      heading,
+      size = this.defaultIconSize,
+      className = 'vehicle-marker'
+    } = config;
     if (!this.loaded) {
       console.warn('Vehicle types not loaded yet.');
     }
@@ -55,10 +78,10 @@ export class VehicleMarkerService {
     const iconFile = `images/vehicles/rp_marker_${vehicleName}_${color}.png`;
 
     return divIcon({
-      className: 'custom-vehicle-marker',
-      html: `<img src="${iconFile}" alt="${vehicleName}" class="w-12 h-12"  style="transform: rotate(${angle}deg); transform-origin: center center;" />`,
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
+      className: `${className} vehicle-${vehicleTypeId} status-${status}`,
+      html: `<img src="${iconFile}" alt="${vehicleName}" class="w-12 h-12"  style="transform: rotate(${heading}deg); transform-origin: center center;" />`,
+      iconSize: size,
+      iconAnchor: [size[0] / 2, size[1] / 2]
     });
   }
 
@@ -74,7 +97,7 @@ export class VehicleMarkerService {
     return statusClasses[status?.toLowerCase()] || statusClasses['default'];
   }
 
-  createPopupContent(vehicle: VehicleData): string {
+  generateTooltipContent(vehicle: VehicleData): string {
     const position = vehicle.apiObject.position;
     const device = vehicle.apiObject.device;
     const statusColorClass = this.getStatusColorClass(position.status.status);
@@ -116,33 +139,138 @@ export class VehicleMarkerService {
       `;
   }
 
-  createVehicleMarker(vehicle: VehicleData): Marker | null {
-    try {
-      const device = vehicle.apiObject.device;
-      const position = vehicle.apiObject.position;
-      const vehicleIcon = this.getVehicleIcon(device?.vehicleType, position.status.status, position.heading);
 
-      const vehicleMarker = marker([position.latitude, position.longitude], {
-        icon: vehicleIcon,
-        title: vehicle.name
-      });
 
-      // Create popup content
-      const popupContent = this.createPopupContent(vehicle);
-      vehicleMarker.bindPopup(popupContent, {
-        className: 'custom-popup',
-        maxWidth: 320,
-        closeButton: true
-      });
+  /**
+   * Sets up tooltip for a marker
+   */
+  private setupMarkerTooltip(marker: L.Marker, config: MarkerTooltipConfig): void {
+    const {
+      vehicle,
+      className = 'vehicle-tooltip',
+      direction = 'top',
+      permanent = false
+    } = config;
 
-      vehicleMarker.on('click', () => {
-        console.log('Vehicle clicked:', vehicle);
-      });
-
-      return vehicleMarker;
-    } catch (error) {
-      console.error('Error creating marker for vehicle:', vehicle, error);
-      return null;
-    }
+    const tooltipContent = this.generateTooltipContent(vehicle);
+    
+    marker.bindTooltip(tooltipContent, {
+      direction,
+      className,
+      permanent,
+      offset: [0, -10]
+    });
   }
+
+
+  /**
+   * Sets up click handler for a marker
+   */
+  private setupMarkerClickHandler(marker: L.Marker, vehicle: VehicleData): void {
+    marker.on('click', () => {
+      console.log('Vehicle marker clicked:', vehicle.name);
+      // Emit event or call callback if needed
+      this.onVehicleMarkerClick(vehicle);
+    });
+  }
+
+  /**
+   * Handles vehicle marker click events
+   */
+  private onVehicleMarkerClick(vehicle: VehicleData): void {
+    // This can be extended to emit events or call callbacks
+    console.log('Vehicle selected:', vehicle);
+  }
+
+
+  /**
+   * Creates a vehicle marker with icon, tooltip, and click handlers
+   */
+  createVehicleMarker(vehicle: VehicleData): L.Marker | null {
+
+    const { latitude, longitude } = vehicle.apiObject.position;
+    const vehicleIcon = this.getVehicleIcon({
+      vehicleTypeId: vehicle.apiObject.device?.vehicleType,
+      status: vehicle.apiObject?.position.status.status,
+      heading: vehicle.apiObject?.position.heading || 0
+    });
+
+    const vehicleMarker = marker([latitude, longitude], {
+      icon: vehicleIcon,
+      title: vehicle.name,
+      alt: `Vehicle: ${vehicle.name}`
+    });
+
+    this.setupMarkerTooltip(vehicleMarker, { vehicle });
+    this.setupMarkerClickHandler(vehicleMarker, vehicle);
+
+    return vehicleMarker;
+  }
+
+    /**
+   * Creates multiple vehicle markers from array
+   */
+  createVehicleMarkers(vehicles: VehicleData[]): L.Marker[] {
+    return vehicles
+      .map(vehicle => this.createVehicleMarker(vehicle))
+      .filter(marker => marker !== null) as L.Marker[];
+  }
+
+
+
+    /**
+   * Creates an animated vehicle marker for single vehicle tracking
+   */
+  createAnimatedVehicleMarker(
+    currentVehicle: VehicleData, 
+    previousVehicle?: VehicleData
+  ): L.Marker | null {
+
+    const vehicleIcon = this.getVehicleIcon({
+      vehicleTypeId: currentVehicle.apiObject.device?.vehicleType,
+      status: currentVehicle.apiObject?.position.status.status,
+      heading: currentVehicle.apiObject?.position.heading
+    });
+
+    const startPosition = previousVehicle?.apiObject?.position || currentVehicle.apiObject?.position;
+    const endPosition = currentVehicle.apiObject?.position;
+
+    const vehicleMarker = marker(
+      [startPosition.latitude, startPosition.longitude],
+      {
+        icon: vehicleIcon,
+        title: currentVehicle.name
+      }
+    );
+
+    // Animate to new position
+    vehicleMarker.setLatLng([endPosition.latitude, endPosition.longitude]);
+    
+    this.setupMarkerTooltip(vehicleMarker, { vehicle: currentVehicle });
+    this.setupMarkerClickHandler(vehicleMarker, currentVehicle);
+
+    return vehicleMarker;
+  }
+
+  /**
+   * Validates if vehicle has valid position data
+   */
+  private isValidVehiclePosition(vehicle: VehicleData): boolean {
+    const position = vehicle.apiObject?.position;
+    return !!(
+      position?.latitude &&
+      position?.longitude &&
+      !isNaN(position.latitude) &&
+      !isNaN(position.longitude)
+    );
+  }
+
+   /**
+   * Validates array of vehicles for mapping
+   */
+  filterValidVehicles(vehicles: VehicleData[]): VehicleData[] {
+    return vehicles.filter(vehicle => this.isValidVehiclePosition(vehicle));
+  }
+
+
 }

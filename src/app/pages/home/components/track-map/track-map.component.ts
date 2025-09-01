@@ -1,5 +1,6 @@
 import 'leaflet-trackplayer';
-import { Component, AfterViewInit, OnDestroy, inject, Input, SimpleChanges, OnChanges } from '@angular/core';
+import 'leaflet-ant-path';
+import { Component, OnDestroy, inject, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LeafletModule } from '@bluehalo/ngx-leaflet';
@@ -7,71 +8,54 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { 
-  icon, 
   latLng, 
   Map, 
-  marker, 
   tileLayer, 
   Marker, 
-  LayerGroup,
-  DivIcon,
   divIcon,
-  MarkerClusterGroup,
-  control
+  marker
 } from 'leaflet';
 import 'leaflet.markercluster';
-import { Observable, Subject, takeUntil, withLatestFrom, filter, combineLatest, distinctUntilChanged, startWith, map, pairwise } from 'rxjs';
+import { Observable, Subject, takeUntil, withLatestFrom, filter, combineLatest, map, pairwise } from 'rxjs';
 import { 
-  selectVehicleLoading, 
-  selectVehiclePolling, 
   selectFilteredVehicles,
-  selectVehiclesLoaded,
-  selectCurrentFilter,
-  selectSearchTerm,
-  selectSelectedVehicle
+  selectVehiclePolling,
+  selectSelectedVehicle,
+  selectVehicleLoading
 } from '../../../../store/vehicle/vehicle.selectors';
-import { loadVehicles, searchVehicles, selectVehicle, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
+import { searchVehicles, selectVehicle, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
 import { Store } from '@ngrx/store';
 import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
 import { PathReplayService } from '../../../service/path-replay.service';
 import { VehicleMarkerService } from '../../../service/vehicle-marker.service';
+import { TrackMapService } from '../../../service/track-map.service';
 import { VehicleData } from '../../../../shared/interfaces/vehicle';
-
-// Extend the Leaflet namespace to include MarkerClusterGroup
-declare global {
-  namespace L {
-    function markerClusterGroup(options?: any): MarkerClusterGroup;
-  }
-}
 
 @Component({
   selector: 'app-track-map',
   standalone: true,
   imports: [LeafletModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule],
- templateUrl:'./track-map.component.html',
- styleUrl:'./track-map.component.scss'
+  templateUrl: './track-map.component.html',
+  styleUrl: './track-map.component.scss'
 })
 export class TrackMapComponent implements OnDestroy, OnChanges {
   @Input() activeTab: 'vehicles' | 'geofences' = 'vehicles';
   
-  private map!: L.Map;
-  private vehicleLayer!: LayerGroup;
-  private geofenceLayer!: L.FeatureGroup;
-  private clusterGroup!: MarkerClusterGroup;
-  userLocationMarker?: Marker;
+  public userLocationMarker?: Marker;
   private store = inject(Store);
   private pathReplayService = inject(PathReplayService);
   private vehicleMarkerService = inject(VehicleMarkerService);
+  private trackMapService = inject(TrackMapService);
   private destroy$ = new Subject<void>();
-  private firstCombineVehicleUpdateForPolling = true;
+  private firstVehicleUpdate = true;
 
   public clusteringEnabled = true;
   public searchTerm = '';
   public gettingLocation = false;
   public currentMapLayer = 'street';
 
-  // Map layers
-  private mapLayers = {
+  // Map layers configuration
+  private readonly mapLayers = {
     street: tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 18
@@ -82,45 +66,36 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     }),
   };
 
-  // NgRx Observables
-  filteredVehicles$: Observable<any[]> = this.store.select(selectFilteredVehicles);
-  loading$: Observable<boolean> = this.store.select(selectVehicleLoading);
-  polling$: Observable<boolean> = this.store.select(selectVehiclePolling);
-  vehiclesLoaded$: Observable<boolean> = this.store.select(selectVehiclesLoaded);
-  currentFilter$: Observable<any> = this.store.select(selectCurrentFilter);
-  searchTerm$: Observable<string> = this.store.select(selectSearchTerm);
-  selectedVehicle$ = this.store.select(selectSelectedVehicle);
+  // Store selectors
+  private readonly filteredVehicles$ = this.store.select(selectFilteredVehicles);
+  private readonly polling$ = this.store.select(selectVehiclePolling);
+  public readonly loading$: Observable<boolean> = this.store.select(selectVehicleLoading);
 
-  geofences$ = this.store.select(selectGeofences);
-  selectedGeofence$ = this.store.select(selectSelectedGeofence);
+  private readonly selectedVehicle$ = this.store.select(selectSelectedVehicle);
+  private readonly geofences$ = this.store.select(selectGeofences);
+  private readonly selectedGeofence$ = this.store.select(selectSelectedGeofence);
 
-  options = {
+  readonly options = {
     layers: [this.mapLayers.street],
     zoom: 7,
     center: latLng([46.879966, -121.726909]),
-    zoomControl: false // Remove default zoom controls
+    zoomControl: false
   };
 
-  ngOnChanges(changes: SimpleChanges) {
-  if (!changes['activeTab']) return;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['activeTab']) return;
 
-  // Clean previous subscriptions
-  this.destroy$.next();
-
-  switch (this.activeTab) {
-    case 'vehicles':
-      // Delay to ensure map is initialized
-      setTimeout(() => this.subscribeToVehicleUpdates(), 100);
-      break;
-
-    case 'geofences':
-      this.subscribeToGeofenceUpdates();
-      break;
-
-    default:
-      break;
+    this.destroy$.next();
+    
+    switch (this.activeTab) {
+      case 'vehicles':
+        setTimeout(() => this.initializeVehicleSubscriptions(), 100);
+        break;
+      case 'geofences':
+        this.initializeGeofenceSubscriptions();
+        break;
+    }
   }
-}
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -128,345 +103,189 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   }
 
   onMapReady(map: Map): void {
-    this.map = map;
-    
-    // Add custom zoom control to bottom right
-    control.zoom({ position: 'bottomright' }).addTo(this.map);
-    
-    // Initialize marker cluster group
-    this.initializeClusterGroup();
-    
-    // Initialize regular markers layer
-    this.vehicleLayer = new LayerGroup();
-    this.geofenceLayer = L.featureGroup();
-
-    // Add the appropriate layer to map
-    if (this.clusteringEnabled) {
-      this.clusterGroup.addTo(this.map);
-    } else {
-      this.vehicleLayer.addTo(this.map);
-    }
-
-    // Set up map event handlers
+    this.trackMapService.initializeMap(map, this.clusteringEnabled);
     this.setupMapEventHandlers();
   }
 
-  private initializeClusterGroup(): void {
-    this.clusterGroup = (L as any).markerClusterGroup({
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: true,
-      zoomToBoundsOnClick: true,
-      maxClusterRadius: 50,
-      disableClusteringAtZoom: 15,
-      animate: true,
-      animateAddingMarkers: true
-    });
+  private initializeVehicleSubscriptions(): void {
+    this.setupFilteredVehiclesSubscription();
+    this.setupSingleVehiclePolling();
+    this.setupPathReplaySubscriptions();
+  }
 
-    this.clusterGroup.on('clustermouseover', (e: any) => {
-      e.layer.bindTooltip(`${e.layer.getChildCount()} vehicles`, {
-        direction: 'top',
-        className: 'bg-gray-800 text-white px-2 py-1 rounded text-xs'
-      }).openTooltip();
+  private setupFilteredVehiclesSubscription(): void {
+    this.filteredVehicles$.pipe(
+      takeUntil(this.destroy$),
+      withLatestFrom(this.polling$),
+      filter(([vehicles, polling]) => !polling)
+    ).subscribe(([vehicles]) => {
+      console.log('Filtered vehicles update (non-polling)');
+      this.updateVehicleMarkers(vehicles);
     });
   }
 
-  private subscribeToVehicleUpdates(): void {
-     if (!this.map || !this.filteredVehicles$ || !this.selectedVehicle$ || !this.pathReplayService) return;
-
-    this.filteredVehicles$.pipe(
-    takeUntil(this.destroy$),
-    withLatestFrom(this.polling$),
-    filter(([vehicles, polling]) => !polling)).subscribe(([vehicles, _polling]) => {
-    if (this.map) {
-      console.log('filtered, polling not running');
-      this.updateMapMarkers(vehicles);
-    }
-  });
-
+  private setupSingleVehiclePolling(): void {
     combineLatest([this.selectedVehicle$, this.polling$])
       .pipe(
         takeUntil(this.destroy$),
         filter(([vehicle, polling]) => !!vehicle && polling),
         map(([vehicle]) => vehicle ? { ...vehicle, apiObject: { ...vehicle.apiObject } } : null),
         pairwise(),
-        filter(([prev, curr]) => {
-          // Reset firstCombineVehicleUpdateForPolling if vehicle id changed
-          if (!prev || prev.id !== curr?.id) {
-            this.firstCombineVehicleUpdateForPolling = true;
-            return true; // always emit for new vehicle
-          }
-
-          // Emit if first time update for this vehicle
-          if (this.firstCombineVehicleUpdateForPolling) return true;
-
-          // Otherwise, emit only if lat/lng changed
-          const prevPos = prev.apiObject?.position;
-          const currPos = curr.apiObject?.position;
-
-          const prevStatus = prev.status;
-          const currStatus = curr.status;
-
-          const prevLastUpdate = prev.lastUpdate;
-          const currLastUpdate = curr.lastUpdate;
-          return prevPos?.latitude !== currPos?.latitude ||
-            prevPos?.longitude !== currPos?.longitude ||
-            prevStatus !== currStatus ||
-            prevLastUpdate !== currLastUpdate;;
-        })
+        filter(([prev, curr]) => this.shouldUpdateVehicle(prev, curr))
       )
       .subscribe(([previousVehicle, currentVehicle]) => {
-        const prevPos = previousVehicle?.apiObject?.position;
-        const currPos = currentVehicle?.apiObject?.position;
-
-        console.log('Previous Lat/Lng:', prevPos?.latitude, prevPos?.longitude);
-        console.log('Current Lat/Lng:', currPos?.latitude, currPos?.longitude);
-        // Update marker
-        this.updateMapMarkers([currentVehicle], true, previousVehicle);
+        this.handleSingleVehicleUpdate(previousVehicle, currentVehicle);
       });
+  }
 
+  private shouldUpdateVehicle(prev: VehicleData | null, curr: VehicleData | null): boolean {
+    if (!prev || prev.id !== curr?.id) {
+      this.firstVehicleUpdate = true;
+      return true;
+    }
 
+    if (this.firstVehicleUpdate) return true;
 
+    const prevPos = prev.apiObject?.position;
+    const currPos = curr.apiObject?.position;
+
+    return prevPos?.latitude !== currPos?.latitude ||
+           prevPos?.longitude !== currPos?.longitude ||
+           prev.status !== curr.status ||
+           prev.lastUpdated !== curr.lastUpdated;
+  }
+
+  private handleSingleVehicleUpdate(previousVehicle: VehicleData, currentVehicle: VehicleData): void {
+    const prevPos = previousVehicle?.apiObject?.position;
+    const currPos = currentVehicle?.apiObject?.position;
+
+    console.log('Previous Lat/Lng:', prevPos?.latitude, prevPos?.longitude);
+    console.log('Current Lat/Lng:', currPos?.latitude, currPos?.longitude);
+
+    this.updateSingleVehicleMarker(currentVehicle, previousVehicle);
+
+    if (this.firstVehicleUpdate && currPos) {
+      this.trackMapService.flyToPosition(currPos.latitude, currPos.longitude, 14, 3);
+      this.firstVehicleUpdate = false;
+    }
+  }
+
+  private setupPathReplaySubscriptions(): void {
     this.pathReplayService.replayActive$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(active => {
-        console.log(active, 'active');
-
-        if (!active?.value) {
-          console.log('Disabled');
-          return
-        };
-
-        if (active?.value && !active.formObj) {
-          this.store.dispatch(stopSingleVehiclePolling());
-          this.clearLayers();
-          console.log("Replay mode is enabled in Track Component 🚀");
-        }
-
-        if (active?.value && active.formObj) {
-          this.pathReplayService._initPathReplayFunc(active.formObj, this.map);
-        }
-
-      });
-
+      .subscribe(active => this.handleReplayActive(active));
 
     this.pathReplayService.replayClosed$
       .pipe(
-        withLatestFrom(this.filteredVehicles$), // get latest vehicles from store
+        withLatestFrom(this.filteredVehicles$),
         takeUntil(this.destroy$)
       )
-      .subscribe(([_, vehicles]) => {
-        console.log(vehicles, 'okkkkk');
-        this.store.dispatch(selectVehicle({vehicle: null}));
-        if (this.map) {
-          this.updateMapMarkers(vehicles); // redraw markers
-        }
-      });
-
-
+      .subscribe(([_, vehicles]) => this.handleReplayClosed(vehicles));
   }
 
-  private clearLayers() {
-    if (this.clusteringEnabled && this.clusterGroup) {
-      this.clusterGroup.clearLayers();
-    }
-    if (this.vehicleLayer) {
-      this.vehicleLayer.clearLayers();
+  private handleReplayActive(active: any): void {
+    console.log(active, 'replay active');
+
+    if (!active?.value) {
+      console.log('Replay disabled');
+      return;
     }
 
-    // 🧹 Clear old geofences
-    if (this.geofenceLayer) {
-      this.geofenceLayer.clearLayers();
+    if (active.value && !active.formObj) {
+      this.store.dispatch(stopSingleVehiclePolling());
+      this.trackMapService.clearAllLayers();
+      console.log("Replay mode enabled 🚀");
+    }
+
+    if (active.value && active.formObj) {
+      this.pathReplayService._initPathReplayFunc(active.formObj, this.trackMapService.getMapInstance());
     }
   }
 
-  private subscribeToGeofenceUpdates(): void {
+  private handleReplayClosed(vehicles: VehicleData[]): void {
+    console.log(vehicles, 'replay closed, restoring vehicles');
+    this.store.dispatch(selectVehicle({ vehicle: null }));
+    this.updateVehicleMarkers(vehicles);
+  }
+
+  private initializeGeofenceSubscriptions(): void {
     this.geofences$
       .pipe(takeUntil(this.destroy$))
       .subscribe((geofences) => {
-        if (this.map) {
-          console.log(geofences);
-          this.updateMapGeofences([]);
-        }
+        console.log('Geofences updated:', geofences);
+        this.updateGeofences([]);
       });
 
     this.selectedGeofence$
       .pipe(takeUntil(this.destroy$))
       .subscribe((geofence) => {
-        if (this.map && geofence) {
-          console.log(geofence.geofence);
-        this.updateMapGeofences([geofence.geofence]);
+        if (geofence) {
+          console.log('Selected geofence:', geofence.geofence);
+          this.updateGeofences([geofence.geofence]);
         }
       });
   }
 
-  private updateMapGeofences(geofences: any[]): void {
-   this.clearLayers();
+  private updateVehicleMarkers(vehicles: VehicleData[]): void {
+    this.trackMapService.clearGeofenceLayers();
+    this.trackMapService.clearVehicleLayers();
 
-    if(!geofences || geofences.length === 0) {
-      console.log('No geofences to display on map');
-      return;
-    }
-
-    geofences.forEach(g => {
-    const geofenceLayer = this.createGeofenceLayer(g);
-    geofenceLayer.addTo(this.geofenceLayer);
-  });
-
-  this.geofenceLayer.addTo(this.map);
-
-  if (this.geofenceLayer && this.geofenceLayer.getLayers().length > 0) {
-  this.map.fitBounds(this.geofenceLayer.getBounds(), { padding: [20, 20] });
-}
-
-  }
-
-  private updateMapMarkers(
-    vehicles: VehicleData[],
-    isSingleSubscribed?: boolean,
-    singleSubscribePreviousData?: any): void {
-
-    // 🧹 Clear geofences when showing vehicles
-    if (this.geofenceLayer) {
-      this.geofenceLayer.clearLayers();
-    }
-
-    // Clear existing markers
-    if (this.clusteringEnabled && this.clusterGroup) {
-      this.clusterGroup.clearLayers();
-    } else if (this.vehicleLayer) {
-      this.vehicleLayer.clearLayers();
-    }
-
-    if (!vehicles || vehicles.length === 0) {
+    if (!vehicles?.length) {
       console.log('No vehicles to display on map');
       return;
     }
 
-    const validVehicles = vehicles.filter(vehicle =>
-      vehicle.apiObject?.position?.latitude &&
-      vehicle.apiObject?.position?.longitude &&
-      !isNaN(vehicle.apiObject.position.latitude) &&
-      !isNaN(vehicle.apiObject.position.longitude)
-    );
-
+    const validVehicles = this.vehicleMarkerService.filterValidVehicles(vehicles);
     console.log(`Displaying ${validVehicles.length} vehicles on map`);
-    console.log('isSingleSubscribed:', isSingleSubscribed);
 
-    if (isSingleSubscribed) {
-      const vehicle = vehicles[0];
-      const currPos = vehicle?.apiObject?.position;
-      if (!vehicle) return;
-      // latest vehcile heading applied
-      const vehicleIcon = this.vehicleMarkerService.getVehicleIcon(vehicle?.apiObject.device?.vehicleType, vehicle?.apiObject?.position.status.status, vehicle?.apiObject?.position.heading);
-      // but the powitiion is still previous one
-      const vehicleMarker: L.Marker = marker([singleSubscribePreviousData?.apiObject?.position.latitude, singleSubscribePreviousData?.apiObject?.position.longitude], {
-        icon: vehicleIcon,
-        title: vehicle.name
-      });
-
-      vehicleMarker.setLatLng([vehicle?.apiObject?.position.latitude, vehicle?.apiObject?.position.longitude]);
-
-      if (this.clusteringEnabled && this.clusterGroup) {
-        this.clusterGroup.addLayer(vehicleMarker);
-      } else if (this.vehicleLayer) {
-        this.vehicleLayer.addLayer(vehicleMarker);
-      }
-
-       // Fly to first vehicle update
-        if (this.firstCombineVehicleUpdateForPolling && currPos) {
-          this.map.flyTo([currPos.latitude, currPos.longitude], 14, { animate: true, duration: 3 });
-          this.firstCombineVehicleUpdateForPolling = false;
-        }
-    } else {
-      // Multi-vehicle case
-      const markers: L.Marker[] = [];
-
-      validVehicles.forEach(vehicle => {
-        const vehicleMarker = this.vehicleMarkerService.createVehicleMarker(vehicle);
-        if (vehicleMarker) {
-          markers.push(vehicleMarker);
-        }
-      });
-
-      // Add markers to appropriate layer
-      if (this.clusteringEnabled && this.clusterGroup) {
-        this.clusterGroup.addLayers(markers);
-      } else if (this.vehicleLayer) {
-        markers.forEach(marker => this.vehicleLayer.addLayer(marker));
-      }
-
-      // Fit map bounds to show all markers
-      if (validVehicles.length > 0) {
-        setTimeout(() => this.fitMapToMarkers(validVehicles), 100);
-      }
+    const markers = this.vehicleMarkerService.createVehicleMarkers(validVehicles);
+    this.trackMapService.addMarkersToLayer(markers);
+    
+    if (validVehicles.length > 0) {
+      setTimeout(() => this.trackMapService.fitMapToMarkers(validVehicles), 100);
     }
   }
 
+  private updateSingleVehicleMarker(currentVehicle: VehicleData, previousVehicle?: VehicleData): void {
+    this.trackMapService.clearVehicleLayers();
+    this.trackMapService.clearGeofenceLayers();
 
+    const vehicleMarker = this.vehicleMarkerService.createAnimatedVehicleMarker(currentVehicle, previousVehicle);
+    
+    if (vehicleMarker) {
+      this.trackMapService.addSingleMarkerToLayer(vehicleMarker);
+    }
+  }
 
-  private createGeofenceLayer(geofence: any): L.Layer {
-  try {
-    const parsedGeometry = JSON.parse(geofence.geojson);
-    const color = geofence.color || '#3388ff';
+  private updateGeofences(geofences: any[]): void {
+    this.trackMapService.clearAllLayers();
 
-    // Create a FeatureGroup so we can call getBounds()
-    const geofenceGroup = L.featureGroup();
-
-    if (parsedGeometry.type === 'FeatureCollection') {
-      parsedGeometry.features.forEach((feature: any) => {
-        const { geometry, properties } = feature;
-
-        if (geometry.type === 'Polygon') {
-          const coords = geometry.coordinates[0].map((coord: number[]) => [coord[1], coord[0]]);
-          const polygon = L.polygon(coords, {
-            color: color,
-            weight: 2,
-            fillOpacity: 0.3
-          });
-          geofenceGroup.addLayer(polygon);
-        } 
-        
-        else if (geometry.type === 'Point') {
-          const lat = geometry.coordinates[1];
-          const lng = geometry.coordinates[0];
-          const radius = properties?.radius || geofence.radius || 100;
-
-          const circle = L.circle([lat, lng], {
-            radius: radius,
-            color: color,
-            weight: 2,
-            fillOpacity: 0.3
-          });
-          geofenceGroup.addLayer(circle);
-        }
-      });
+    if (!geofences?.length) {
+      console.log('No geofences to display on map');
+      return;
     }
 
-    return geofenceGroup;
-  } catch (error) {
-    console.error('Error parsing geofence geometry:', error);
-    return L.featureGroup(); // Return empty layer if failed
-  }
-}
+    geofences.forEach(geofence => {
+      const geofenceLayer = this.trackMapService.createGeofenceLayer(geofence);
+      this.trackMapService.addGeofenceToLayer(geofenceLayer);
+    });
 
-  private fitMapToMarkers(vehicles: VehicleData[]): void {
-      const bounds = vehicles.map(v => [v.apiObject.position.latitude, v.apiObject.position.longitude] as [number, number]);
-      this.map.fitBounds(bounds, { padding: [20, 20] });
+    this.trackMapService.addGeofenceLayerToMap();
+    this.trackMapService.fitMapToGeofences();
   }
 
   private setupMapEventHandlers(): void {
-    this.map.on('zoomend', () => {
-      console.log('Map zoom level:', this.map.getZoom());
+    this.trackMapService.setupMapEventHandlers((zoom) => {
+      console.log('Map zoom level:', zoom);
     });
   }
 
-  // Search functionality
+  // Public methods - User Interactions
   onSearchChange(event: any): void {
     const searchTerm = event.target.value || '';
     this.store.dispatch(searchVehicles({ searchTerm }));
   }
 
-  // Get user location
   goToUserLocation(): void {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by this browser.');
@@ -476,49 +295,8 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     this.gettingLocation = true;
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        
-        // Remove existing user location marker
-        if (this.userLocationMarker) {
-          this.map.removeLayer(this.userLocationMarker);
-        }
-
-        // Create animated user location marker
-        const userIcon = divIcon({
-          className: 'user-location-marker',
-          html: `
-            <div class="relative">
-              <div class="w-6 h-6 bg-[var(--primary-color)] rounded-full border-4 border-white shadow-lg animate-pulse">
-                <div class="absolute inset-0 bg-[var(--primary-color)] rounded-full animate-ping opacity-25"></div>
-              </div>
-            </div>
-          `,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
-
-        this.userLocationMarker = marker([lat, lng], { icon: userIcon });
-        this.userLocationMarker.bindPopup('Your Location', {
-          className: 'user-location-popup'
-        });
-        
-        this.userLocationMarker.addTo(this.map);
-        
-        // Animate to user location
-        this.map.flyTo([lat, lng], 18, {
-          animate: true,
-          duration: 2
-        });
-
-        this.gettingLocation = false;
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-        alert('Unable to get your location. Please check your browser settings.');
-        this.gettingLocation = false;
-      },
+      (position) => this.handleLocationSuccess(position),
+      (error) => this.handleLocationError(error),
       {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -527,61 +305,94 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     );
   }
 
-  // Switch map layers
+  private handleLocationSuccess(position: GeolocationPosition): void {
+    const { latitude: lat, longitude: lng } = position.coords;
+    
+    this.removeExistingUserMarker();
+    this.createUserLocationMarker(lat, lng);
+    this.trackMapService.flyToPosition(lat, lng, 18, 2);
+    this.gettingLocation = false;
+  }
+
+  private handleLocationError(error: GeolocationPositionError): void {
+    console.error('Error getting location:', error);
+    alert('Unable to get your location. Please check your browser settings.');
+    this.gettingLocation = false;
+  }
+
+  private removeExistingUserMarker(): void {
+    if (this.userLocationMarker) {
+      this.trackMapService.getMapInstance().removeLayer(this.userLocationMarker);
+    }
+  }
+
+  private createUserLocationMarker(lat: number, lng: number): void {
+    const userIcon = divIcon({
+      className: 'user-location-marker',
+      html: `
+        <div class="relative">
+          <div class="w-6 h-6 bg-[var(--primary-color)] rounded-full border-4 border-white shadow-lg animate-pulse">
+            <div class="absolute inset-0 bg-[var(--primary-color)] rounded-full animate-ping opacity-25"></div>
+          </div>
+        </div>
+      `,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+
+    this.userLocationMarker = marker([lat, lng], { icon: userIcon });
+    this.userLocationMarker.bindPopup('Your Location', {
+      className: 'user-location-popup'
+    });
+    
+    this.userLocationMarker.addTo(this.trackMapService.getMapInstance());
+  }
+
   switchMapLayer(): void {
     const layers = Object.keys(this.mapLayers);
     const currentIndex = layers.indexOf(this.currentMapLayer);
     const nextIndex = (currentIndex + 1) % layers.length;
     const nextLayer = layers[nextIndex];
 
-    // Remove current layer
-    this.map.removeLayer(this.mapLayers[this.currentMapLayer as keyof typeof this.mapLayers]);
-    
-    // Add new layer
-    this.map.addLayer(this.mapLayers[nextLayer as keyof typeof this.mapLayers]);
+    const mapInstance = this.trackMapService.getMapInstance();
+    mapInstance.removeLayer(this.mapLayers[this.currentMapLayer as keyof typeof this.mapLayers]);
+    mapInstance.addLayer(this.mapLayers[nextLayer as keyof typeof this.mapLayers]);
     
     this.currentMapLayer = nextLayer;
     console.log('Switched to map layer:', nextLayer);
   }
 
-  // Public methods
-  public fitAllMarkers(): void {
-    this.filteredVehicles$.pipe(takeUntil(this.destroy$)).subscribe(vehicles => {
-      if (vehicles && vehicles.length > 0) {
-        this.fitMapToMarkers(vehicles);
-      }
-    });
+  // Public API methods
+  fitAllMarkers(): void {
+    this.filteredVehicles$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(vehicles => {
+        if (vehicles?.length > 0) {
+          this.trackMapService.fitMapToMarkers(vehicles);
+        }
+      });
   }
 
-  public toggleClustering(): void {
+  toggleClustering(): void {
     this.clusteringEnabled = !this.clusteringEnabled;
+    this.trackMapService.toggleClustering(this.clusteringEnabled);
     
-    if (this.clusteringEnabled) {
-      this.map.removeLayer(this.vehicleLayer);
-      this.clusterGroup.addTo(this.map);
-    } else {
-      this.map.removeLayer(this.clusterGroup);
-      this.vehicleLayer.addTo(this.map);
-    }
-
-    this.filteredVehicles$.pipe(takeUntil(this.destroy$)).subscribe(vehicles => {
-      this.updateMapMarkers(vehicles);
-    });
+    this.filteredVehicles$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(vehicles => {
+        this.updateVehicleMarkers(vehicles);
+      });
   }
 
-  public refreshMap(): void {
-    if (this.map) {
-      this.map.invalidateSize();
-    }
+  refreshMap(): void {
+    this.trackMapService.invalidateMapSize();
   }
 
-  public centerOnVehicle(vehicleId: string): void {
-    this.filteredVehicles$.pipe(takeUntil(this.destroy$)).subscribe(vehicles => {
-      const vehicle = vehicles.find(v => v.id.toString() === vehicleId);
-      if (vehicle && vehicle.apiObject?.position) {
-        const pos = vehicle.apiObject.position;
-        this.map.setView([pos.latitude, pos.longitude], 15);
-      }
-    });
+  centerOnVehicle(vehicleId: string): void {
+    this.filteredVehicles$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(vehicles => {
+        this.trackMapService.centerOnVehicle(vehicleId, vehicles);
+      });
   }
 }
