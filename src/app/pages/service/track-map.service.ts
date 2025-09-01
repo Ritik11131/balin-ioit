@@ -1,3 +1,4 @@
+import 'leaflet-ant-path';
 import { Injectable } from '@angular/core';
 import { 
   Map, 
@@ -161,16 +162,34 @@ export class TrackMapService {
     if (this.trailCoordinates.length < 2) return;  
 
     // Create polyline with gradient effect
-    const polyline = L.polyline(this.trailCoordinates, {
-      color: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
-      weight: 4,
-      opacity: 0.8,
-      smoothFactor: 1,
-      className: 'vehicle-trail'
-    });
+    // const polyline = L.polyline(this.trailCoordinates, {
+    //   color: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+    //   weight: 4,
+    //   opacity: 0.8,
+    //   smoothFactor: 1,
+    //   className: 'vehicle-trail'
+    // });
+    
+    const polyline = (L as any).polyline.antPath(this.trailCoordinates, {
+      delay: 400,           // Animation delay in milliseconds
+      dashArray: [10, 20],  // Dash pattern [dash length, gap length]
+      weight: 5,            // Line weight
+      color: `color-mix(in srgb, ${getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim()} 50%, transparent)`,
+      pulseColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+      paused: false,        // Start animation immediately
+      reverse: false,       // Animation direction
+      hardwareAccelerated: true,
+      
+      // Standard polyline options
+      opacity: 0.7,
+      lineCap: 'round',
+      lineJoin: 'round'
+    })
+
+
 
     // Add fade effect by creating multiple segments with different opacities
-    this.createFadingTrailSegments();
+    // this.createFadingTrailSegments();
     
     // Add main polyline
     this.vehicleTrailLayer.addLayer(polyline);
