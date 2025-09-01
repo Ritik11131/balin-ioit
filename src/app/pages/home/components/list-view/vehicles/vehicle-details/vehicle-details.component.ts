@@ -1,7 +1,7 @@
 import { Component, EventEmitter, inject, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { Button, ButtonModule } from 'primeng/button';
 import { TieredMenuModule } from 'primeng/tieredmenu';
-import { filter, Observable, Subject, take, takeUntil } from 'rxjs';
+import { distinctUntilChanged, filter, Observable, Subject, take, takeUntil } from 'rxjs';
 import { MenuItem, VehicleDetailsMenuBuilderService } from '../../../../../service/vehicle-details-menu-builder.service';
 import { CommonModule } from '@angular/common';
 import { VehicleStatusPipe } from '../../../../../../shared/pipes/vehicle-status.pipe';
@@ -61,7 +61,7 @@ export class VehicleDetailsComponent implements OnInit, OnChanges, OnDestroy {
       (actionKey) => this.handleNavigation(actionKey)
     );
 
-    this.selectedVehicle$.pipe(filter(vehicle => !!vehicle),takeUntil(this.destroy$)).subscribe((vehicle) => {      
+    this.selectedVehicle$.pipe(filter(vehicle => !!vehicle), distinctUntilChanged((prev, curr) => prev?.id === curr?.id),takeUntil(this.destroy$)).subscribe((vehicle) => {      
       this.iframeUrl = this.liveStreamingService.getStreamingUrl({
         protocol: vehicle?.apiObject?.position?.protocol,
         uniqueId: vehicle?.apiObject?.device?.deviceId,
