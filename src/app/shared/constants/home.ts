@@ -23,7 +23,7 @@ export const VEHICLE_OVERVIEW_FIELDS = [
     value: (v: any) => `${v?.apiObject?.position.details.charge === true ? "On" : "Off"} | ${v?.apiObject?.position.valid === 1 ? "Available" : "Not Available"}`
   },
   {
-    label: 'Wheel | Immobilizer (Status)',
+    label: 'Wheel | Immobilizer',
     value: (v: any) => `${v?.apiObject?.position?.details?.wheelLock ? "Lock" : "Unlock"} | ${v?.apiObject?.position?.details?.armed ? "Immobilised" : "Mobilised"}`
   },
   {

@@ -169,7 +169,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     this.updateSingleVehicleMarker(currentVehicle, previousVehicle);
 
     if (this.firstVehicleUpdate && currPos) {
-      this.trackMapService.flyToPosition(currPos.latitude, currPos.longitude, 14, 3);
+      this.trackMapService.flyToPosition(currPos.latitude, currPos.longitude, 16, 3);
       this.firstVehicleUpdate = false;
     }
   }
