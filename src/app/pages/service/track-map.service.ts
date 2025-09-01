@@ -150,7 +150,7 @@ export class TrackMapService {
   }
 
   // Vehicle Trail Management
-  addToVehicleTrail(vehicleId: string, lat: number, lng: number, heading: number): void {
+  addToVehicleTrail(vehicleId: string, lat: number, lng: number, trialPathColor:string): void {
     // If different vehicle selected, clear previous trail
     if (this.currentTrailVehicleId && this.currentTrailVehicleId !== vehicleId) {
       this.clearVehicleTrail();
@@ -163,7 +163,7 @@ export class TrackMapService {
     if (this.trailCoordinates.length === 0 || 
         this.getDistanceFromLastPoint(newPoint) > 10) { // 10 meters threshold
       this.trailCoordinates.push(newPoint);
-      this.updateTrailPolyline(heading);
+      this.updateTrailPolyline(trialPathColor);
     }
   }
 
@@ -174,7 +174,7 @@ export class TrackMapService {
     return newPoint.distanceTo(lastPoint);
   }
 
-  private updateTrailPolyline(heading: number): void {
+  private updateTrailPolyline(trialPathColor: string): void {
     // Clear existing trail polyline
     this.vehicleTrailLayer.clearLayers();
 
@@ -193,8 +193,8 @@ export class TrackMapService {
       delay: 400,           // Animation delay in milliseconds
       dashArray: [10, 20],  // Dash pattern [dash length, gap length]
       weight: 5,            // Line weight
-      color: `color-mix(in srgb, ${getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim()} 50%, transparent)`,
-      pulseColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+      color: `color-mix(in srgb, ${trialPathColor} 50%, transparent)`,
+      pulseColor: trialPathColor || getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
       paused: false,        // Start animation immediately
       reverse: false,       // Animation direction
       hardwareAccelerated: true,
@@ -215,71 +215,6 @@ export class TrackMapService {
 
     // Add direction arrows along the trail
     // this.addTrailDirectionArrows(heading);
-  }
-
-  private createFadingTrailSegments(): void {
-    const segmentCount = Math.min(this.trailCoordinates.length - 1, 20); // Max 20 segments
-    const startIndex = Math.max(0, this.trailCoordinates.length - segmentCount - 1);
-
-    for (let i = startIndex; i < this.trailCoordinates.length - 1; i++) {
-      const segmentIndex = i - startIndex;
-      const opacity = 0.3 + (segmentIndex / segmentCount) * 0.5; // 0.3 to 0.8 opacity
-      
-      const segment = L.polyline(
-        [this.trailCoordinates[i], this.trailCoordinates[i + 1]], 
-        {
-          color: '#3b82f6',
-          weight: 3,
-          opacity: opacity,
-          className: 'vehicle-trail-segment'
-        }
-      );
-      
-      this.vehicleTrailLayer.addLayer(segment);
-    }
-  }
-
-  private addTrailDirectionArrows(heading: number): void {
-    if (this.trailCoordinates.length < 2) return;
-
-    // Add arrows every few points to show direction
-    const arrowInterval = Math.max(1, Math.floor(this.trailCoordinates.length / 5));
-    
-    for (let i = arrowInterval; i < this.trailCoordinates.length; i += arrowInterval) {
-      const currentPoint = this.trailCoordinates[i];
-      const previousPoint = this.trailCoordinates[i - 1];
-      
-      // const bearing = this.calculateBearing(previousPoint, currentPoint);
-      const arrowMarker = this.createArrowMarker(currentPoint, heading);
-      
-      this.vehicleTrailLayer.addLayer(arrowMarker);
-    }
-  }
-
-  private createArrowMarker(position: L.LatLng, bearing: number): L.Marker {
-    const arrowIcon = L.divIcon({
-      className: 'trail-arrow',
-      html: `<div style="transform: rotate(${bearing}deg); color: #3b82f6; font-size: 12px;">➤</div>`,
-      iconSize: [12, 12],
-      iconAnchor: [6, 6]
-    });
-
-    return L.marker(position, { icon: arrowIcon });
-  }
-
-  private calculateBearing(from: L.LatLng, to: L.LatLng): number {
-    const fromLat = from.lat * Math.PI / 180;
-    const fromLng = from.lng * Math.PI / 180;
-    const toLat = to.lat * Math.PI / 180;
-    const toLng = to.lng * Math.PI / 180;
-
-    const deltaLng = toLng - fromLng;
-    
-    const x = Math.sin(deltaLng) * Math.cos(toLat);
-    const y = Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(deltaLng);
-    
-    const bearing = Math.atan2(x, y) * 180 / Math.PI;
-    return (bearing + 360) % 360;
   }
 
   clearVehicleTrail(): void {

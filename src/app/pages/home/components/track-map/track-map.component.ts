@@ -35,6 +35,7 @@ import { VehicleStatusLabelPipe } from '../../../../shared/pipes/vehicle-status-
 import { VehicleStatusPipe } from '../../../../shared/pipes/vehicle-status.pipe';
 import { CdkDrag, CdkDragHandle } from "@angular/cdk/drag-drop";
 import { UiService } from '../../../../layout/service/ui.service';
+import { TRIAL_PATH_COLORS } from '../../../../shared/utils/helper_functions';
 
 @Component({
   selector: 'app-track-map',
@@ -274,7 +275,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
         currentVehicle.id.toString(), 
         currentPos.latitude, 
         currentPos.longitude,
-        currentPos.heading
+        TRIAL_PATH_COLORS[currentPos?.status?.status]
       );
     }
 

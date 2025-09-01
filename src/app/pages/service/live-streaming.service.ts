@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
+import { STREAM_PROTOCOLS } from '../../shared/utils/helper_functions';
 
 export interface LiveStreamOptions {
   protocol: string;
@@ -18,18 +19,10 @@ export class LiveStreamingService {
 
   private baseUrl = environment.liveStreamingBaseUrl;
 
-  // Map protocols to actual values
-  private protocolMap: Record<string, string> = {
-    livetrack24: 'cvpro',
-    jt808: 'cvpro',
-    cbalin: 'cvpro',
-    cbalinlock: 'cvpro',
-  };
-
   constructor(private sanitizer: DomSanitizer) { }
 
   getStreamingUrl(options: LiveStreamOptions): SafeResourceUrl | null {
-    const protocolToUse = this.protocolMap[options.protocol];
+    const protocolToUse = STREAM_PROTOCOLS[options.protocol];
 
     if (!protocolToUse) {
       // console.warn(`Protocol "${options.protocol}" not supported`);

@@ -26,6 +26,19 @@ export const tailwindColors500: Record<string, string> = {
   rose: '#f43f5e'
 };
 
+export const TRIAL_PATH_COLORS: Record<string, string> = {
+  "running": "#22c55e",
+  "stop": "#ef4444",
+  "dormant": "#eab308",
+};
+
+export const STREAM_PROTOCOLS: Record<string, string> = {
+  livetrack24: 'cvpro',
+  jt808: 'cvpro',
+  cbalin: 'cvpro',
+  cbalinlock: 'cvpro',
+};
+
 
 // Create a reverse map (hex -> name)
 export const tailwindColors500Reverse: Record<string, string> = Object.fromEntries(

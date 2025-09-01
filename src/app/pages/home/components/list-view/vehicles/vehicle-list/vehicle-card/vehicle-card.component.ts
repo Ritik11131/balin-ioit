@@ -2,6 +2,7 @@ import { TimeAgoPipe } from './../../../../../../../shared/pipes/time-ago.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-status.pipe';
+import { STREAM_PROTOCOLS } from '../../../../../../../shared/utils/helper_functions';
 
 @Component({
     selector: 'app-vehicle-card',
@@ -25,7 +26,11 @@ import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-sta
                     </span>
                 </div>
                 <div class="flex gap-2">
-                    <i class="pi pi pi-video" style="color: var(--primary-color)"></i>
+                    @if(STREAM_PROTOCOLS[vehicle.apiObject?.position?.protocol]) {
+                        <i class="pi pi pi-video" style="color: var(--primary-color)"></i>
+                    } @else {
+                        <i class="pi pi-exclamation-circle" style="color: var(--primary-color)"></i>
+                    }
                 </div>
             </div>
 
@@ -53,6 +58,9 @@ export class VehicleCardComponent {
     @Input() vehicle: any;
     @Input() isSelected: boolean = false;
     @Output() cardSelected = new EventEmitter<any>();
+
+
+    STREAM_PROTOCOLS = STREAM_PROTOCOLS;
 
     get cardClasses() {
         return {
