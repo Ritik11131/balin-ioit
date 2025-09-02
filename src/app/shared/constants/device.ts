@@ -3,7 +3,7 @@ export const DEVICE_DETAILS_TABS = [
         label: 'Details',
         icon: 'pi pi-user',
         key: 'details',
-        type: 'cards', // cards | table
+        type: 'cards',
         cardFields: [
             { label: 'Vehicle No', key: 'vehicleNo' },
             { label: 'IMEI', key: 'deviceImei' },
@@ -64,6 +64,36 @@ export const DEVICE_DETAILS_TABS = [
                         required: true,
                         options: [],
                         dataSource: 'users' 
+                    },
+                ]
+            },
+              {
+                formTitle: 'Plan Linking',
+                columns: 2,
+                isEditMode: false,
+                fields: [
+                    {
+                        key: 'planLink',
+                        label: 'Link Plan',
+                        type: 'select',
+                        placeholder: 'Select a Plan',
+                        required: true,
+                        options: [],
+                        dataSource: 'plans' 
+                    },
+                ]
+            },
+             {
+                formTitle: 'Send Command',
+                columns: 2,
+                isEditMode: false,
+                fields: [
+                    {
+                        key: 'sendCommand',
+                        label: 'Send Command',
+                        type: 'text',
+                        placeholder: 'e.g. Stop Device',
+                        required: true,
                     },
                 ]
             }

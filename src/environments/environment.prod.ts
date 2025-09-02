@@ -5,5 +5,6 @@ export const environment = {
     googleMapStaticApiURl:'https://gm-static-api.vercel.app/api/map',
     storeRefreshInterval: 10 * 60 * 1000,
     singleVehiclePollingInterval: 10 * 1000,
-    liveStreamingBaseUrl: 'https://live-streaming-6afbf.web.app/index.html'
+    liveStreamingBaseUrl: 'https://live-streaming-6afbf.web.app/index.html',
+    cctcCameraFlv:'https://media.baliniot.in/live/'
 }

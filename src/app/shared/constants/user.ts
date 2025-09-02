@@ -71,7 +71,8 @@ export const USER_DETAILS_TABS = [
           { label: 'ETA', key: 'eta', permissions: ['0','1'] },
           { label: 'Raw Data', key: 'rawData', permissions: ['0','1'] },
           { label: 'Subscription', key: 'subscription', permissions: ['0','1'] },
-          { label: 'Notification', key: 'notification', permissions: ['0','1'] }
+          { label: 'Notification', key: 'notification', permissions: ['0','1'] },
+          { label: 'CCTV', key: 'cctv', permissions: ['0','1'] },
         ]
       },
       {

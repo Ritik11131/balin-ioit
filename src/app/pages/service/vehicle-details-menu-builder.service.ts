@@ -107,11 +107,11 @@ export class VehicleDetailsMenuBuilderService {
     },
 
     // Simple command actions
-    cctv: {
-      label: 'CCTV',
-      icon: 'pi pi-video',
-      actionType: 'command'
-    },
+    // cctv: {
+    //   label: 'CCTV',
+    //   icon: 'pi pi-video',
+    //   actionType: 'command'
+    // },
     dashCam: {
       label: 'Dash Cam',
       icon: 'pi pi-camera',

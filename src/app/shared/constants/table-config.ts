@@ -67,8 +67,8 @@ export const DEVICE_TABLE_CONFIG = {
         enabled: true, 
         actions: [
             { id: 'download', label: 'Download Report', icon: 'pi pi-download', severity: 'contrast' },
-            { id: 'delete', label: 'Delete', icon: 'pi pi-trash', severity: 'danger' },
-            { id: 'more', label: 'More', icon: 'pi pi-share-alt', severity: 'contrast' },
+            { id: 'delete', label: 'Delete', icon: 'pi pi-trash', severity: 'contrast' },
+            { id: 'more', label: 'More', icon: 'pi pi-ellipsis-h', severity: 'contrast' },
         ]
     },
     globalFilterFields: [],

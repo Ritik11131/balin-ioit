@@ -40,6 +40,13 @@ export const sidebarItems = [
     icon: 'pi pi-chart-bar',
     route: '/pages/reports',
     requiredModuleKey: 'reports'
+  },
+  {
+    name:'CCTV',
+    key: 'cctv',
+    icon: 'pi pi-video',
+    route: '/pages/cctv',
+    requiredModuleKey: 'cctv'
   }
 
   // Add more items as needed

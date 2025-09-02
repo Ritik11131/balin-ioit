@@ -1,0 +1,82 @@
+<div class="w-full h-screen flex flex-col bg-gray-50 text-gray-900">
+  <div class="flex-1 p-4">
+    <p-carousel
+      [value]="carouselPages"
+      [numVisible]="1"
+      [numScroll]="1"
+      [showNavigators]="true"
+      [showIndicators]="true"
+      [circular]="false"
+      [autoplayInterval]="0"
+      (onPage)="onPageChange($event)"
+      class="w-full h-full">
+      <ng-template let-pageGrids pTemplate="item">
+        <div class="w-full h-[calc(100vh-120px)]">
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 h-full">
+            <div
+              *ngFor="let camera of pageGrids; trackBy: trackByCamera"
+              class="flex flex-col bg-white border rounded-lg shadow-sm overflow-hidden hover:shadow-md transition"
+            >
+              <div class="p-2 flex justify-between items-center border-b bg-gray-50">
+                <span class="text-xs font-medium text-gray-600">Cam {{ camera.id }}</span>
+                <p-select
+                  [options]="getChannelOptions(camera.deviceImei)"
+                  [(ngModel)]="camera.channelName"
+                  (onChange)="onChannelSelect(camera, $event.value)"
+                  optionLabel="label"
+                  optionValue="value"
+                  styleClass="text-xs w-24"
+                ></p-select>
+              </div>
+
+              <!-- Video -->
+              <div class="relative flex-1 bg-black">
+                <video
+                  #videoPlayer
+                  [src]="camera.videoSrc"
+                  class="w-full h-full object-cover"
+                  muted
+                  autoplay
+                  loop
+                  (error)="onVideoError(camera, $event)"
+                  (loadeddata)="onVideoLoaded(camera)"
+                >
+                  <source [src]="camera.videoSrc" type="video/mp4" />
+                </video>
+
+                <!-- Hover Controls -->
+                <div class="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition opacity-0 hover:opacity-100">
+                  <div class="flex gap-2">
+                    <p-button icon="pi pi-play" (click)="toggleVideoPlay(videoPlayer)" rounded text></p-button>
+                    <p-button icon="pi pi-window-maximize" (click)="toggleFullscreen(camera)" rounded text></p-button>
+                  </div>
+                </div>
+
+                <!-- Selected -->
+                <div *ngIf="camera.isSelected" class="absolute top-2 right-2 w-5 h-5 rounded-full bg-[var(--primary-color)] text-white flex items-center justify-center">
+                  <i class="pi pi-check text-xs"></i>
+                </div>
+
+                <!-- Status -->
+                <div class="absolute bottom-2 left-2 flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  <span class="text-xs text-white bg-green-600 px-2 py-0.5 rounded">LIVE</span>
+                </div>
+              </div>
+
+              <!-- Footer -->
+              <div class="p-2 flex justify-between items-center text-xs bg-gray-50 border-t">
+                <span class="text-gray-500 truncate">
+                  {{ camera.deviceImei.slice(-6) }}
+                </span>
+                <span class="text-[var(--primary-color)] font-semibold">
+                  {{ camera.channelName }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </p-carousel>
+  </div>
+</div>

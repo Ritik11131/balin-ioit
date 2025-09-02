@@ -57,7 +57,7 @@ export class DevicesComponent implements OnDestroy, OnInit {
     selectedRowItems: any[] = [];
     editData!: any
     device!:any;
-    activeTab = 'details';
+    activeTab = 'config';
     // Maps for generic handling
     loadingMap: Record<string, boolean> = {
         details: false,
@@ -100,17 +100,46 @@ export class DevicesComponent implements OnDestroy, OnInit {
     };
 
     
-    async viewMoreDetailsHandler(row: any): Promise<void> {
-        console.log(row);
-        this.device = row;
-        this.formConfigEnricher.enrichForms(DEVICE_DETAILS_TABS).subscribe(res => {
+    async viewMoreDetailsHandler(data: any | any[]): Promise<void> {
+        const isMultiSelected = Array.isArray(data);
+
+        if (!data || (isMultiSelected && data.length === 0)) {
+            this.uiService.showToast('warn', 'Warning', 'No device(s) selected');
+            return;
+        }
+
+        this.device = isMultiSelected ? data : [data];        
+
+        // Filter tabs dynamically based on single vs multi
+        const filteredTabs = DEVICE_DETAILS_TABS.filter(tab => {
+            if (isMultiSelected && (tab.key === 'details' || tab.key === 'linkedUsers')) {
+                return false;
+            }
+            return true;
+        });
+
+        this.formConfigEnricher.enrichForms(filteredTabs).subscribe(res => {
             this.tabsConfig = res;
         });
-        this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
-        await Promise.all([
-            this.loadLinkedUsers(row.id)
-        ]);
+
+        // Open drawer
+        this.uiService.openDrawer(
+            this.viewMoreDetails,
+            ' ',
+            '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]',
+            true
+        );
+
+        // Only load linked users if single selection
+        if (!isMultiSelected) {
+            try {
+               await this.loadLinkedUsers(data.id)
+            } catch (err) {
+                this.uiService.showToast('error', 'Error', 'Failed to load linked users');
+            }
+        }
     }
+
 
   private async loadLinkedUsers(deviceId: number) {
     try {
@@ -203,11 +232,14 @@ export class DevicesComponent implements OnDestroy, OnInit {
     }
 
     handleMultiSelectPanelActionClick(action: SelectionAction) {
+        this.activeTab = 'config';
         switch (action.id) {
             case 'delete':
                 console.log(this.selectedRowItems);
-                
                 this.deleteHandler(this.selectedRowItems);
+                break;
+            case 'more':
+                this.viewMoreDetailsHandler(this.selectedRowItems);
                 break;
         }
 
@@ -247,6 +279,7 @@ export class DevicesComponent implements OnDestroy, OnInit {
                             : `${data?.userName} deleted successfully`
                     );
                     this.store.dispatch(loadDevices());
+                    this.selectedRowItems = []
                 } catch (err: any) {
                     this.uiService.showToast('error', 'Error', err?.message || 'Delete failed');
                 }

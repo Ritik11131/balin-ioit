@@ -18,17 +18,22 @@
     <div class="w-full mx-auto">
 
         <!-- Header -->
-        <div class="flex items-center justify-between mb-4 md:mb-6">
+        <div class="flex items-center justify-start">
+            @for (item of device; track $index) {
             <div class="flex items-center gap-3">
-                <p-avatar [label]="('?').toUpperCase()" shape="circle"
-                    styleClass="shadow"></p-avatar>
+                <p-avatar [label]="('?').toUpperCase()" shape="circle" styleClass="shadow"></p-avatar>
                 <div>
                     <div class="text-lg md:text-xl font-semibold text-gray-800">
-                        {{ device?.vehicleNo || 'Entity' }}
+                        {{ item?.vehicleNo || 'Entity' }}
                     </div>
-                    <div class="text-xs md:text-sm text-gray-500">{{ device?.deviceImei || '—' }}</div>
+                    <div class="text-xs md:text-sm text-gray-500">{{ item?.deviceImei || '—' }}</div>
                 </div>
             </div>
+             <!-- Separator (only on large screens) -->
+        @if($index < device.length - 1) {
+          <p-divider class="hidden sm:block" layout="vertical" />
+        }
+            }
         </div>
 
         <p-divider></p-divider>
@@ -56,13 +61,13 @@
                             <div class="text-xs uppercase text-gray-500 mb-1">{{ card.label }}</div>
                             <div class="text-sm font-medium text-gray-800">
                                 @if (card.chip) {
-                                <p-chip [label]="device?.[card.key] || '—'"></p-chip>
+                                <p-chip [label]="(device?.[card.key] || device[0]?.[card.key]) || '—'"></p-chip>
                                 } @else if (card.date) {
-                                {{ device?.[card.key] | date:'medium' }}
+                                {{ (device?.[card.key] || device[0]?.[card.key]) | date:'medium' }}
                                 } @else if (card.boolean) {
-                                {{ device?.[card.key] ? 'Enabled' : 'Disabled' }}
+                                {{ (device?.[card.key] || device[0]?.[card.key]) ? 'Enabled' : 'Disabled' }}
                                 } @else {
-                                {{ device?.[card.key] || '—' }}
+                                {{ (device?.[card.key] || device[0]?.[card.key]) || '—' }}
                                 }
                             </div>
                         </div>
