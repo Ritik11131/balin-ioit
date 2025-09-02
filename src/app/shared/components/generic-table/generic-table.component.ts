@@ -14,26 +14,28 @@ import { TieredMenuModule } from 'primeng/tieredmenu';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToolbarSkeletonComponent } from './skeletons/toolbar-skeleton/toolbar-skeleton.component';
 import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleton.component';
+import { MultiselectActionPanelComponent, SelectionAction } from "./multiselect-action-panel/multiselect-action-panel.component";
 
 @Component({
     selector: 'app-generic-table',
     imports: [
-        ToolbarModule,
-        ButtonModule,
-        RippleModule,
-        FormsModule,
-        TableModule,
-        IconFieldModule,
-        SelectButtonModule,
-        InputIconModule,
-        SplitButtonModule,
-        InputTextModule,
-        DatePipe,
-        TieredMenuModule,
-        SkeletonModule,
-        ToolbarSkeletonComponent,
-        TableSkeletonComponent
-    ],
+    ToolbarModule,
+    ButtonModule,
+    RippleModule,
+    FormsModule,
+    TableModule,
+    IconFieldModule,
+    SelectButtonModule,
+    InputIconModule,
+    SplitButtonModule,
+    InputTextModule,
+    DatePipe,
+    TieredMenuModule,
+    SkeletonModule,
+    ToolbarSkeletonComponent,
+    TableSkeletonComponent,
+    MultiselectActionPanelComponent
+],
     template: `
         @if (isLoading) {
             <div class="w-full">
@@ -43,6 +45,8 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                 <app-table-skeleton />
             </div>
         } @else {
+
+        <!-- Toolbar  -->
             @if(toolBarStartActions.length) {
                 <p-toolbar styleClass="mb-6">
                     <ng-template #start>
@@ -69,10 +73,12 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                 </p-toolbar>
             }
 
+        <!-- Filter Buttons  -->
             @if (tableFilterByStatusConfig.length) {
                 <p-selectbutton class="mb-6" [options]="tableFilterByStatusConfig" [(ngModel)]="selectedRouteStatusType" (onChange)="handleTableFilterByStatusChange($event)" [allowEmpty]="false" />
             }
 
+        <!-- Table  -->
             <p-table
                 #dt
                 [columns]="tableConfig.columns"
@@ -156,6 +162,15 @@ import { TableSkeletonComponent } from './skeletons/table-skeleton/table-skeleto
                     </tr>
                 </ng-template>
             </p-table>
+
+        <!-- Multi Select Control Panel -->
+         @if(selectedItems.length) {
+             <app-multiselect-action-panel [selectedCount]="selectedItems.length"
+            [actions]="tableConfig.multiSelect.actions"
+            (actionClicked)="hanldeSelectionAction($event)"
+            (closeClicked)="onCloseSelection()" />
+         }
+       
         }
     `,
     styles: [
@@ -180,14 +195,15 @@ export class GenericTableComponent {
     @Input() tableConfig!: any;
     @Input() tableData!: any;
     @Input() isLoading: any = false;
-
+    
     @Output() onToolBarStartAction = new EventEmitter<any>();
     @Output() onSelectionChange = new EventEmitter<any>(); // Event emitter for row select
     @Output() onTableDropdownFilter = new EventEmitter<any>();
     @Output() onTableFilterByStatus = new EventEmitter<any>(); // Event emitter for filter by status
     @Output() onActionClick = new EventEmitter<{ label: string, row: any }>();
-
-
+    @Output() onMultiSelectPanelActionClick = new EventEmitter<SelectionAction>();
+    
+    
     selectedRouteStatusType: any = 'all';
 
     onSearch(dt: Table, event: Event) {
@@ -217,7 +233,7 @@ export class GenericTableComponent {
     }
 
     handleSelectionChange(event: any) {
-        this.onSelectionChange.emit(event);
+        this.onSelectionChange.emit({event, items: this.selectedItems});
     }
 
     handleTableDropdownFilter(event: any) {
@@ -227,4 +243,12 @@ export class GenericTableComponent {
     handleTableFilterByStatusChange(event: any) {
         this.onTableFilterByStatus.emit(event.value);
     }
+
+    hanldeSelectionAction(action: SelectionAction): void {
+    this.onMultiSelectPanelActionClick.emit(action);
+  }
+
+  onCloseSelection(): void {
+    this.selectedItems = [];
+  }
 }

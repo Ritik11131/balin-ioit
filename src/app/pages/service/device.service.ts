@@ -98,4 +98,15 @@ export class DeviceService {
     }
   }
 
+    async deleteDevice(data: any): Promise<any> {
+    try {
+      const response = await this.http.delete('device', data?.id);
+      return response;
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error', error?.error?.data);
+      throw error;
+      
+    }
+  }
+
 }

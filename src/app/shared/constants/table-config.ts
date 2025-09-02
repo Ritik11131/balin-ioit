@@ -54,12 +54,23 @@ export const DEVICE_TABLE_CONFIG = {
                 icon: 'pi pi-user-edit',
             },
             {
+                label: 'Delete',
+                icon: 'pi pi-trash',
+            },
+            {
                 label: 'More',
                 icon: 'pi pi-ellipsis-v',
             },
         ]
     },
-
+    multiSelect: {
+        enabled: true, 
+        actions: [
+            { id: 'download', label: 'Download Report', icon: 'pi pi-download', severity: 'contrast' },
+            { id: 'delete', label: 'Delete', icon: 'pi pi-trash', severity: 'danger' },
+            { id: 'more', label: 'More', icon: 'pi pi-share-alt', severity: 'contrast' },
+        ]
+    },
     globalFilterFields: [],
     dataKey: 'id'
 };

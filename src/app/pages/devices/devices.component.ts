@@ -24,6 +24,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { ChipModule } from 'primeng/chip';
 import { selectUsers } from '../../store/users/users.selectors';
 import { FormEnricherService } from '../service/form-enricher.service';
+import { SelectionAction } from '../../shared/components/generic-table/multiselect-action-panel/multiselect-action-panel.component';
+import { ConfirmationService } from 'primeng/api';
 
 
 @Component({
@@ -37,9 +39,10 @@ export class DevicesComponent implements OnDestroy, OnInit {
     @ViewChild('viewMoreDetails') viewMoreDetails: any;
     private store = inject(Store);
     private uiService = inject(UiService);
+    private confirmationService = inject(ConfirmationService);
     private userService = inject(UserService);
     private deviceService = inject(DeviceService);
-    private formConfigEnricher = inject(FormEnricherService)
+    private formConfigEnricher = inject(FormEnricherService);
     private destroy$ = new Subject<void>();
 
     devices$: Observable<any[]> = this.store.select(selectAllDevices);
@@ -92,6 +95,7 @@ export class DevicesComponent implements OnDestroy, OnInit {
 
     private actionHandlers: Record<string, (row: any) => void> = {
         'Update': (row) => this.editHandler(row),
+        'Delete': (row) => this.deleteHandler(row),
         'More': (row) => this.viewMoreDetailsHandler(row),
     };
 
@@ -197,4 +201,63 @@ export class DevicesComponent implements OnDestroy, OnInit {
         this.formFields = CREATE_DEVICE_FORM_FIELDS;
         this.uiService.closeDrawer();
     }
+
+    handleMultiSelectPanelActionClick(action: SelectionAction) {
+        switch (action.id) {
+            case 'delete':
+                console.log(this.selectedRowItems);
+                
+                this.deleteHandler(this.selectedRowItems);
+                break;
+        }
+
+    }
+
+    async deleteHandler(data: any | any[]): Promise<void> {
+        const items = Array.isArray(data) ? data : [data]; // normalize to array
+
+        this.confirmationService.confirm({
+            target: data,
+            message: Array.isArray(data)
+                ? `Are you sure you want to delete ${items.length} devices?`
+                : `Are you sure that you want to delete ${data?.vehicleNo}?`,
+            header: 'Confirmation',
+            closable: true,
+            closeOnEscape: true,
+            icon: 'pi pi-exclamation-triangle',
+            rejectButtonProps: {
+                label: 'Cancel',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Delete',
+                severity: 'danger',
+            },
+            accept: async () => {
+                try {
+                    for (const item of items) {
+                        await this.deviceService.deleteDevice(item);
+                    }
+                    this.uiService.showToast(
+                        'success',
+                        'Success',
+                        Array.isArray(data)
+                            ? `${items.length} users deleted successfully`
+                            : `${data?.userName} deleted successfully`
+                    );
+                    this.store.dispatch(loadDevices());
+                } catch (err: any) {
+                    this.uiService.showToast('error', 'Error', err?.message || 'Delete failed');
+                }
+            },
+        });
+    }
+
+    handleTableSelectionChange(event: any) {
+        console.log(event,'evvv');
+        this.selectedRowItems = event.event || event.items;
+        
+    }
+
 }

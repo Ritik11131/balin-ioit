@@ -69,6 +69,4 @@ export const DEVICE_DETAILS_TABS = [
             }
         ]
     }
-
-
 ];

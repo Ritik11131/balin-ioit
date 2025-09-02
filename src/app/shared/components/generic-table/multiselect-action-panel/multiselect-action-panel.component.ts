@@ -1,0 +1,82 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
+import { DividerModule } from 'primeng/divider';
+
+export interface SelectionAction {
+  id: string;
+  label: string;
+  icon: string;
+  severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warn' | 'danger' | 'help' | 'contrast';
+}
+
+@Component({
+  selector: 'app-multiselect-action-panel',
+  imports: [DragDropModule, ButtonModule, DividerModule, CommonModule],
+  template:`
+    <div 
+  cdkDrag 
+  cdkDragHandle 
+  class="fixed bottom-4 left-1/2 z-50 w-[95%] sm:w-auto bg-[var(--primary-color)] text-white rounded-lg shadow-lg flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 px-4 py-3"
+  style="transform: translateX(-50%);"
+>
+
+  <!-- Left section -->
+  <div class="flex items-center space-x-2 sm:space-x-4">
+    <p-button 
+      icon="pi pi-times" 
+      (click)="onClose()" 
+      [text]="true"
+      severity="danger"
+      size="small">
+    </p-button>
+    <span class="text-sm font-medium whitespace-nowrap">{{selectedCount}} Selected</span>
+  </div>
+
+  <!-- Right section -->
+  <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:ml-20">
+    @for(action of actions; track action.id; let i = $index) {
+      <p-button 
+        [label]="action.label"
+        [icon]="action.icon"
+        (click)="onActionClick(action)"
+        [severity]="action.severity || 'secondary'"
+        [text]="true"
+        size="small"
+        class="text-sm whitespace-nowrap">
+      </p-button>
+
+      <!-- Separator (only show on larger screens) -->
+      @if(i < actions.length - 1) {
+        <p-divider class="hidden sm:block" layout="vertical" />
+      }
+    }
+  </div>
+</div>
+
+  `
+  
+})
+export class MultiselectActionPanelComponent {
+
+  @Input() selectedCount: number = 0;
+  @Input() actions: SelectionAction[] = [
+    { id: 'share', label: 'Share', icon: 'pi pi-share-alt', severity: 'contrast' },
+    { id: 'immobilize', label: 'Immobilize', icon: 'pi pi-lock', severity: 'contrast' },
+    { id: 'replay', label: 'Path Replay', icon: 'pi pi-replay', severity: 'contrast' },
+    { id: 'download', label: 'Download Report', icon: 'pi pi-download', severity: 'contrast' }
+  ];
+
+  @Output() actionClicked = new EventEmitter<SelectionAction>();
+  @Output() closeClicked = new EventEmitter<void>();
+
+  onActionClick(action: SelectionAction): void {
+    this.actionClicked.emit(action);
+  }
+
+  onClose(): void {
+    this.closeClicked.emit();
+  }
+
+}

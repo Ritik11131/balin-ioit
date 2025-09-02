@@ -10,6 +10,7 @@ import { UiService } from '../../../../../../layout/service/ui.service';
 import { VehicleActionEvent, VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
 import { PathReplayService } from '../../../../../service/path-replay.service';
 import { Subject, takeUntil } from 'rxjs';
+import { LiveTrackingControl, TrackMapService } from '../../../../../service/track-map.service';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -54,6 +55,8 @@ export class VehicleListComponent {
   private store = inject(Store);
   private uiService = inject(UiService);
   private pathReplayService = inject(PathReplayService);
+  public trackMapService = inject(TrackMapService);
+  
   selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
 
@@ -131,6 +134,7 @@ export class VehicleListComponent {
 
   private handlePathReplay(event: any) {
     console.log(event);
+    this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl)
     this.uiService.closeDrawer();
     this.pathReplayService.startPathReplay(null);
   }

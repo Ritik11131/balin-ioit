@@ -40,7 +40,7 @@ import { TRIAL_PATH_COLORS } from '../../../../shared/utils/helper_functions';
 @Component({
   selector: 'app-track-map',
   standalone: true,
-  imports: [ButtonModule, LeafletModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule, VehicleStatusLabelPipe, VehicleStatusPipe, CdkDrag, CdkDragHandle],
+  imports: [ButtonModule, LeafletModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule, VehicleStatusPipe, CdkDrag, CdkDragHandle],
   templateUrl: './track-map.component.html',
   styleUrl: './track-map.component.scss'
 })

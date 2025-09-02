@@ -1,8 +1,8 @@
 <div class="p-8">
     <div class="w-[calc(100vw-150px)]">
         <app-generic-table [selectedItems]="selectedRowItems" [toolBarStartActions]="toolbarItems"
-            [tableConfig]="tableConfig" [tableData]="(devices$ | async)" [isLoading]="isLoading$ | async"
-            (onToolBarStartAction)="handleToolBarActions($event)" (onActionClick)="handleInTableActions($event)" />
+            [tableConfig]="tableConfig" [tableData]="(devices$ | async)" [isLoading]="isLoading$ | async" (onSelectionChange)="handleTableSelectionChange($event)"
+            (onToolBarStartAction)="handleToolBarActions($event)" (onActionClick)="handleInTableActions($event)" (onMultiSelectPanelActionClick)="handleMultiSelectPanelActionClick($event)" />
     </div>
 </div>
 
