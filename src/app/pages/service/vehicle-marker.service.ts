@@ -76,12 +76,6 @@ export class VehicleMarkerService {
     const color = this.getStatusColor(status);
 
     const iconFile = `images/vehicles/rp_marker_${vehicleName}_${color}.png`;
-
-    if(vehicleTypeId === 19) {
-      console.log(iconFile,'iconnn');
-      
-    }
-
     return divIcon({
       className: `${className} vehicle-${vehicleTypeId} status-${status}`,
       html: `<img src="${iconFile}" alt="${vehicleName}" class="w-12 h-12"  style="transform: rotate(${heading}deg); transform-origin: center center;" />`,
