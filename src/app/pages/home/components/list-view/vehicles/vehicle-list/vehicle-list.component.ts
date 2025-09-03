@@ -9,8 +9,9 @@ import { CommonModule } from '@angular/common';
 import { UiService } from '../../../../../../layout/service/ui.service';
 import { VehicleActionEvent, VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
 import { PathReplayService } from '../../../../../service/path-replay.service';
-import { Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { LiveTrackingControl, TrackMapService } from '../../../../../service/track-map.service';
+import { VehicleDetailsMenuBuilderService } from '../../../../../service/vehicle-details-menu-builder.service';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -56,7 +57,8 @@ export class VehicleListComponent {
   private uiService = inject(UiService);
   private pathReplayService = inject(PathReplayService);
   public trackMapService = inject(TrackMapService);
-  
+  private vehcileDetailMenuService = inject(VehicleDetailsMenuBuilderService);
+
   selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
 
@@ -81,16 +83,13 @@ export class VehicleListComponent {
     this.uiService.openDrawer(this.vehicleDetailsTemplate);
   }
 
-  onActionExecuted(event: VehicleActionEvent) {
+  async onActionExecuted(event: VehicleActionEvent): Promise<any> {
     switch (event.actionKey) {
       case 'immobilizer':
-        this.handleImmobilizer(event.actionType);
+        await this.handleImmobilizer(event.actionType);
         break;
-      case 'dashCam':
-        this.openDashCam();
-        break;
-      case 'trackingLink':
-        this.openLiveTracking();
+      case 'parking':
+        await this.handleParking(event.actionType);
         break;
       case 'elocking':
         this.handleELocking(event.actionType);
@@ -98,42 +97,67 @@ export class VehicleListComponent {
       case 'historyReplay':
         this.handlePathReplay(event);
         break;
-      // Add more cases as needed
+      case 'bootLock':
+        await this.handleBootLock(event.actionType);
+        break;
       default:
         console.log('Unhandled action:', event);
     }
   }
 
-  private handleImmobilizer(actionType: string) {
-    if (actionType === 'enable') {
-      // Call API to enable immobilizer
-      console.log('Enabling immobilizer...');
-    } else if (actionType === 'disable') {
-      // Call API to disable immobilizer
-      console.log('Disabling immobilizer...');
+  private async handleBootLock(actionType: string) {
+    await this.executeVehicleAction('Commands/Immobilizer', actionType, (deviceId, action) => {
+      return {
+        deviceId: deviceId,
+        command: "*GIPL,BULOCK,$",
+        commandType: 'custom',
+        token: 'web'
+      };
+    });
+  }
+
+  private async handleImmobilizer(actionType: string) {
+    await this.executeVehicleAction('Commands/Immobilizer', actionType, (deviceId, action) => {
+      return {
+        deviceId: deviceId,
+        commandType: action === 'enable' ? 'engineResume' : 'engineStop',
+        token: 'web'
+      };
+    });
+  }
+
+  private async handleParking(actionType: string) {
+    await this.executeVehicleAction('Parking', actionType, (deviceId, action) => ({
+      deviceId: deviceId,
+      status: action === 'enable' ? 1 : 0
+    }));
+  }
+
+
+
+  private async executeVehicleAction(
+    actionKey: string,
+    actionType: string,
+    payloadMap: (deviceId: any, actionType: string) => any
+  ) {
+    const vehicle = await firstValueFrom(this.store.select(selectSelectedVehicle));
+    if (!vehicle) {
+      console.warn('No vehicle selected!');
+      return;
     }
+
+    const payload = payloadMap(vehicle.id, actionType); // build payload dynamically
+    await this.vehcileDetailMenuService.handleCustomActionRequest(actionKey, payload);
   }
 
-  private handleELocking(actionType: string) {
-    if (actionType === 'enable') {
-      console.log('Locking vehicle...');
-    } else if (actionType === 'disable') {
-      console.log('Unlocking vehicle...');
-    }
-  }
-
-  private openDashCam() {
-    console.log('Opening dash cam...');
-    // Navigate to dash cam or open modal
-  }
-
-  private openLiveTracking() {
-    console.log('Opening live tracking...');
-    // Navigate to tracking page
+  private async handleELocking(actionType: string) {
+     await this.executeVehicleAction('Parking', actionType, (deviceId, action) => ({
+      deviceId: deviceId,
+      status: action === 'enable' ? 1 : 0
+    }));
   }
 
   private handlePathReplay(event: any) {
-    console.log(event);
     this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl)
     this.uiService.closeDrawer();
     this.pathReplayService.startPathReplay(null);

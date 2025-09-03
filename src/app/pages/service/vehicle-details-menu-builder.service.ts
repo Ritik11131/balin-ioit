@@ -32,6 +32,8 @@ import { Injectable } from '@angular/core';
 import { selectWebConfigActions } from '../../store/user-configuration/selectors';
 import { map, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
+import { HttpService } from './http.service';
+import { UiService } from '../../layout/service/ui.service';
 
 @Injectable({
   providedIn: 'root'
@@ -74,11 +76,11 @@ export class VehicleDetailsMenuBuilderService {
       actionType: 'toggle'
     },
     bootLock: {
-      label: 'Boot Lock',
+      label: 'Boot',
       icon: 'pi pi-box',
       hasSubItems: true,
-      enabledLabel: 'Lock Boot',
-      disabledLabel: 'Unlock Boot',
+      enabledLabel: 'Unlock',
+      disabledLabel: 'Lock',
       actionType: 'toggle'
     },
     padlocking: {
@@ -112,11 +114,11 @@ export class VehicleDetailsMenuBuilderService {
     //   icon: 'pi pi-video',
     //   actionType: 'command'
     // },
-    dashCam: {
-      label: 'Dash Cam',
-      icon: 'pi pi-camera',
-      actionType: 'command'
-    },
+    // dashCam: {
+    //   label: 'Dash Cam',
+    //   icon: 'pi pi-camera',
+    //   actionType: 'command'
+    // },
     historyReplay: {
       label: 'History Replay',
       icon: 'pi pi-history',
@@ -136,7 +138,7 @@ export class VehicleDetailsMenuBuilderService {
     }
   };
 
-  constructor(private store: Store) {}
+  constructor(private store: Store, private http: HttpService, private uiService: UiService) {}
 
   /**
    * Builds menu items based on webConfig actions
@@ -306,4 +308,18 @@ export class VehicleDetailsMenuBuilderService {
       this.menuConfig[actionKey] = { ...this.menuConfig[actionKey], ...config };
     }
   }
+
+
+  async handleCustomActionRequest(endpoint: string, data: any): Promise<any> {
+    try {
+      this.uiService.toggleLoader(true);
+      await this.http.post(endpoint, data);
+      this.uiService.showToast('success', 'Success', 'Action Executed');
+    } catch (error: any) {
+      this.uiService.showToast('error', 'Error', error.error.data)
+    } finally {
+      this.uiService.toggleLoader(false);
+    }
+  }
+
 }

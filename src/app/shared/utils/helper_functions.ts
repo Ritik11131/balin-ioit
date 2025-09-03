@@ -39,6 +39,8 @@ export const STREAM_PROTOCOLS: Record<string, string> = {
   cbalinlock: 'cvpro',
 };
 
+export const EV_VEHICLES = [19]
+
 
 // Create a reverse map (hex -> name)
 export const tailwindColors500Reverse: Record<string, string> = Object.fromEntries(

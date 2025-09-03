@@ -192,7 +192,7 @@ export class TrackMapService {
     const polyline = (L as any).polyline.antPath(this.trailCoordinates, {
       delay: 400,           // Animation delay in milliseconds
       dashArray: [10, 20],  // Dash pattern [dash length, gap length]
-      weight: 5,            // Line weight
+      weight: 4,            // Line weight
       color: `color-mix(in srgb, ${trialPathColor} 50%, transparent)`,
       pulseColor: trialPathColor || getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
       paused: false,        // Start animation immediately

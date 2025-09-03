@@ -2,7 +2,7 @@ import { TimeAgoPipe } from './../../../../../../../shared/pipes/time-ago.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { VehicleStatusPipe } from '../../../../../../../shared/pipes/vehicle-status.pipe';
-import { STREAM_PROTOCOLS } from '../../../../../../../shared/utils/helper_functions';
+import { EV_VEHICLES, STREAM_PROTOCOLS } from '../../../../../../../shared/utils/helper_functions';
 
 @Component({
     selector: 'app-vehicle-card',
@@ -26,11 +26,15 @@ import { STREAM_PROTOCOLS } from '../../../../../../../shared/utils/helper_funct
                     </span>
                 </div>
                 <div class="flex gap-2">
-                    @if(STREAM_PROTOCOLS[vehicle.apiObject?.position?.protocol]) {
-                        <i class="pi pi pi-video" style="color: var(--primary-color)"></i>
-                    } @else {
-                        <i class="pi pi-exclamation-circle" style="color: var(--primary-color)"></i>
+                    @if(EV_VEHICLES.includes(vehicle.apiObject?.device?.vehicleType)) {
+                        <i class="pi pi pi-bolt text-green-500"></i>
                     }
+                    @if(STREAM_PROTOCOLS[vehicle.apiObject?.position?.protocol]) {
+                        <i class="pi pi pi-video text-red-500 animate-pulse"></i>
+                    } @else {
+                        <i class="pi pi-exclamation-circle text-yellow-500"></i>
+                    }
+
                 </div>
             </div>
 
@@ -61,6 +65,7 @@ export class VehicleCardComponent {
 
 
     STREAM_PROTOCOLS = STREAM_PROTOCOLS;
+    EV_VEHICLES = EV_VEHICLES;
 
     get cardClasses() {
         return {
