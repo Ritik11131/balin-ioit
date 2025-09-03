@@ -13,6 +13,7 @@ import { AuthService } from '../../pages/service/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 import { logout } from '../../store/core/action';
 import { Store } from '@ngrx/store';
+import { SidebarService } from '../../pages/service/sidebar.service';
 
 @Component({
   selector: 'app-topbar',
@@ -69,7 +70,7 @@ export class AppTopbar implements OnInit, OnDestroy {
   constructor(
     public layoutService: LayoutService,
     private authService: AuthService,
-    private router: Router,
+    private sidebarService: SidebarService,
     private store: Store,
     private storeService: StoreService
   ) {}
@@ -97,10 +98,9 @@ export class AppTopbar implements OnInit, OnDestroy {
     const childItems = children.map((child, index) => ({
       label: `Go To ${child.userName}`,
       icon: 'pi pi-sign-in',
-      command: () => {
+      command: async () => {
         this.authService.switchToChild(index);
-        this.store.dispatch(logout());
-        this.storeService.startAutoRefresh();
+        this.switchHandler()
       }
     }));
 
@@ -113,8 +113,7 @@ export class AppTopbar implements OnInit, OnDestroy {
               icon: 'pi pi-sign-in',
               command: () => {
                 this.authService.switchToParent();
-                this.store.dispatch(logout());
-                this.storeService.startAutoRefresh();
+                this.switchHandler();
               }
             }
           ]
@@ -140,6 +139,13 @@ export class AppTopbar implements OnInit, OnDestroy {
     this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
   }
 
+
+  switchHandler() {
+    this.store.dispatch(logout());
+        this.storeService.startAutoRefresh();
+        this.sidebarService.navigateToFirstSidebarItem();
+  }
+ 
     ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

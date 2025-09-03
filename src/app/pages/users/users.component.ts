@@ -297,6 +297,7 @@ async viewMoreDetailsHandler(row: any): Promise<void> {
 
 async handleChildLogins(row: any): Promise<void> {
   try {
+    this.uiService.toggleLoader(true);
     const res = await this.userService.getUserDetailsById(row?.id);
     const { loginId, password, id, userName } = res?.data;
 
@@ -310,6 +311,8 @@ async handleChildLogins(row: any): Promise<void> {
     console.log(`Switched to child: ${userName}`);
   } catch (error) {
     console.error('Error logging in as child:', error);
+  } finally {
+    this.uiService.toggleLoader(false);
   }
 }
 

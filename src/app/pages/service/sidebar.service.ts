@@ -6,10 +6,12 @@ import { map } from 'rxjs/operators';
 import { sidebarItems } from '../../shared/constants/sidebar';
 import { selectWebConfigModules } from '../../store/user-configuration/selectors';
 import { ConfigModules } from '../../store/user-configuration/state';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class SidebarService {
   private store = inject(Store);
+  private router = inject(Router);
 
   /**
    * Returns sidebar items filtered by ConfigModules
@@ -26,6 +28,17 @@ export class SidebarService {
         });
       })
     );
+  }
+
+  /**
+   * Navigate to first available sidebar item whenever items change
+   */
+  navigateToFirstSidebarItem(): void {
+    this.getSidebarItems().subscribe(items => {
+      if (items.length > 0) {
+        this.router.navigate([items[0].route]);
+      }
+    });
   }
 
   /**
