@@ -10,6 +10,7 @@ import { loadVehicles } from '../../store/vehicle/vehicle.actions';
 import { loadGeofences } from '../../store/geofence/geofence.actions';
 import { loadUserConfiguration } from '../../store/user-configuration/actions';
 import { AuthService } from './auth.service';
+import { loadPlans } from '../../store/plans/actions';
 
 @Injectable({ providedIn: 'root' })
 export class StoreService implements OnDestroy {
@@ -41,13 +42,14 @@ export class StoreService implements OnDestroy {
    * Manual refresh
    */
   refreshStore() {
-    this.store.dispatch(loadUsers());
-    this.store.dispatch(loadDevices());
+    this.store.dispatch(loadUserConfiguration());
     this.store.dispatch(loadVehicleTypes());
     this.store.dispatch(loadDeviceTypes());
+    this.store.dispatch(loadPlans());
+    this.store.dispatch(loadUsers());
+    this.store.dispatch(loadDevices());
     this.store.dispatch(loadVehicles());
     this.store.dispatch(loadGeofences());
-    this.store.dispatch(loadUserConfiguration());
   }
 
   ngOnDestroy() {

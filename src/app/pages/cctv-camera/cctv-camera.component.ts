@@ -77,7 +77,7 @@ export class CctvCameraComponent implements OnInit, OnDestroy {
     return {
       imei: vehicle?.apiObject?.device?.deviceId ?? '',
       name: vehicle?.vehicleNo ?? `Vehicle ${vehicle.id}`,
-      channels: Array.from({ length: 4 }, (_, i) => ({
+      channels: Array.from({ length: 2 }, (_, i) => ({
         label: `CH ${i + 1}`,
         value: i + 1
       })),

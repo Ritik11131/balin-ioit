@@ -105,6 +105,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
+    this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl);
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -448,7 +449,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   exitTracking() {
     this.trackMapService.clearAllLayers();
     this.uiService.closeDrawer();
-    this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl)
+    this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl);
     this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(selectVehicle({ vehicle: null }));
     this.store.dispatch(loadVehicles());

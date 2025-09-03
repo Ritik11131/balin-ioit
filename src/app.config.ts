@@ -26,6 +26,8 @@ import { vehicleTypeReducer } from './app/store/vehicle-type/reducer';
 import { DeviceTypeEffects } from './app/store/device-type/effects';
 import { deviceTypeReducer } from './app/store/device-type/reducer';
 import { WhitelabelThemeService } from './app/pages/service/whitelabel-theme.service';
+import { plansReducer } from './app/store/plans/reducer';
+import { PlansEffects } from './app/store/plans/effects';
 
 export function initTheme() {
   const themeService = inject(WhitelabelThemeService);
@@ -56,7 +58,8 @@ export const appConfig: ApplicationConfig = {
     users: usersReducer,
     devices: devicesReducer,
     vehicleType: vehicleTypeReducer,
-    deviceType: deviceTypeReducer
+    deviceType: deviceTypeReducer,
+    plans: plansReducer
   },
   { metaReducers: [clearStateMetaReducer] }
   ),
@@ -68,6 +71,7 @@ export const appConfig: ApplicationConfig = {
     DevicesEffects,
     VehicleTypeEffects,
     DeviceTypeEffects,
+    PlansEffects
 
   ]),
   provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),

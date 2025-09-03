@@ -10,11 +10,9 @@ import { VehicleService } from '../../pages/service/vehicle.service';
 @Injectable()
 export class VehicleTypeEffects {
 
-    private actions$ = inject(Actions);
+  private actions$ = inject(Actions);
     
-        constructor(
-            private vehicleService: VehicleService
-        ) { }
+  constructor(private vehicleService: VehicleService) { }
 
   loadVehicleTypes$ = createEffect(() =>
     this.actions$.pipe(

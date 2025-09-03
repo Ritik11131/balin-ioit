@@ -5,6 +5,7 @@ import { selectDeviceTypes } from '../../store/device-type/selectors';
 import { selectVehicleTypes } from '../../store/vehicle-type/selectors';
 import { selectUsers } from '../../store/users/users.selectors';
 import { selectVehicles } from '../../store/vehicle/vehicle.selectors';
+import { selectPlans } from '../../store/plans/selectors';
 
 @Injectable({
   providedIn: 'root'
@@ -18,14 +19,16 @@ export class FormEnricherService {
       this.store.select(selectDeviceTypes),
       this.store.select(selectVehicleTypes),
       this.store.select(selectUsers),
-      this.store.select(selectVehicles)
+      this.store.select(selectVehicles),
+      this.store.select(selectPlans)
     ]).pipe(
-      map(([deviceTypes, vehicleTypes, users, vehicles]) => {
+      map(([deviceTypes, vehicleTypes, users, vehicles, plans]) => {
         const sourceMap: Record<string, any[]> = {
           deviceTypes,
           vehicleTypes,
           users,
-          vehicles
+          vehicles,
+          plans
         };
 
         console.log(sourceMap,'map');
@@ -37,7 +40,7 @@ export class FormEnricherService {
 
         const fillField = (field: any) => {
           if (field.dataSource && sourceMap[field.dataSource]) {
-            const labelKey = field.dataSource === 'users' ? 'userName' : 'name';
+            const labelKey = field.dataSource === 'users' ? 'userName' : field.dataSource === 'plans' ? 'planName' : 'name';
             field.options = mapOptions(sourceMap[field.dataSource], labelKey);
           }
           return field;
