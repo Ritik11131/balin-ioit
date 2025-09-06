@@ -7,6 +7,7 @@ export const availableReports = [
             date: { show: true, disableFutureDate: true },
         },
         api: { endpoint: 'v1/history', multiRequest: false },
+        map: {historyReplay: true},
         tableColumns: [
             { field: 'serverTime', header: 'Server Time' },
             { field: 'timestamp', header: 'Device Time' },
@@ -22,7 +23,8 @@ export const availableReports = [
             vehicle: { show: true, multiSelection: {enabled: true, maxSelection:7} },
             date: { show: true, disableFutureDate: true },
         },
-        api: { endpoint: 'v1/history', multiRequest: false },
+        api: { endpoint: 'TripReport', multiRequest: true },
+        map: {historyReplay: false, plotMarkers: true},
         tableColumns: [
             { field: 'serverTime', header: 'Server Time' },
             { field: 'timestamp', header: 'Device Time' },

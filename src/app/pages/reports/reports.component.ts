@@ -29,6 +29,7 @@ export class ReportsComponent {
 
 
   navigateToReport(report: any) {
+    console.log(report);    
     this.router.navigate([`/pages/reports/${report?.id}`])
   }
 

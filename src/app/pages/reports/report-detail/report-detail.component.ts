@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { map, Observable } from 'rxjs';
 import { selectVehicles } from '../../../store/vehicle/vehicle.selectors';
 import { Store } from '@ngrx/store';
+import { ReportsService } from '../../service/reports.service';
 
 @Component({
   selector: 'app-report-detail',
@@ -14,11 +15,11 @@ import { Store } from '@ngrx/store';
   styleUrl: './report-detail.component.scss'
 })
 export class ReportDetailComponent {
-
-  public pathReplayService = inject(PathReplayService);
+  private reportsService = inject(ReportsService);
   private store = inject(Store);
+  public pathReplayService = inject(PathReplayService);
+  
   vehicles$ = this.store.select(selectVehicles);
-
   selectedVehicle$ = this.vehicles$.pipe(map(vehicles => vehicles.length ? vehicles[0] : null));
 
   ngOnInit(): void {
