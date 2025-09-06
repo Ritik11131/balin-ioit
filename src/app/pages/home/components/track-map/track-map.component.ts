@@ -36,6 +36,7 @@ import { VehicleStatusPipe } from '../../../../shared/pipes/vehicle-status.pipe'
 import { CdkDrag, CdkDragHandle } from "@angular/cdk/drag-drop";
 import { UiService } from '../../../../layout/service/ui.service';
 import { TRIAL_PATH_COLORS } from '../../../../shared/utils/helper_functions';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-track-map',
@@ -45,11 +46,12 @@ import { TRIAL_PATH_COLORS } from '../../../../shared/utils/helper_functions';
   styleUrl: './track-map.component.scss'
 })
 export class TrackMapComponent implements OnDestroy, OnChanges {
-  @Input() activeTab: 'vehicles' | 'geofences' | 'pathReplay' = 'vehicles';
+  @Input() activeTab: 'vehicles' | 'geofences' | 'reports' = 'vehicles';
   
   public userLocationMarker?: Marker;
   private uiService = inject(UiService);
   private store = inject(Store);
+  private router = inject(Router);
   private pathReplayService = inject(PathReplayService);
   private vehicleMarkerService = inject(VehicleMarkerService);
   public trackMapService = inject(TrackMapService);
@@ -92,7 +94,6 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (!changes['activeTab']) return;
 
-    this.destroy$.next();
     switch (this.activeTab) {
       case 'vehicles':
         setTimeout(() => this.initializeVehicleSubscriptions(), 100);
@@ -100,14 +101,13 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
       case 'geofences':
         this.initializeGeofenceSubscriptions();
         break;
-      case 'pathReplay':
+      case 'reports':
         this.setupPathReplaySubscriptions();
         break;
     }
   }
 
   ngOnDestroy(): void {
-    this.pathReplayService.resetPathReplayService();
     this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl);
     this.destroy$.next();
     this.destroy$.complete();
@@ -227,7 +227,11 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   private handleReplayClosed(vehicles: VehicleData[]): void {
     console.log(vehicles, 'replay closed, restoring vehicles');
     this.store.dispatch(selectVehicle({ vehicle: null }));
-    this.updateVehicleMarkers(vehicles);
+    if(this.activeTab !== 'reports') {
+      this.updateVehicleMarkers(vehicles);
+    } else {
+      this.router.navigate(['/pages/reports'])
+    }
   }
 
   private initializeGeofenceSubscriptions(): void {

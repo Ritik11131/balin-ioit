@@ -1,4 +1,5 @@
 <div class="bg-white shadow-sm border border-gray-200 p-4 h-full">
+    <p-button icon="pi pi-angle-left" [label]="'Back'" (onClick)="handleBackClick()"/>
     <app-generic-form-generator [config]="formFields" [initialData]="defaultPlaybackObj"
         (formSubmit)="onFormSubmit($event)"></app-generic-form-generator>
     <app-playback-path-info />

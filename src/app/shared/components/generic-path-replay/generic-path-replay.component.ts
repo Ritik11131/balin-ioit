@@ -55,12 +55,19 @@ export class GenericPathReplayComponent implements OnChanges {
     this.onFormSubmit({ isEditMode: true, formValue: this.defaultPlaybackObj });
   }
 
+  handleBackClick() {
+    this.pathReplayService.stopPathReplay();
+    this.pathReplayService.resetPathReplayService();
+  }
+
   ngOnDestroy(): void {
+    console.log('Apth Replay Componnt Destroyed');
+    this.pathReplayService.handlePlaybackControls('close');
     this.destroy$.next();
     this.destroy$.complete();
-    this.pathReplayService.handlePlaybackControls('close');
     console.log('Path ReplayDestroyed');
-    
   }
+
+
 
 }
