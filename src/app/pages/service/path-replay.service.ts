@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, map, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, Subject, combineLatest } from 'rxjs';
 import { CREATE_USER_FORM_FIELDS } from '../../shared/constants/forms';
 import { PATH_REPLAY_FORM_FIELDS } from '../../shared/constants/path-replay';
 import { FormEnricherService } from './form-enricher.service';
@@ -11,6 +11,40 @@ import moment from 'moment';
 import * as turf from "@turf/turf";
 import { ReportsService } from './reports.service';
 
+// Loading state interfaces
+interface LoadingStates {
+  initializing: boolean;
+  fetchingHistory: boolean;
+  fetchingStops: boolean;
+  processingData: boolean;
+  fetchingAddresses: boolean;
+  plottingStops: boolean;
+  initializingPlayer: boolean;
+}
+
+interface DataStates {
+  hasHistoryData: boolean;
+  hasStopsData: boolean;
+  hasVehicleInfo: boolean;
+  hasTrackPlayer: boolean;
+}
+
+interface ErrorStates {
+  historyError: string | null;
+  stopsError: string | null;
+  addressError: string | null;
+  playerError: string | null;
+  generalError: string | null;
+}
+
+interface ServiceState {
+  loading: LoadingStates;
+  data: DataStates;
+  errors: ErrorStates;
+  isReady: boolean;
+  // progress: number; // 0-100
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -20,16 +54,77 @@ export class PathReplayService {
 
   private _historyData = new BehaviorSubject<any[]>([]);
   historyData$ = this._historyData.asObservable();
-  hasHistory$ = this.historyData$.pipe(map(d => d.length > 0));
+
+  private _stopsData = new BehaviorSubject<any[]>([]);
+  stopsData$ = this._stopsData.asObservable();
 
   private _replayClosed = new Subject<void>();
   replayClosed$ = this._replayClosed.asObservable();
+
+  // Enhanced state management
+  private _serviceState = new BehaviorSubject<ServiceState>({
+    loading: {
+      initializing: false,
+      fetchingHistory: false,
+      fetchingStops: false,
+      processingData: false,
+      fetchingAddresses: false,
+      plottingStops: false,
+      initializingPlayer: false
+    },
+    data: {
+      hasHistoryData: false,
+      hasStopsData: false,
+      hasVehicleInfo: false,
+      hasTrackPlayer: false
+    },
+    errors: {
+      historyError: null,
+      stopsError: null,
+      addressError: null,
+      playerError: null,
+      generalError: null
+    },
+    isReady: false,
+    // progress: 0
+  });
+
+  // Public observables for state management
+  serviceState$ = this._serviceState.asObservable();
+  
+  // Convenience observables
+  isLoading$ = this.serviceState$.pipe(
+    map(state => Object.values(state.loading).some(loading => loading))
+  );
+  
+  hasAnyError$ = this.serviceState$.pipe(
+    map(state => Object.values(state.errors).some(error => error !== null))
+  );
+  
+  // loadingProgress$ = this.serviceState$.pipe(
+  //   map(state => state.progress)
+  // );
+  
+  isReady$ = this.serviceState$.pipe(
+    map(state => state.isReady)
+  );
+
+  // Legacy computed observables for backward compatibility
+  hasHistory$ = combineLatest([this.historyData$, this.serviceState$]).pipe(
+    map(([data, state]) => data.length > 0 && state.data.hasHistoryData)
+  );
+
+  hasStops$ = combineLatest([this.stopsData$, this.serviceState$]).pipe(
+    map(([data, state]) => data.length > 0 && state.data.hasStopsData)
+  );
+
   private formConfigEnricher = inject(FormEnricherService);
   private http = inject(HttpService);
   private uiService = inject(UiService);
   private addressService = inject(AddressService);
   private reportsService = inject(ReportsService);
   private stopMarkers: L.Marker[] = [];
+  
   formFields$ = this.formConfigEnricher.enrichForms([PATH_REPLAY_FORM_FIELDS]).pipe(map((res) => res[0]));
 
   trackPlayer!: any;
@@ -43,8 +138,99 @@ export class PathReplayService {
     endInfo: { address: '', timestamp: '' },
     maxSpeed: 0,
     totalDistance: 0,
-    stopsData: { total: 0, data:[]},
-    historyData: { total: 0, data:[] }
+    stopsData: { total: 0, data: [] },
+    historyData: { total: 0, data: [] }
+  };
+
+  // State management helper methods
+  private updateLoadingState(updates: Partial<LoadingStates>) {
+    const currentState = this._serviceState.value;
+    const newLoadingState = { ...currentState.loading, ...updates };
+    
+    // Calculate progress based on completed operations
+    const operations = Object.keys(newLoadingState);
+    const completedOperations = operations.filter(op => !newLoadingState[op as keyof LoadingStates]);
+    // const progress = (completedOperations.length / operations.length) * 100;
+    
+    this._serviceState.next({
+      ...currentState,
+      loading: newLoadingState,
+      // progress: Math.round(progress)
+    });
+  }
+
+  private updateDataState(updates: Partial<DataStates>) {
+    const currentState = this._serviceState.value;
+    const newDataState = { ...currentState.data, ...updates };
+    
+    // Check if service is ready
+    const isReady = newDataState.hasHistoryData || newDataState.hasVehicleInfo;
+    
+    this._serviceState.next({
+      ...currentState,
+      data: newDataState,
+      isReady
+    });
+  }
+
+  private updateErrorState(updates: Partial<ErrorStates>) {
+    const currentState = this._serviceState.value;
+    this._serviceState.next({
+      ...currentState,
+      errors: { ...currentState.errors, ...updates }
+    });
+  }
+
+  private clearErrors() {
+    this.updateErrorState({
+      historyError: null,
+      stopsError: null,
+      addressError: null,
+      playerError: null,
+      generalError: null
+    });
+  }
+
+  private resetServiceState() {
+    this._serviceState.next({
+      loading: {
+        initializing: false,
+        fetchingHistory: false,
+        fetchingStops: false,
+        processingData: false,
+        fetchingAddresses: false,
+        plottingStops: false,
+        initializingPlayer: false
+      },
+      data: {
+        hasHistoryData: false,
+        hasStopsData: false,
+        hasVehicleInfo: false,
+        hasTrackPlayer: false
+      },
+      errors: {
+        historyError: null,
+        stopsError: null,
+        addressError: null,
+        playerError: null,
+        generalError: null
+      },
+      isReady: false,
+      // progress: 0
+    });
+  }
+
+  // Getters for easy access to current state
+  get currentState(): ServiceState {
+    return this._serviceState.value;
+  }
+
+  get isCurrentlyLoading(): boolean {
+    return Object.values(this.currentState.loading).some(loading => loading);
+  }
+
+  get hasCurrentErrors(): boolean {
+    return Object.values(this.currentState.errors).some(error => error !== null);
   }
 
   startPathReplay(formObj: any) {
@@ -56,79 +242,102 @@ export class PathReplayService {
   }
 
   async fetchHistory(payload: any): Promise<any> {
-    this.uiService.toggleLoader(true);
+    this.updateLoadingState({ fetchingHistory: true });
+    
     try {
       const response = await this.http.post('history', payload);
+      this.updateLoadingState({ fetchingHistory: false });
+      this.updateErrorState({ historyError: null });
       return response;
     } catch (error: any) {
-      this.uiService.showToast('error', 'Error', error?.error?.data);
+      this.updateLoadingState({ fetchingHistory: false });
+      const errorMessage = error?.error?.data || 'Failed to fetch history data';
+      this.updateErrorState({ historyError: errorMessage });
+      this.uiService.showToast('error', 'Error', errorMessage);
       throw error;
     }
   }
 
   async setVehicleStartEndInfo(track: any[], stops: any[]) {
-    if (!track?.length) {
+    this.updateLoadingState({ processingData: true, fetchingAddresses: true });
+    
+    try {
+      if (!track?.length) {
+        this.vehicleStartEndInfo = {
+          startInfo: { address: '', timestamp: '' },
+          endInfo: { address: '', timestamp: '' },
+          maxSpeed: 0,
+          totalDistance: 0,
+          stopsData: { total: 0, data: [] },
+          historyData: { total: 0, data: [] }
+        };
+        this.updateDataState({ hasVehicleInfo: false });
+        this.updateLoadingState({ processingData: false, fetchingAddresses: false });
+        return;
+      }
+
+      const [start, end] = [track[0], track.at(-1)];
+
+      // Fetch addresses in parallel
+      const [startAddress, endAddress] = await Promise.all([
+        this.addressService.getAddress(start.lat, start.lng),
+        this.addressService.getAddress(end.lat, end.lng),
+      ]);
+
+      this.updateLoadingState({ fetchingAddresses: false });
+
+      // Max speed
+      const maxSpeed = track.reduce((max, point) => Math.max(max, point.speed || 0), 0);
+
+      // Total distance using Turf.js
+      const line = turf.lineString(track.map(p => [p.lng, p.lat])); // [lng, lat] order
+      const totalDistance = turf.length(line, { units: 'kilometers' }); // in km
+
       this.vehicleStartEndInfo = {
-        startInfo: { address: '', timestamp: '' },
-        endInfo: { address: '', timestamp: '' },
-        maxSpeed: 0,
-        totalDistance: 0,
-        stopsData: { total: 0, data: [] },
-        historyData: { total: 0, data: [] }
+        startInfo: {
+          address: startAddress,
+          timestamp: moment(start.timestamp).format('DD MMM YYYY, hh:mm A')
+        },
+        endInfo: {
+          address: endAddress,
+          timestamp: moment(end.timestamp).format('DD MMM YYYY, hh:mm A')
+        },
+        maxSpeed,
+        totalDistance: totalDistance?.toFixed(2),
+        stopsData: {
+          total: stops?.length || 0,
+          data: await Promise.all(
+            stops.map(async (stop, index) => {
+              const address = await this.addressService.getAddress(stop.latitude, stop.longitude);
+              return {
+                label: `Stop ${index + 1}`,
+                address,
+                duration: formatStopDuration(stop),
+              };
+            })
+          )
+        },
+        historyData: { total: track?.length || 0, data: track || [] }
       };
-      return;
+
+      this.updateDataState({ hasVehicleInfo: true });
+      this.updateLoadingState({ processingData: false });
+      this.updateErrorState({ addressError: null });
+
+    } catch (error: any) {
+      this.updateLoadingState({ processingData: false, fetchingAddresses: false });
+      const errorMessage = 'Failed to process vehicle information';
+      this.updateErrorState({ addressError: errorMessage });
+      console.error('Error setting vehicle info:', error);
     }
-
-    const [start, end] = [track[0], track.at(-1)];
-
-    // Fetch addresses in parallel
-    const [startAddress, endAddress] = await Promise.all([
-      this.addressService.getAddress(start.lat, start.lng),
-      this.addressService.getAddress(end.lat, end.lng),
-    ]);
-
-    // Max speed
-    const maxSpeed = track.reduce((max, point) => Math.max(max, point.speed || 0), 0);
-
-    // Total distance using Turf.js
-    const line = turf.lineString(track.map(p => [p.lng, p.lat])); // [lng, lat] order
-    const totalDistance = turf.length(line, { units: 'kilometers' }); // in km
-
-    this.vehicleStartEndInfo = {
-      startInfo: {
-        address: startAddress,
-        timestamp: moment(start.timestamp).format('DD MMM YYYY, hh:mm A')
-      },
-      endInfo: {
-        address: endAddress,
-        timestamp: moment(end.timestamp).format('DD MMM YYYY, hh:mm A')
-      },
-      maxSpeed,
-      totalDistance: totalDistance?.toFixed(2),
-      stopsData: {
-        total: stops?.length || 0,
-        data: await Promise.all(
-          stops.map(async (stop, index) => {
-            const address = await this.addressService.getAddress(stop.latitude, stop.longitude);
-            return {
-              label: `Stop ${index + 1}`,
-              address,
-              duration: formatStopDuration(stop),
-            };
-          })
-        )
-      },
-      historyData: { total: track?.length || 0, data: track || [] }
-    };
   }
-
 
   /**
    * Plots stop points on the map with animated pulse markers
-   * @param stopsData - Array of stop data from API
-   * @param map - Leaflet map instance
    */
   public plotStopPoints(stopsData: any[], map: any): void {
+    this.updateLoadingState({ plottingStops: true });
+    
     try {
       // Reset/clear existing stop markers first
       this.clearStopPoints();
@@ -136,11 +345,14 @@ export class PathReplayService {
       // Validate inputs
       if (!map) {
         console.warn('Map instance not provided for plotting stop points');
+        this.updateLoadingState({ plottingStops: false });
         return;
       }
 
       if (!stopsData || !Array.isArray(stopsData) || stopsData.length === 0) {
         console.info('No stop data available to plot');
+        this.updateDataState({ hasStopsData: false });
+        this.updateLoadingState({ plottingStops: false });
         return;
       }
 
@@ -204,9 +416,13 @@ export class PathReplayService {
       this.injectStopMarkerStyles();
 
       console.log(`Successfully plotted ${this.stopMarkers.length} stop points`);
+      this.updateDataState({ hasStopsData: true });
+      this.updateLoadingState({ plottingStops: false });
 
     } catch (error) {
       console.error('Error plotting stop points:', error);
+      this.updateErrorState({ generalError: 'Failed to plot stop points' });
+      this.updateLoadingState({ plottingStops: false });
     }
   }
 
@@ -227,6 +443,7 @@ export class PathReplayService {
         });
 
         this.stopMarkers = [];
+        this.updateDataState({ hasStopsData: false });
       }
     } catch (error) {
       console.error('Error clearing stop points:', error);
@@ -284,9 +501,6 @@ export class PathReplayService {
   `;
   }
 
-  
-
-
   /**
    * Injects CSS styles for stop marker animations
    */
@@ -336,144 +550,190 @@ export class PathReplayService {
     document.head.appendChild(style);
   }
 
-  // Updated _initPathReplayFunc method
+  // Updated _initPathReplayFunc method with enhanced loading states
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
-    if (this.trackPlayer) {
-      this.trackPlayer.remove();
-      this.trackPlayer = null;
-    }
-    this._historyData.next([]);
+    this.updateLoadingState({ initializing: true });
+    this.clearErrors();
 
-    // Clear existing stop points
-    this.clearStopPoints();
+    try {
+      if (this.trackPlayer) {
+        this.trackPlayer.remove();
+        this.trackPlayer = null;
+        this.updateDataState({ hasTrackPlayer: false });
+      }
+      
+      this._historyData.next([]);
+      this._stopsData.next([]);
 
-    // Reset playback controls
-    this.playbackControlObject = {
-      speed: 500,
-      progress: 0,
-      status: 'Idle',
-      start: () => { },
-      pause: () => { },
-      remove: () => { },
-      updateSpeed: () => { },
-      updateProgress: () => { },
-      reset: () => { }
-    };
+      // Clear existing stop points
+      this.clearStopPoints();
 
-    // Reset vehicle history info
-    this.vehiclePlaybackObject = {
-      speed: 0,
-      timestamp: '00:00:00'
-    };
+      // Reset playback controls
+      this.playbackControlObject = {
+        speed: 500,
+        progress: 0,
+        status: 'Idle',
+        start: () => { },
+        pause: () => { },
+        remove: () => { },
+        updateSpeed: () => { },
+        updateProgress: () => { },
+        reset: () => { }
+      };
 
-    this.vehicleStartEndInfo = {
-      startInfo: { address: '', timestamp: '' },
-      endInfo: { address: '', timestamp: '' },
-      maxSpeed: 0,
-      totalDistance: 0,
-      stopsData: { total: 0, data: [] },
-      historyData: { total: 0, data: [] }
-    }
+      // Reset vehicle history info
+      this.vehiclePlaybackObject = {
+        speed: 0,
+        timestamp: '00:00:00'
+      };
 
-    const { formValue } = historyPayload;
+      this.vehicleStartEndInfo = {
+        startInfo: { address: '', timestamp: '' },
+        endInfo: { address: '', timestamp: '' },
+        maxSpeed: 0,
+        totalDistance: 0,
+        stopsData: { total: 0, data: [] },
+        historyData: { total: 0, data: [] }
+      }
 
-    const requests = buildHistoryRequests(
-      formValue?.vehicle,
-      formValue?.date[0],
-      formValue?.date[1]
-    );
+      this.updateDataState({
+        hasHistoryData: false,
+        hasStopsData: false,
+        hasVehicleInfo: false,
+        hasTrackPlayer: false
+      });
 
-    const [historyResults, stopsResults] = await Promise.all([
-      Promise.allSettled(requests.map(r =>
-        this.fetchHistory({
-          DeviceId: r.deviceId,
-          FromTime: r.fromTime,
-          ToTime: r.toTime
-        }).catch(err => ({ error: err.message, data: [] }))
-      )),
-      Promise.allSettled(requests.map(r =>
-        this.reportsService.fetchStopReport({
-          DeviceId: r.deviceId,
-          FromTime: r.fromTime,
-          ToTime: r.toTime
-        }).catch(err => ({ error: err.message, data: [] }))
-      ))
-    ]);
+      const { formValue } = historyPayload;
 
-    // Extract successful data
-    const historyData = historyResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
-    const stopsData = stopsResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
+      const requests = buildHistoryRequests(
+        formValue?.vehicle,
+        formValue?.date[0],
+        formValue?.date[1]
+      );
 
-    console.log(historyData, 'historyData');
-    console.log(stopsData, 'stopsData');
+      // Fetch data with proper loading states
+      this.updateLoadingState({ fetchingHistory: true, fetchingStops: true });
 
-    if (!historyData.length) {
-      this.uiService.showToast('warn', 'Warning', 'No Data Found')
+      const [historyResults, stopsResults] = await Promise.all([
+        Promise.allSettled(requests.map(r =>
+          this.fetchHistory({
+            DeviceId: r.deviceId,
+            FromTime: r.fromTime,
+            ToTime: r.toTime
+          }).catch(err => ({ error: err.message, data: [] }))
+        )),
+        Promise.allSettled(requests.map(r =>
+          this.reportsService.fetchStopReport({
+            DeviceId: r.deviceId,
+            FromTime: r.fromTime,
+            ToTime: r.toTime
+          }).catch(err => ({ error: err.message, data: [] }))
+        ))
+      ]);
+
+      this.updateLoadingState({ fetchingHistory: false, fetchingStops: false });
+
+      // Extract successful data
+      const historyData = historyResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
+      const stopsData = stopsResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
+
+      console.log(historyData, 'historyData');
+      console.log(stopsData, 'stopsData');
+
+      // Update data states
+      this._stopsData.next(stopsData);
+
+      if (!historyData.length) {
+        this.updateErrorState({ historyError: 'No history data found' });
+        this.uiService.showToast('warn', 'Warning', 'No Data Found');
+        this.updateLoadingState({ initializing: false });
+        return;
+      }
+
+      this.updateLoadingState({ processingData: true });
+      
+      const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
+      await this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
+      
+      this._historyData.next(uniqueTrackPath);
+      this.updateDataState({ hasHistoryData: true });
+
+      if (uniqueTrackPath && uniqueTrackPath.length > 0) {
+        map.fitBounds(uniqueTrackPath);
+        await this.initilizeTrackPlayer(uniqueTrackPath, map);
+      }
+
+      // Plot stop points after track initialization
+      this.plotStopPoints(stopsData, map);
+      
+      this.updateLoadingState({ initializing: false });
+
+    } catch (error: any) {
+      console.error('Error in _initPathReplayFunc:', error);
+      this.updateErrorState({ generalError: 'Failed to initialize path replay' });
+      this.updateLoadingState({ initializing: false });
       this.uiService.toggleLoader(false);
-      return;
     }
+  }
+
+  public async initilizeTrackPlayer(trackPathData: any[], map: any) {
+    this.updateLoadingState({ initializingPlayer: true });
     
-    const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
-    await this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
-    this._historyData.next(uniqueTrackPath);
-    if (uniqueTrackPath && uniqueTrackPath.length > 0) {
-      map.fitBounds(uniqueTrackPath);
-      this.initilizeTrackPlayer(uniqueTrackPath, map);
+    try {
+      const primaryColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-color')
+        .trim();
+      console.log(primaryColor, 'primary');
+
+      this.trackPlayer = new (L as any).TrackPlayer(trackPathData, {
+        speed: 500,
+        weight: 4,
+        markerIcon: L.icon({
+          iconUrl: 'images/home/car.png',
+          iconSize: [27, 54],
+          iconAnchor: [13.5, 27],
+          shadowUrl:
+            'data:image/svg+xml;base64,' +
+            btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="90" viewBox="0 0 32 60">
+              <ellipse cx="16" cy="50" rx="12" ry="8" fill="rgba(0,0,0,0.3)"/>
+            </svg>
+          `),
+          shadowSize: [32, 60],
+          shadowAnchor: [16, 30]
+        }),
+        passedLineColor: primaryColor,
+        notPassedLineColor: '#2196F3',
+        polylineDecoratorOptions: {
+          patterns: [
+            {
+              offset: 30,
+              repeat: 60,
+              symbol: (L as any).Symbol.arrowHead({
+                pixelSize: 8,
+                headAngle: 75,
+                polygon: false,
+                pathOptions: { stroke: true, weight: 3, color: primaryColor },
+              }),
+            },
+          ],
+        },
+      });
+
+      this.trackPlayer.addTo(map);
+      this.initializetrackListeners(trackPathData);
+      this.playbackControlObject = this.initializePlayBackControlObject(map);
+      
+      this.updateDataState({ hasTrackPlayer: true });
+      this.updateLoadingState({ initializingPlayer: false });
+      this.updateErrorState({ playerError: null });
+      
+    } catch (error: any) {
+      console.error('Error initializing track player:', error);
+      this.updateErrorState({ playerError: 'Failed to initialize track player' });
+      this.updateLoadingState({ initializingPlayer: false });
     }
-
-    // Plot stop points after track initialization
-    this.plotStopPoints(stopsData, map);
-    this.uiService.toggleLoader(false);
   }
-
-
-  public initilizeTrackPlayer(trackPathData: any[], map: any) {
-    const primaryColor = getComputedStyle(document.documentElement)
-      .getPropertyValue('--primary-color')
-      .trim();
-    console.log(primaryColor, 'primary');
-
-    this.trackPlayer = new (L as any).TrackPlayer(trackPathData, {
-      speed: 500,
-      weight: 4,
-      markerIcon: L.icon({
-        iconUrl: 'images/home/car.png',
-        iconSize: [27, 54],
-        iconAnchor: [13.5, 27],
-        shadowUrl:
-          'data:image/svg+xml;base64,' +
-          btoa(`
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="90" viewBox="0 0 32 60">
-            <ellipse cx="16" cy="50" rx="12" ry="8" fill="rgba(0,0,0,0.3)"/>
-          </svg>
-        `),
-        shadowSize: [32, 60],
-        shadowAnchor: [16, 30]
-      }),
-      passedLineColor: primaryColor,
-      notPassedLineColor: '#2196F3',
-      polylineDecoratorOptions: {
-        patterns: [
-          {
-            offset: 30,
-            repeat: 60,
-            symbol: (L as any).Symbol.arrowHead({
-              pixelSize: 8,
-              headAngle: 75,
-              polygon: false,
-              pathOptions: { stroke: true, weight: 3, color: primaryColor },
-            }),
-          },
-        ],
-      },
-    });
-
-    this.trackPlayer.addTo(map); // <-- map is explicitly passed
-
-    this.initializetrackListeners(trackPathData);
-    this.playbackControlObject = this.initializePlayBackControlObject(map);
-  }
-
 
   initializePlayBackControlObject(map: any) {
     return {
@@ -517,11 +777,7 @@ export class PathReplayService {
       this.playbackControlObject.pause();
     } else if (control === 'updatespeed') {
       this.playbackControlObject.updateSpeed(event?.value);
-      // this.playbackControlObject.speed = event.value;
-      // this.trackPlayer.setSpeed(event.value);
     } else if (control === 'updateprogress') {
-      // this.playbackControlObject.progress = event.value / 100
-      // this.trackPlayer.setProgress(event.value / 100);
       this.playbackControlObject.updateProgress(event?.value / 100);
     } else if (control === 'close') {
       this.playbackControlObject.remove();
@@ -560,8 +816,9 @@ export class PathReplayService {
 
     // Reset replay state
     this._replayActive.next({ value: false });
-    this._historyData.next([]);   // clear history data
-    this._replayClosed.next();    // notify listeners
+    this._historyData.next([]);
+    this._stopsData.next([]);
+    this._replayClosed.next();
 
     // Reset playback controls
     this.playbackControlObject = {
@@ -582,10 +839,9 @@ export class PathReplayService {
       timestamp: '00:00:00'
     };
 
-
     this.clearStopPoints();
+    this.resetServiceState();
 
     console.log('♻️ Path Replay fully reset');
   }
-
 }
