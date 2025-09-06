@@ -31,7 +31,7 @@ import { TooltipModule } from 'primeng/tooltip';
             </div>
 
             <!-- Error Messages -->
-            @if (hasErrors) {
+            <!-- @if (hasErrors) {
                 <div class="mb-4 space-y-2">
                     @for (error of getCurrentErrors(); track error.type) {
                         <p-message 
@@ -41,7 +41,7 @@ import { TooltipModule } from 'primeng/tooltip';
                         </p-message>
                     }
                 </div>
-            }
+            } -->
 
             <!-- Start/End Points Section -->
             <div class="mb-6">
@@ -114,7 +114,6 @@ import { TooltipModule } from 'primeng/tooltip';
                     <div class="">
                         @if (isLoading || serviceState?.loading?.processingData || serviceState?.loading?.initializing) {
                             <!-- Loading State -->
-                            <p-skeleton width="4rem" height="2rem" styleClass="mb-2" />
                             <p-skeleton width="3rem" height="1rem" />
                         } @else if (serviceState?.data?.hasVehicleInfo && pathReplayService.vehicleStartEndInfo.totalDistance) {
                             <!-- Data Available -->
@@ -125,8 +124,8 @@ import { TooltipModule } from 'primeng/tooltip';
                             <div class="text-gray-600 font-medium text-sm">Distance</div>
                         } @else {
                             <!-- Empty State -->
-                            <div class="flex flex-col items-center justify-center text-center">
-                                 <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
+                            <div class="flex flex-row items-center justify-center text-center">
+                                 <i class="pi pi-info-circle text-2xl text-gray-400 mr-2"></i>
                                 <div class="text-sm text-gray-500">No distance data</div>
                             </div>
                         }
@@ -142,7 +141,6 @@ import { TooltipModule } from 'primeng/tooltip';
                     <div class="">
                         @if (isLoading || serviceState?.loading?.processingData || serviceState?.loading?.initializing) {
                             <!-- Loading State -->
-                            <p-skeleton width="4rem" height="2rem" styleClass="mb-2" />
                             <p-skeleton width="3rem" height="1rem" />
                         } @else if (serviceState?.data?.hasVehicleInfo && pathReplayService.vehicleStartEndInfo.maxSpeed !== undefined) {
                             <!-- Data Available -->
@@ -153,8 +151,8 @@ import { TooltipModule } from 'primeng/tooltip';
                             <div class="text-gray-600 font-medium text-sm">Max Speed</div>
                         } @else {
                             <!-- Empty State -->
-                            <div class="flex flex-col items-center justify-center text-center">
-                                 <i class="pi pi-info-circle text-2xl text-gray-400 mb-2"></i>
+                            <div class="flex flex-row items-center justify-center text-center">
+                                 <i class="pi pi-info-circle text-2xl text-gray-400 mr-2"></i>
                                 <div class="text-sm text-gray-500">No speed data</div>
                             </div>
                         }
@@ -296,14 +294,14 @@ import { TooltipModule } from 'primeng/tooltip';
             </div>
 
             <!-- Debug Info (Only in Development) -->
-            @if (showDebugInfo) {
+            <!-- @if (showDebugInfo) {
                 <div class="mt-4 p-3 bg-gray-100 rounded text-xs">
                     <details>
                         <summary class="cursor-pointer font-medium">Debug Info</summary>
                         <pre class="mt-2 text-xs">{{ getDebugInfo() | json }}</pre>
                     </details>
                 </div>
-            }
+            } -->
         </div>
     `,
     styles: [
@@ -388,46 +386,46 @@ export class PlaybackPathInfoComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    getLoadingMessage(): string {
-        if (!this.serviceState?.loading) return 'Loading...';
+    // getLoadingMessage(): string {
+    //     if (!this.serviceState?.loading) return 'Loading...';
         
-        const loading = this.serviceState.loading;
+    //     const loading = this.serviceState.loading;
         
-        if (loading.initializing) return 'Initializing...';
-        if (loading.fetchingHistory) return 'Fetching history...';
-        if (loading.fetchingStops) return 'Fetching stops...';
-        if (loading.processingData) return 'Processing data...';
-        if (loading.fetchingAddresses) return 'Loading addresses...';
-        if (loading.plottingStops) return 'Plotting stops...';
-        if (loading.initializingPlayer) return 'Initializing player...';
+    //     if (loading.initializing) return 'Initializing...';
+    //     if (loading.fetchingHistory) return 'Fetching history...';
+    //     if (loading.fetchingStops) return 'Fetching stops...';
+    //     if (loading.processingData) return 'Processing data...';
+    //     if (loading.fetchingAddresses) return 'Loading addresses...';
+    //     if (loading.plottingStops) return 'Plotting stops...';
+    //     if (loading.initializingPlayer) return 'Initializing player...';
         
-        return 'Loading...';
-    }
+    //     return 'Loading...';
+    // }
 
-    getCurrentErrors(): Array<{type: string, message: string}> {
-        if (!this.serviceState?.errors) return [];
+    // getCurrentErrors(): Array<{type: string, message: string}> {
+    //     if (!this.serviceState?.errors) return [];
         
-        const errors: Array<{type: string, message: string}> = [];
-        const errorState = this.serviceState.errors;
+    //     const errors: Array<{type: string, message: string}> = [];
+    //     const errorState = this.serviceState.errors;
         
-        if (errorState.historyError) {
-            errors.push({ type: 'history', message: `History: ${errorState.historyError}` });
-        }
-        if (errorState.stopsError) {
-            errors.push({ type: 'stops', message: `Stops: ${errorState.stopsError}` });
-        }
-        if (errorState.addressError) {
-            errors.push({ type: 'address', message: `Address: ${errorState.addressError}` });
-        }
-        if (errorState.playerError) {
-            errors.push({ type: 'player', message: `Player: ${errorState.playerError}` });
-        }
-        if (errorState.generalError) {
-            errors.push({ type: 'general', message: errorState.generalError });
-        }
+    //     if (errorState.historyError) {
+    //         errors.push({ type: 'history', message: `History: ${errorState.historyError}` });
+    //     }
+    //     if (errorState.stopsError) {
+    //         errors.push({ type: 'stops', message: `Stops: ${errorState.stopsError}` });
+    //     }
+    //     if (errorState.addressError) {
+    //         errors.push({ type: 'address', message: `Address: ${errorState.addressError}` });
+    //     }
+    //     if (errorState.playerError) {
+    //         errors.push({ type: 'player', message: `Player: ${errorState.playerError}` });
+    //     }
+    //     if (errorState.generalError) {
+    //         errors.push({ type: 'general', message: errorState.generalError });
+    //     }
         
-        return errors;
-    }
+    //     return errors;
+    // }
 
     retryStopsData() {
         // This would need to be implemented in the service
@@ -435,15 +433,15 @@ export class PlaybackPathInfoComponent implements OnInit, OnDestroy {
         // You could emit an event or call a service method to retry
     }
 
-    getDebugInfo() {
-        return {
-            serviceState: this.serviceState,
-            isLoading: this.isLoading,
-            hasErrors: this.hasErrors,
-            isReady: this.isReady,
-            loadingProgress: this.loadingProgress,
-            vehicleInfo: this.pathReplayService.vehicleStartEndInfo,
-            hasTrackPlayer: !!this.pathReplayService.trackPlayer
-        };
-    }
+    // getDebugInfo() {
+    //     return {
+    //         serviceState: this.serviceState,
+    //         isLoading: this.isLoading,
+    //         hasErrors: this.hasErrors,
+    //         isReady: this.isReady,
+    //         loadingProgress: this.loadingProgress,
+    //         vehicleInfo: this.pathReplayService.vehicleStartEndInfo,
+    //         hasTrackPlayer: !!this.pathReplayService.trackPlayer
+    //     };
+    // }
 }
