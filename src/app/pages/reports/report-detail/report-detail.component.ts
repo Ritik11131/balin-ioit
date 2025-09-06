@@ -7,6 +7,8 @@ import { map, Observable } from 'rxjs';
 import { selectVehicles } from '../../../store/vehicle/vehicle.selectors';
 import { Store } from '@ngrx/store';
 import { ReportsService } from '../../service/reports.service';
+import { ActivatedRoute } from '@angular/router';
+import { ReportHandlerFactory } from '../handler/report-handler.factory';
 
 @Component({
   selector: 'app-report-detail',
@@ -15,18 +17,20 @@ import { ReportsService } from '../../service/reports.service';
   styleUrl: './report-detail.component.scss'
 })
 export class ReportDetailComponent {
-  private reportsService = inject(ReportsService);
+  private reportFactory = inject(ReportHandlerFactory);
+  private route = inject(ActivatedRoute);
   private store = inject(Store);
   public pathReplayService = inject(PathReplayService);
   
   vehicles$ = this.store.select(selectVehicles);
   selectedVehicle$ = this.vehicles$.pipe(map(vehicles => vehicles.length ? vehicles[0] : null));
+  currentReport = this.route.snapshot.data['report'];;
 
-  ngOnInit(): void {
-    //Called after the constructor, initializing input properties, and the first call to ngOnChanges.
-    //Add 'implements OnInit' to the class.
-    this.pathReplayService.startPathReplay(null);
-    
+  ngOnInit() {
+    if (this.currentReport) {
+      const handler = this.reportFactory.getHandler(this.currentReport.type);
+      handler?.init(this.currentReport);
+    }
   }
 
 }

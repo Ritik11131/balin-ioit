@@ -62,7 +62,8 @@ export class GenericPathReplayComponent implements OnChanges {
 
   ngOnDestroy(): void {
     console.log('Apth Replay Componnt Destroyed');
-    this.pathReplayService.handlePlaybackControls('close');
+    this.pathReplayService.stopPathReplay();
+    this.pathReplayService.resetPathReplayService();
     this.destroy$.next();
     this.destroy$.complete();
     console.log('Path ReplayDestroyed');

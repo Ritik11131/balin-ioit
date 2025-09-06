@@ -30,7 +30,6 @@ export class ReportsService {
       const response = await this.http.post('reports/StopReport', payload);
       return response;
     } catch (error: any) {
-      this.uiService.showToast('error', 'Error', error?.error?.data);
       throw error;
     }
   }

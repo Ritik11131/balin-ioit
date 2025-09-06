@@ -460,6 +460,5 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(selectVehicle({ vehicle: null }));
     this.store.dispatch(loadVehicles());
-
   }
 }

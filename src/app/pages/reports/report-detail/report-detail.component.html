@@ -1,10 +1,35 @@
 <div class="w-full h-[calc(100vh-60px)]">
-      <div class="flex flex-col lg:flex-row h-full">
-        <div class="w-full lg:w-[340px] lg:flex-shrink-0 h-full">
-            <app-generic-path-replay [vehicle]="(selectedVehicle$ | async)" [formFields]="pathReplayService.formFields$ | async" />
-        </div>
-        <div class="flex-1 min-w-0 h-full">
-          <app-track-map [activeTab]="'reports'" />
-        </div>
-      </div>
+  <div class="flex flex-col lg:flex-row h-full">
+
+    <!-- Left Side Panel -->
+    <div class="w-full lg:w-[340px] lg:flex-shrink-0 h-full">
+
+      @switch (currentReport?.type) {
+        @case ('historyReplay') {
+          <app-generic-path-replay
+            [vehicle]="(selectedVehicle$ | async)"
+            [formFields]="pathReplayService.formFields$ | async">
+          </app-generic-path-replay>
+        }
+
+        <!-- @case ('pointMarkers') {
+          <app-point-markers
+            [vehicle]="(selectedVehicle$ | async)">
+          </app-point-markers>
+        } -->
+
+        @default {
+          <div class="flex items-center justify-center h-full text-gray-500">
+            No valid report type selected
+          </div>
+        }
+      }
+
+    </div>
+
+    <div class="flex-1 min-w-0 h-full">
+      <app-track-map [activeTab]="'reports'"></app-track-map>
+    </div>
+
+  </div>
 </div>

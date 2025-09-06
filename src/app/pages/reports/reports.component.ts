@@ -21,15 +21,10 @@ export class ReportsComponent {
 
   ngOnInit() {
     this.reports$ = this.reportsService.getFilteredReportsForCurrentUser();
-    this.reports$.subscribe((val)=>{
-      console.log(val);
-      
-    })
   }
 
 
   navigateToReport(report: any) {
-    console.log(report);    
     this.router.navigate([`/pages/reports/${report?.id}`])
   }
 

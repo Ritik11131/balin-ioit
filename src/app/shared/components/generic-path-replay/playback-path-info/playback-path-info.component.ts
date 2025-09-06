@@ -177,14 +177,14 @@ import { TooltipModule } from 'primeng/tooltip';
                         </p-tab>
                         
                         <!-- Future: History Tab -->
-                        <p-tab value="1" class="flex items-center !gap-2" [disabled]="!serviceState?.data?.hasHistoryData">
+                        <!-- <p-tab value="1" class="flex items-center !gap-2" [disabled]="!serviceState?.data?.hasHistoryData">
                             <span class="font-bold whitespace-nowrap">History</span>
                             @if (serviceState?.data?.hasHistoryData) {
                                 <p-badge [value]="pathReplayService.vehicleStartEndInfo?.historyData?.total" />
                             } @else {
                                 <p-badge value="0" />
                             }
-                        </p-tab>
+                        </p-tab> -->
                     </p-tablist>
                     
                     <p-tabpanels>
@@ -258,7 +258,7 @@ import { TooltipModule } from 'primeng/tooltip';
                         </p-tabpanel>
                         
                         <!-- History Tab Panel -->
-                        <p-tabpanel value="1">
+                        <!-- <p-tabpanel value="1">
                             <div class="max-h-[160px] overflow-y-auto mt-4 px-2">
                                 @if (serviceState?.loading?.fetchingHistory) {
                                     <div class="flex items-center justify-center py-4">
@@ -288,7 +288,7 @@ import { TooltipModule } from 'primeng/tooltip';
                                     </div>
                                 }
                             </div>
-                        </p-tabpanel>
+                        </p-tabpanel> -->
                     </p-tabpanels>
                 </p-tabs>
             </div>

@@ -1,5 +1,5 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, inject, isDevMode, provideAppInitializer  } from '@angular/core';
+import { ApplicationConfig, inject, isDevMode, provideAppInitializer } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeng/themes/aura';
@@ -28,6 +28,8 @@ import { deviceTypeReducer } from './app/store/device-type/reducer';
 import { WhitelabelThemeService } from './app/pages/service/whitelabel-theme.service';
 import { plansReducer } from './app/store/plans/reducer';
 import { PlansEffects } from './app/store/plans/effects';
+import { HISTORY_REPLAY_PROVIDER } from './app/pages/reports/handler/history-replay-report.handler';
+import { POINT_MARKERS_PROVIDER } from './app/pages/reports/handler/point-markers-report.handler';
 
 export function initTheme() {
   const themeService = inject(WhitelabelThemeService);
@@ -35,47 +37,49 @@ export function initTheme() {
 }
 
 export const appConfig: ApplicationConfig = {
-    providers: [
-  MessageService,
-  ConfirmationService,
-  provideRouter(
-    appRoutes,
-    withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
-    withEnabledBlockingInitialNavigation()
-  ),
-  provideHttpClient(
-    withFetch(),
-    withInterceptors([apiInterceptor]) // ✅ Combined here
-  ),
-  provideAnimationsAsync(),
-  providePrimeNG({
-    theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } }
-  }),
-  provideStore({
-    vehicle: vehicleReducer,
-    geofence: geofenceReducer,
-    userConfiguration: userConfigurationReducer,
-    users: usersReducer,
-    devices: devicesReducer,
-    vehicleType: vehicleTypeReducer,
-    deviceType: deviceTypeReducer,
-    plans: plansReducer
-  },
-  { metaReducers: [clearStateMetaReducer] }
-  ),
-  provideEffects([
-    VehicleEffects,
-    UserConfigurationEffects,
-    GeofenceEffects,
-    UsersEffects,
-    DevicesEffects,
-    VehicleTypeEffects,
-    DeviceTypeEffects,
-    PlansEffects
+  providers: [
+    MessageService,
+    ConfirmationService,
+    HISTORY_REPLAY_PROVIDER,
+    POINT_MARKERS_PROVIDER,
+    provideRouter(
+      appRoutes,
+      withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
+      withEnabledBlockingInitialNavigation()
+    ),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([apiInterceptor]) // ✅ Combined here
+    ),
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } }
+    }),
+    provideStore({
+      vehicle: vehicleReducer,
+      geofence: geofenceReducer,
+      userConfiguration: userConfigurationReducer,
+      users: usersReducer,
+      devices: devicesReducer,
+      vehicleType: vehicleTypeReducer,
+      deviceType: deviceTypeReducer,
+      plans: plansReducer
+    },
+      { metaReducers: [clearStateMetaReducer] }
+    ),
+    provideEffects([
+      VehicleEffects,
+      UserConfigurationEffects,
+      GeofenceEffects,
+      UsersEffects,
+      DevicesEffects,
+      VehicleTypeEffects,
+      DeviceTypeEffects,
+      PlansEffects
 
-  ]),
-  provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
-   provideAppInitializer(initTheme),
-]
+    ]),
+    provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
+    provideAppInitializer(initTheme),
+  ]
 
 };
