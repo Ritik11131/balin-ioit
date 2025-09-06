@@ -25,7 +25,7 @@ import { TooltipModule } from 'primeng/tooltip';
     template: `
         <div class="path-info-container">
             <!-- Header with Loading Indicator -->
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between">
                 <h2 class="text-xl font-semibold text-gray-800">Path Info</h2>
 
             </div>

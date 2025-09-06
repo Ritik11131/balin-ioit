@@ -253,7 +253,6 @@ export class PathReplayService {
       this.updateLoadingState({ fetchingHistory: false });
       const errorMessage = error?.error?.data || 'Failed to fetch history data';
       this.updateErrorState({ historyError: errorMessage });
-      this.uiService.showToast('error', 'Error', errorMessage);
       throw error;
     }
   }

@@ -13,10 +13,13 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { GenericTableComponent } from "../../../shared/components/generic-table/generic-table.component";
 import { reportViewOptions } from '../../../shared/constants/reports';
+import { GenericFormGeneratorComponent } from "../../../shared/components/generic-form-generator/generic-form-generator.component";
+import { Button } from "primeng/button";
+import { GenericPointMarkersComponent } from "../../../shared/components/generic-point-markers/generic-point-markers.component";
 
 @Component({
   selector: 'app-report-detail',
-  imports: [TrackMapComponent, GenericPathReplayComponent, CommonModule, SelectButtonModule, FormsModule, GenericTableComponent],
+  imports: [TrackMapComponent, GenericPathReplayComponent, CommonModule, SelectButtonModule, FormsModule, GenericTableComponent, GenericFormGeneratorComponent, Button, GenericPointMarkersComponent],
   templateUrl: './report-detail.component.html',
   styleUrl: './report-detail.component.scss'
 })

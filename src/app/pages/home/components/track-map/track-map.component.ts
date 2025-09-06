@@ -220,7 +220,10 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     }
 
     if (active.value && active.formObj) {
-      this.pathReplayService._initPathReplayFunc(active.formObj, this.trackMapService.getMapInstance());
+      setTimeout(()=> {
+        this.pathReplayService._initPathReplayFunc(active.formObj, this.trackMapService.getMapInstance());
+      },100)
+      
     }
   }
 
