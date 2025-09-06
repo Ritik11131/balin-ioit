@@ -107,6 +107,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
+    this.pathReplayService.resetPathReplayService();
     this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl);
     this.destroy$.next();
     this.destroy$.complete();

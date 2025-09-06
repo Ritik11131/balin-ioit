@@ -406,6 +406,12 @@ export class PathReplayService {
 
     console.log(historyData, 'historyData');
     console.log(stopsData, 'stopsData');
+
+    if (!historyData.length) {
+      this.uiService.showToast('warn', 'Warning', 'No Data Found')
+      this.uiService.toggleLoader(false);
+      return;
+    }
     
     const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
     await this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
