@@ -40,7 +40,7 @@
 
             <!-- Content -->
             @if (currentReport.selectedView === 'map') {
-            <app-track-map [activeTab]="'reports'"></app-track-map>
+                <app-track-map [activeTab]="'reports'"></app-track-map>
             } @else {
             <div class="w-[calc(100vw-430px)] lg:w-[calc(100vw-430px)]">
                 <app-generic-table [tableConfig]="currentReport.table" [tableData]="[]" />
