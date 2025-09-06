@@ -1,0 +1,10 @@
+<div class="w-full h-[calc(100vh-60px)]">
+      <div class="flex flex-col lg:flex-row h-full">
+        <div class="w-full lg:w-[340px] lg:flex-shrink-0 h-full">
+            <app-generic-path-replay [vehicle]="(selectedVehicle$ | async)" [formFields]="pathReplayService.formFields$ | async" />
+        </div>
+        <div class="flex-1 min-w-0 h-full">
+          <app-track-map [activeTab]="'pathReplay'" />
+        </div>
+      </div>
+</div>

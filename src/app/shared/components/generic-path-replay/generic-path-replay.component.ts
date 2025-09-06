@@ -58,6 +58,9 @@ export class GenericPathReplayComponent implements OnChanges {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.pathReplayService.handlePlaybackControls('close');
+    console.log('Path ReplayDestroyed');
+    
   }
 
 }

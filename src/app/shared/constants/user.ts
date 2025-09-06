@@ -83,7 +83,10 @@ export const USER_DETAILS_TABS = [
           { label: 'Trip Report', key: 'tripReport' },
           { label: 'Idle Report', key: 'idleReport' },
           { label: 'Alert Report', key: 'alertReport' },
-          { label: 'Fuel Report', key: 'fuelReport' }
+          { label: 'Fuel Report', key: 'fuelReport' },
+          { label: 'Position Report', key: 'positionReport' },
+          { label: 'Distance Report', key: 'distanceReport' },
+
         ]
       },
        {

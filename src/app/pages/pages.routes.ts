@@ -13,7 +13,7 @@ export default [
     { path: 'devices',component: DevicesComponent },
     { path: 'whitelabel', component: WhitelabelComponent},
     { path: 'cctv', component: CctvCameraComponent},
-    { path: 'reports', component: ReportsComponent },
+    { path: 'reports', loadChildren: () => import('./reports/reports.routes') },
     { path: 'crud', component: Crud },
     { path: 'empty', component: Empty },
     { path: '**', redirectTo: '/notfound' },

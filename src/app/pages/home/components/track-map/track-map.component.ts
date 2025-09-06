@@ -45,7 +45,7 @@ import { TRIAL_PATH_COLORS } from '../../../../shared/utils/helper_functions';
   styleUrl: './track-map.component.scss'
 })
 export class TrackMapComponent implements OnDestroy, OnChanges {
-  @Input() activeTab: 'vehicles' | 'geofences' = 'vehicles';
+  @Input() activeTab: 'vehicles' | 'geofences' | 'pathReplay' = 'vehicles';
   
   public userLocationMarker?: Marker;
   private uiService = inject(UiService);
@@ -93,13 +93,15 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     if (!changes['activeTab']) return;
 
     this.destroy$.next();
-    
     switch (this.activeTab) {
       case 'vehicles':
         setTimeout(() => this.initializeVehicleSubscriptions(), 100);
         break;
       case 'geofences':
         this.initializeGeofenceSubscriptions();
+        break;
+      case 'pathReplay':
+        this.setupPathReplaySubscriptions();
         break;
     }
   }
