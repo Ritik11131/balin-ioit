@@ -9,10 +9,14 @@ import { Store } from '@ngrx/store';
 import { ReportsService } from '../../service/reports.service';
 import { ActivatedRoute } from '@angular/router';
 import { ReportHandlerFactory } from '../handler/report-handler.factory';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { FormsModule } from '@angular/forms';
+import { GenericTableComponent } from "../../../shared/components/generic-table/generic-table.component";
+import { reportViewOptions } from '../../../shared/constants/reports';
 
 @Component({
   selector: 'app-report-detail',
-  imports: [TrackMapComponent, GenericPathReplayComponent, CommonModule],
+  imports: [TrackMapComponent, GenericPathReplayComponent, CommonModule, SelectButtonModule, FormsModule, GenericTableComponent],
   templateUrl: './report-detail.component.html',
   styleUrl: './report-detail.component.scss'
 })
@@ -24,7 +28,8 @@ export class ReportDetailComponent {
   
   vehicles$ = this.store.select(selectVehicles);
   selectedVehicle$ = this.vehicles$.pipe(map(vehicles => vehicles.length ? vehicles[0] : null));
-  currentReport = this.route.snapshot.data['report'];;
+  currentReport = this.route.snapshot.data['report'];
+  reportViewOptions = reportViewOptions;
 
   ngOnInit() {
     if (this.currentReport) {

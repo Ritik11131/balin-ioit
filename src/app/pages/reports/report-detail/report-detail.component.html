@@ -1,35 +1,52 @@
 <div class="w-full h-[calc(100vh-60px)]">
-  <div class="flex flex-col lg:flex-row h-full">
+    <div class="flex flex-col lg:flex-row h-full">
 
-    <!-- Left Side Panel -->
-    <div class="w-full lg:w-[340px] lg:flex-shrink-0 h-full">
+        <!-- Left Side Panel -->
+        <div class="w-full lg:w-[340px] lg:flex-shrink-0 h-full">
 
-      @switch (currentReport?.type) {
-        @case ('historyReplay') {
-          <app-generic-path-replay
-            [vehicle]="(selectedVehicle$ | async)"
-            [formFields]="pathReplayService.formFields$ | async">
-          </app-generic-path-replay>
-        }
+            @switch (currentReport?.type) {
+            @case ('historyReplay') {
+            <app-generic-path-replay [vehicle]="(selectedVehicle$ | async)"
+                [formFields]="pathReplayService.formFields$ | async">
+            </app-generic-path-replay>
+            }
 
-        <!-- @case ('pointMarkers') {
+            <!-- @case ('pointMarkers') {
           <app-point-markers
             [vehicle]="(selectedVehicle$ | async)">
           </app-point-markers>
         } -->
 
-        @default {
-          <div class="flex items-center justify-center h-full text-gray-500">
-            No valid report type selected
-          </div>
-        }
-      }
+            @default {
+            <div class="flex items-center justify-center h-full text-gray-500">
+                No valid report type selected
+            </div>
+            }
+            }
 
+        </div>
+
+        <div class="flex-1 min-w-0 h-full relative">
+
+            <!-- Toggle Button -->
+            <div class="absolute top-2 left-2" style="z-index: 999;">
+                <p-selectButton [options]="reportViewOptions" [(ngModel)]="currentReport.selectedView" optionLabel="label"
+                    optionValue="value" styleClass="bg-white shadow-md rounded-md">
+                    <ng-template #item let-item>
+                        <i [class]="item.icon"></i>
+                    </ng-template>
+                </p-selectButton>
+            </div>
+
+            <!-- Content -->
+            @if (currentReport.selectedView === 'map') {
+            <app-track-map [activeTab]="'reports'"></app-track-map>
+            } @else {
+            <div class="w-[calc(100vw-430px)] lg:w-[calc(100vw-430px)]">
+                <app-generic-table [tableConfig]="currentReport.table" [tableData]="[]" />
+            </div>
+            }
+
+        </div>
     </div>
-
-    <div class="flex-1 min-w-0 h-full">
-      <app-track-map [activeTab]="'reports'"></app-track-map>
-    </div>
-
-  </div>
 </div>
