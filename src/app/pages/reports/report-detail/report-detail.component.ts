@@ -1,7 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { TrackMapComponent } from "../../home/components/track-map/track-map.component";
 import { GenericPathReplayComponent } from "../../../shared/components/generic-path-replay/generic-path-replay.component";
-import { PathReplayService } from '../../service/path-replay.service';
 import { CommonModule } from '@angular/common';
 import { map, Observable } from 'rxjs';
 import { selectVehicles } from '../../../store/vehicle/vehicle.selectors';
@@ -21,7 +20,7 @@ import { GenericPointMarkersComponent } from "../../../shared/components/generic
   templateUrl: './report-detail.component.html',
   styleUrl: './report-detail.component.scss'
 })
-export class ReportDetailComponent {
+export class ReportDetailComponent implements OnInit, OnDestroy {
   private reportFactory = inject(ReportHandlerFactory);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
@@ -38,6 +37,10 @@ export class ReportDetailComponent {
       const handler = this.reportFactory.getHandler(this.currentReport.type);
       handler?.init(this.currentReport);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.reportService.clearTableData();
   }
 
 }
