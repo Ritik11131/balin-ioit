@@ -37,6 +37,7 @@ import { CdkDrag, CdkDragHandle } from "@angular/cdk/drag-drop";
 import { UiService } from '../../../../layout/service/ui.service';
 import { TRIAL_PATH_COLORS } from '../../../../shared/utils/helper_functions';
 import { Router } from '@angular/router';
+import { PointMarkerService } from '../../../service/point-markers.service';
 
 @Component({
   selector: 'app-track-map',
@@ -46,7 +47,7 @@ import { Router } from '@angular/router';
   styleUrl: './track-map.component.scss'
 })
 export class TrackMapComponent implements OnDestroy, OnChanges {
-  @Input() activeTab: 'vehicles' | 'geofences' | 'historyReplay' = 'vehicles';
+  @Input() activeTab: 'vehicles' | 'geofences' | 'historyReplay' | 'pointMarkers' = 'vehicles';
   
   public userLocationMarker?: Marker;
   private uiService = inject(UiService);
@@ -55,6 +56,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   private pathReplayService = inject(PathReplayService);
   private vehicleMarkerService = inject(VehicleMarkerService);
   public trackMapService = inject(TrackMapService);
+  private pointMarkerService = inject(PointMarkerService);
   private destroy$ = new Subject<void>();
   private firstVehicleUpdate = true;
 
@@ -104,6 +106,8 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
       case 'historyReplay':
         this.setupPathReplaySubscriptions();
         break;
+      case 'pointMarkers':
+        this.setupPointMarkerSubscriptions()
     }
   }
 
@@ -236,6 +240,37 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
       this.router.navigate(['/pages/reports'])
     }
   }
+
+  private setupPointMarkerSubscriptions(): void {
+  this.pointMarkerService.pointMarkersActive$
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(active => this.handlePointMarkersActive(active));
+}
+
+private handlePointMarkersActive(active: any): void {
+  console.log(active,'active');
+  
+  if (!active?.value) {
+    this.router.navigate(['/pages/reports'])
+    console.log('Point markers disabled ❌');
+    return;
+  }
+
+  if (active.value && !active.formObj) {
+    this.trackMapService.clearAllLayers();
+    console.log("Point markers mode enabled 🚀");
+  }
+
+  if (active.value && active.formObj && active.reportConfig) {
+    setTimeout(() => {
+      this.pointMarkerService._initPointMarkersFunc(
+        active.reportConfig,
+        active.formObj,
+        this.trackMapService.getMapInstance(),
+      );
+    }, 100);
+  }
+}
 
   private initializeGeofenceSubscriptions(): void {
     this.geofences$

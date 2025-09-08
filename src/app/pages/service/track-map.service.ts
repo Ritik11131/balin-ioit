@@ -32,6 +32,7 @@ export class TrackMapService {
   private vehicleLayer!: LayerGroup;
   private geofenceLayer!: L.FeatureGroup;
   private clusterGroup!: MarkerClusterGroup;
+  private pointMarkerLayer!: L.LayerGroup;
   private vehicleTrailLayer!: LayerGroup;
   private clusteringEnabled = true;
   private currentTrailVehicleId: string | null = null;
@@ -65,6 +66,7 @@ export class TrackMapService {
     this.vehicleLayer = new LayerGroup();
     this.geofenceLayer = L.featureGroup();
     this.vehicleTrailLayer = new LayerGroup();
+    this.pointMarkerLayer = new LayerGroup();
     this.vehicleTrailLayer.addTo(this.map);
   }
 
@@ -110,6 +112,14 @@ export class TrackMapService {
 
   getGeofenceLayer(): L.FeatureGroup {
     return this.geofenceLayer;
+  }
+
+  getPointMarkerLayer(): L.LayerGroup {
+    return this.pointMarkerLayer;
+  }
+
+  clearPointMarkers(): void {
+    this.pointMarkerLayer.clearLayers();
   }
 
   isClusteringEnabled(): boolean {

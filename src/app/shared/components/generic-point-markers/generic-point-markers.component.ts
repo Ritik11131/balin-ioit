@@ -1,6 +1,7 @@
 import { Component, Input, SimpleChanges } from '@angular/core';
 import { Button } from "primeng/button";
 import { GenericFormGeneratorComponent } from "../generic-form-generator/generic-form-generator.component";
+import { PointMarkerService } from '../../../pages/service/point-markers.service';
 
 @Component({
   selector: 'app-generic-point-markers',
@@ -12,9 +13,11 @@ export class GenericPointMarkersComponent {
 
     @Input() vehicle: any;
     @Input() formFields: any;
+    @Input() currenReportConfig: any;
 
     defaultPlaybackObj = {}
 
+    constructor(private pointMarkerService: PointMarkerService) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (!changes['vehicle']?.currentValue) return;
@@ -34,17 +37,18 @@ export class GenericPointMarkersComponent {
           ]
         };
     
-        this.onFormSubmit({ isEditMode: true, formValue: this.defaultPlaybackObj });
+        this.onFormSubmit({ isEditMode: true, formValue: this.defaultPlaybackObj});
       }
 
 
 
-    handleBackClick() {
+  handleBackClick() {
+    this.pointMarkerService.stopPointMarkers();
 
-    }
+  }
 
     onFormSubmit(e: any) {
-
+      this.pointMarkerService.startPointMarkers(e,this.currenReportConfig)      
     }
 
 }

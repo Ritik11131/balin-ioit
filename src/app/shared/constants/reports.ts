@@ -63,9 +63,9 @@ export const availableReports = [
             vehicle: { show: true, multiSelection: { enabled: true, maxSelection: 7 } },
             date: { show: true, disableFutureDate: true },
         },
-        api: { endpoint: 'TripReport', multiRequest: true },
+        api: { endpoints: ['reports/TripReport'], multiRequest: true },
         type: 'pointMarkers',
-        selectedView: 'table',
+        selectedView: 'map',
         table: {
             columns: [
                 { field: 'serverTime', header: 'Server Time' },

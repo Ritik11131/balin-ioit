@@ -10,7 +10,7 @@
             }
 
             @case ('pointMarkers') {
-            <app-generic-point-markers [vehicle]="(selectedVehicle$ | async)" [formFields]="currentReport.formFields" />
+            <app-generic-point-markers [vehicle]="(selectedVehicle$ | async)" [formFields]="currentReport.formFields" [currenReportConfig]="currentReport" />
             }
 
             @default {
