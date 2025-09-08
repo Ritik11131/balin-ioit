@@ -7,13 +7,13 @@
             @switch (currentReport?.type) {
             @case ('historyReplay') {
             <app-generic-path-replay [vehicle]="(selectedVehicle$ | async)"
-                [formFields]="currentReport.formFields | async">
+                [formFields]="currentReport.formFields">
             </app-generic-path-replay>
             }
 
             @case ('pointMarkers') {
             <app-generic-point-markers [vehicle]="(selectedVehicle$ | async)"
-                [formFields]="currentReport.formFields | async"/>
+                [formFields]="currentReport.formFields"/>
         }
 
             @default {
