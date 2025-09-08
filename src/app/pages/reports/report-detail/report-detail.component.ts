@@ -13,8 +13,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { GenericTableComponent } from "../../../shared/components/generic-table/generic-table.component";
 import { reportViewOptions } from '../../../shared/constants/reports';
-import { GenericFormGeneratorComponent } from "../../../shared/components/generic-form-generator/generic-form-generator.component";
-import { Button } from "primeng/button";
 import { GenericPointMarkersComponent } from "../../../shared/components/generic-point-markers/generic-point-markers.component";
 
 @Component({
@@ -27,10 +25,11 @@ export class ReportDetailComponent {
   private reportFactory = inject(ReportHandlerFactory);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
-  public pathReplayService = inject(PathReplayService);
+  public reportService = inject(ReportsService);
   
   vehicles$ = this.store.select(selectVehicles);
   selectedVehicle$ = this.vehicles$.pipe(map(vehicles => vehicles.length ? vehicles[0] : null));
+  tableData$ = this.reportService.tableData$;
   currentReport = this.route.snapshot.data['report'];
   reportViewOptions = reportViewOptions;
 

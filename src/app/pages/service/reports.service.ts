@@ -3,7 +3,7 @@ import { HttpService } from './http.service';
 import { UiService } from '../../layout/service/ui.service';
 import { Store } from '@ngrx/store';
 import { selectWebConfigReports } from '../../store/user-configuration/selectors';
-import { map, Observable } from 'rxjs';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import { ConfigReports } from '../../store/user-configuration/state';
 import { availableReports } from '../../shared/constants/reports';
 
@@ -14,6 +14,34 @@ export class ReportsService {
   private store = inject(Store);
 
   constructor(private http: HttpService, private uiService: UiService) { }
+
+   // Table data observable
+  private _tableData = new BehaviorSubject<any[]>([]);
+  tableData$ = this._tableData.asObservable();
+
+  // Context to decide if table should be updated
+  private _tableUpdateContext = new BehaviorSubject<'reports' | null>(null);
+  tableUpdateContext$ = this._tableUpdateContext.asObservable();
+
+  // Set table data
+  setTableData(data: any[]) {
+    this._tableData.next(data);
+  }
+
+  // Clear table data
+  clearTableData() {
+    this._tableData.next([]);
+  }
+
+  // Set the update context ('reports' or null)
+  setTableUpdateContext(context: 'reports' | null) {
+    this._tableUpdateContext.next(context);
+  }
+
+  // Get current context value
+  get currentContext() {
+    return this._tableUpdateContext.value;
+  }
 
   private async safeFetch(endpoint: string, payload: any) {
   try {

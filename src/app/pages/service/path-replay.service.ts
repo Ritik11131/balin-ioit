@@ -626,6 +626,11 @@ export class PathReplayService {
 
     this._stopsData.next(stopsData);
 
+     // Only update table if context is 'reports'
+      if (this.reportsService.currentContext === 'reports') {
+        this.reportsService.setTableData(historyData);
+      }
+
     if (!historyData.length) {
       this.updateErrorState({ historyError: "No history data found" });
       this.uiService.showToast("warn", "Warning", "No Data Found");

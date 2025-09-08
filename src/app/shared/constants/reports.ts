@@ -16,10 +16,12 @@ export const availableReports = [
         selectedView: 'map',
         table: {
             columns: [
-                { field: 'serverTime', header: 'Server Time' },
-                { field: 'timestamp', header: 'Device Time' },
+                { field: 'serverTime', header: 'Server Time',date:true  },
+                { field: 'timestamp', header: 'Device Time', date:true  },
                 { field: 'latitude', header: 'Latitude' },
-                { field: 'longitude', header: 'Longitude' }
+                { field: 'longitude', header: 'Longitude' },
+                { field: 'address', header: 'Address' },
+
             ],
             title: 'Posiitons',
             globalFilterFields: [],

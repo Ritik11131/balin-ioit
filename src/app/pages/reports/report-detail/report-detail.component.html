@@ -35,13 +35,14 @@
             </div>
 
             <!-- Content -->
-            @if (currentReport.selectedView === 'map') {
+        <div [hidden]="currentReport.selectedView !== 'map'" class="w-full h-full">
             <app-track-map [activeTab]="currentReport.type"></app-track-map>
-            } @else {
-            <div class="w-[calc(100vw-430px)] lg:w-[calc(100vw-430px)]">
-                <app-generic-table [tableConfig]="currentReport.table" [tableData]="[]" />
-            </div>
-            }
+        </div>
+        
+        <!-- Table -->
+        <div [hidden]="currentReport.selectedView !== 'table'" class="w-[calc(100vw-430px)] lg:w-[calc(100vw-430px)]">
+            <app-generic-table [tableConfig]="currentReport.table" [tableData]="tableData$ | async"></app-generic-table>
+        </div>
 
         </div>
     </div>
