@@ -6,15 +6,12 @@
 
             @switch (currentReport?.type) {
             @case ('historyReplay') {
-            <app-generic-path-replay [vehicle]="(selectedVehicle$ | async)"
-                [formFields]="currentReport.formFields">
-            </app-generic-path-replay>
+            <app-generic-path-replay [vehicle]="(selectedVehicle$ | async)" [formFields]="currentReport.formFields" />
             }
 
             @case ('pointMarkers') {
-            <app-generic-point-markers [vehicle]="(selectedVehicle$ | async)"
-                [formFields]="currentReport.formFields"/>
-        }
+            <app-generic-point-markers [vehicle]="(selectedVehicle$ | async)" [formFields]="currentReport.formFields" />
+            }
 
             @default {
             <div class="flex items-center justify-center h-full text-gray-500">
@@ -29,8 +26,8 @@
 
             <!-- Toggle Button -->
             <div class="absolute top-2 left-2" style="z-index: 999;">
-                <p-selectButton [options]="reportViewOptions" [(ngModel)]="currentReport.selectedView" optionLabel="label"
-                    optionValue="value" styleClass="bg-white shadow-md rounded-md">
+                <p-selectButton [options]="reportViewOptions" [(ngModel)]="currentReport.selectedView"
+                    optionLabel="label" optionValue="value" styleClass="bg-white shadow-md rounded-md">
                     <ng-template #item let-item>
                         <i [class]="item.icon"></i>
                     </ng-template>
@@ -39,7 +36,7 @@
 
             <!-- Content -->
             @if (currentReport.selectedView === 'map') {
-                <app-track-map [activeTab]="'reports'"></app-track-map>
+            <app-track-map [activeTab]="currentReport.type"></app-track-map>
             } @else {
             <div class="w-[calc(100vw-430px)] lg:w-[calc(100vw-430px)]">
                 <app-generic-table [tableConfig]="currentReport.table" [tableData]="[]" />

@@ -1,5 +1,11 @@
 import { FormConfig } from "../components/generic-form-generator/generic-form-generator.component";
 
+export const PATH_REPLAY_REPORT_CONFIG_ = {
+      id: "positionReport",
+      reportName: "Position",
+      api: { endpoints: ["v1/history", "reports/StopReport"], multiRequest: false }
+};
+
 export const PATH_REPLAY_FORM_FIELDS: FormConfig = {
   formTitle: 'Path Replay',
   columns: 1,

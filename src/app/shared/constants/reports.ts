@@ -11,7 +11,7 @@ export const availableReports = [
             vehicle: { show: true, multiSelection: { enabled: true, maxSelection: 7 } },
             date: { show: true, disableFutureDate: true },
         },
-        api: { endpoint: 'v1/history', multiRequest: false },
+        api: { endpoints: ['v1/history', 'reports/StopReport'], multiRequest: false },
         type: 'historyReplay',
         selectedView: 'map',
         table: {

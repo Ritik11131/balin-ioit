@@ -19,7 +19,7 @@ import { GenericPointMarkersComponent } from "../../../shared/components/generic
 
 @Component({
   selector: 'app-report-detail',
-  imports: [TrackMapComponent, GenericPathReplayComponent, CommonModule, SelectButtonModule, FormsModule, GenericTableComponent, GenericFormGeneratorComponent, Button, GenericPointMarkersComponent],
+  imports: [TrackMapComponent, GenericPathReplayComponent, CommonModule, SelectButtonModule, FormsModule, GenericTableComponent, GenericPointMarkersComponent],
   templateUrl: './report-detail.component.html',
   styleUrl: './report-detail.component.scss'
 })

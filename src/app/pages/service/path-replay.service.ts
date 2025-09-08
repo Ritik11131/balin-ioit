@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, map, Subject, combineLatest } from 'rxjs';
-import { CREATE_USER_FORM_FIELDS } from '../../shared/constants/forms';
-import { PATH_REPLAY_FORM_FIELDS } from '../../shared/constants/path-replay';
+import { BehaviorSubject, map, Subject, combineLatest } from 'rxjs';
+import { PATH_REPLAY_FORM_FIELDS, PATH_REPLAY_REPORT_CONFIG_ } from '../../shared/constants/path-replay';
 import { FormEnricherService } from './form-enricher.service';
 import { HttpService } from './http.service';
 import { UiService } from '../../layout/service/ui.service';
@@ -549,131 +548,115 @@ export class PathReplayService {
     document.head.appendChild(style);
   }
 
-  // Updated _initPathReplayFunc method with enhanced loading states
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
-    this.updateLoadingState({ initializing: true });
-    this.clearErrors();
+  this.updateLoadingState({ initializing: true });
+  this.clearErrors();
 
-    try {
-      if (this.trackPlayer) {
-        this.trackPlayer.remove();
-        this.trackPlayer = null;
-        this.updateDataState({ hasTrackPlayer: false });
-      }
-      
-      this._historyData.next([]);
-      this._stopsData.next([]);
-
-      // Clear existing stop points
-      this.clearStopPoints();
-
-      // Reset playback controls
-      this.playbackControlObject = {
-        speed: 500,
-        progress: 0,
-        status: 'Idle',
-        start: () => { },
-        pause: () => { },
-        remove: () => { },
-        updateSpeed: () => { },
-        updateProgress: () => { },
-        reset: () => { }
-      };
-
-      // Reset vehicle history info
-      this.vehiclePlaybackObject = {
-        speed: 0,
-        timestamp: '00:00:00'
-      };
-
-      this.vehicleStartEndInfo = {
-        startInfo: { address: '', timestamp: '' },
-        endInfo: { address: '', timestamp: '' },
-        maxSpeed: 0,
-        totalDistance: 0,
-        stopsData: { total: 0, data: [] },
-        historyData: { total: 0, data: [] }
-      }
-
-      this.updateDataState({
-        hasHistoryData: false,
-        hasStopsData: false,
-        hasVehicleInfo: false,
-        hasTrackPlayer: false
-      });
-
-      const { formValue } = historyPayload;
-
-      const requests = buildHistoryRequests(
-        formValue?.vehicle,
-        formValue?.date[0],
-        formValue?.date[1]
-      );
-
-      // Fetch data with proper loading states
-      this.updateLoadingState({ fetchingHistory: true, fetchingStops: true });
-
-      const [historyResults, stopsResults] = await Promise.all([
-        Promise.allSettled(requests.map(r =>
-          this.fetchHistory({
-            DeviceId: r.deviceId,
-            FromTime: r.fromTime,
-            ToTime: r.toTime
-          }).catch(err => ({ error: err.message, data: [] }))
-        )),
-        Promise.allSettled(requests.map(r =>
-          this.reportsService.fetchStopReport({
-            DeviceId: r.deviceId,
-            FromTime: r.fromTime,
-            ToTime: r.toTime
-          }).catch(err => ({ error: err.message, data: [] }))
-        ))
-      ]);
-
-      this.updateLoadingState({ fetchingHistory: false, fetchingStops: false });
-
-      // Extract successful data
-      const historyData = historyResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
-      const stopsData = stopsResults.filter(r => r.status === 'fulfilled').flatMap(r => r.value?.data || []);
-
-      console.log(historyData, 'historyData');
-      console.log(stopsData, 'stopsData');
-
-      // Update data states
-      this._stopsData.next(stopsData);
-
-      if (!historyData.length) {
-        this.updateErrorState({ historyError: 'No history data found' });
-        this.uiService.showToast('warn', 'Warning', 'No Data Found');
-        this.updateLoadingState({ initializing: false });
-        return;
-      }
-
-      this.updateLoadingState({ processingData: true });
-      
-      const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
-      await this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
-      
-      this._historyData.next(uniqueTrackPath);
-      this.updateDataState({ hasHistoryData: true });
-
-      if (uniqueTrackPath && uniqueTrackPath.length > 0) {
-        map.fitBounds(uniqueTrackPath);
-        await this.initilizeTrackPlayer(uniqueTrackPath, map);
-      }
-
-      // Plot stop points after track initialization
-      this.plotStopPoints(stopsData, map);
-      
-      this.updateLoadingState({ initializing: false });
-
-    } catch (error: any) {
-      console.error('Error in _initPathReplayFunc:', error);
-      this.updateErrorState({ generalError: 'Failed to initialize path replay' });
-      this.updateLoadingState({ initializing: false });
-      this.uiService.toggleLoader(false);
+  try {
+    // Reset everything
+    if (this.trackPlayer) {
+      this.trackPlayer.remove();
+      this.trackPlayer = null;
+      this.updateDataState({ hasTrackPlayer: false });
     }
+
+    this._historyData.next([]);
+    this._stopsData.next([]);
+    this.clearStopPoints();
+
+    this.playbackControlObject = {
+      speed: 500,
+      progress: 0,
+      status: 'Idle',
+      start: () => {},
+      pause: () => {},
+      remove: () => {},
+      updateSpeed: () => {},
+      updateProgress: () => {},
+      reset: () => {}
+    };
+
+    this.vehiclePlaybackObject = { speed: 0, timestamp: '00:00:00' };
+
+    this.vehicleStartEndInfo = {
+      startInfo: { address: '', timestamp: '' },
+      endInfo: { address: '', timestamp: '' },
+      maxSpeed: 0,
+      totalDistance: 0,
+      stopsData: { total: 0, data: [] },
+      historyData: { total: 0, data: [] }
+    };
+
+    this.updateDataState({
+      hasHistoryData: false,
+      hasStopsData: false,
+      hasVehicleInfo: false,
+      hasTrackPlayer: false
+    });
+
+    const { formValue } = historyPayload;
+
+    const requests = buildHistoryRequests(
+      formValue?.vehicle,
+      formValue?.date[0],
+      formValue?.date[1]
+    );
+
+    this.updateLoadingState({ fetchingHistory: true, fetchingStops: true });
+
+    const results = await this.reportsService.fetchReport(PATH_REPLAY_REPORT_CONFIG_, requests);
+    console.log(results,'results');
+    
+
+    this.updateLoadingState({ fetchingHistory: false, fetchingStops: false });
+
+    // Extract data safely
+    const historyResults = results["v1/history"] || [];
+    const stopsResults = results["reports/StopReport"] || [];
+
+    const historyData = historyResults
+      .filter((r: any) => r.status === "fulfilled")
+      .flatMap((r: any) => r.value?.data || []);
+    const stopsData = stopsResults
+      .filter((r: any) => r.status === "fulfilled")
+      .flatMap((r: any) => r.value?.data || []);
+
+    console.log(historyData, "historyData");
+    console.log(stopsData, "stopsData");
+
+    this._stopsData.next(stopsData);
+
+    if (!historyData.length) {
+      this.updateErrorState({ historyError: "No history data found" });
+      this.uiService.showToast("warn", "Warning", "No Data Found");
+      this.updateLoadingState({ initializing: false });
+      return;
+    }
+
+    this.updateLoadingState({ processingData: true });
+
+    const uniqueTrackPath = pathReplayConvertedValidJson(historyData);
+    await this.setVehicleStartEndInfo(uniqueTrackPath, stopsData);
+
+    this._historyData.next(uniqueTrackPath);
+    this.updateDataState({ hasHistoryData: true });
+
+    if (uniqueTrackPath && uniqueTrackPath.length > 0) {
+      map.fitBounds(uniqueTrackPath);
+      await this.initilizeTrackPlayer(uniqueTrackPath, map);
+    }
+
+    this.plotStopPoints(stopsData, map);
+
+    this.updateLoadingState({ initializing: false });
+  } catch (error: any) {
+    console.error("Error in _initPathReplayFunc:", error);
+    this.updateErrorState({ generalError: "Failed to initialize path replay" });
+    this.updateLoadingState({ initializing: false });
+    this.uiService.toggleLoader(false);
   }
+}
+
 
   public async initilizeTrackPlayer(trackPathData: any[], map: any) {
     this.updateLoadingState({ initializingPlayer: true });

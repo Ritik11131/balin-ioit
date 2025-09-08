@@ -46,7 +46,7 @@ import { Router } from '@angular/router';
   styleUrl: './track-map.component.scss'
 })
 export class TrackMapComponent implements OnDestroy, OnChanges {
-  @Input() activeTab: 'vehicles' | 'geofences' | 'reports' = 'vehicles';
+  @Input() activeTab: 'vehicles' | 'geofences' | 'historyReplay' = 'vehicles';
   
   public userLocationMarker?: Marker;
   private uiService = inject(UiService);
@@ -101,7 +101,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
       case 'geofences':
         this.initializeGeofenceSubscriptions();
         break;
-      case 'reports':
+      case 'historyReplay':
         this.setupPathReplaySubscriptions();
         break;
     }
@@ -230,7 +230,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   private handleReplayClosed(vehicles: VehicleData[]): void {
     console.log(vehicles, 'replay closed, restoring vehicles');
     this.store.dispatch(selectVehicle({ vehicle: null }));
-    if(this.activeTab !== 'reports') {
+    if(this.activeTab !== 'historyReplay') {
       this.updateVehicleMarkers(vehicles);
     } else {
       this.router.navigate(['/pages/reports'])
