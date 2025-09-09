@@ -79,7 +79,7 @@ export class WhitelabelComponent {
         id: this.editData?.id,
         lastUpdateOn: this.editData?.lastUpdateOn,
         creationTime: this.editData?.creationTime,
-        personName: formValue?.personName, 
+        name: formValue?.name, 
         url: formValue?.url, 
         attributes: JSON.stringify({
           title: formValue?.title,
@@ -93,7 +93,7 @@ export class WhitelabelComponent {
     } else {
       console.log('create');
       const createWhiteLabelObj = {
-        personName: formValue?.personName, 
+        name: formValue?.name, 
         url: formValue?.url, 
         attributes: JSON.stringify({
           title: formValue?.title,
@@ -196,7 +196,7 @@ private async createWhiteLabel(data: any): Promise<void> {
         id: data?.id,
         lastUpdateOn: data?.lastUpdateOn,
         creationTime: data?.creationTime,
-        personName: data.personName ?? '',
+        name: data.name ?? '',
         url: data.url ?? '',
         logo, favicon, message, baseUrl, title, themeColor
       };
@@ -228,7 +228,7 @@ private async createWhiteLabel(data: any): Promise<void> {
   async deleteHandler(row: any): Promise<void> {
      this.confirmationService.confirm({
             target: row,
-            message: `Are you sure that you want to delete ${row?.personname}?`,
+            message: `Are you sure that you want to delete ${row?.name}?`,
             header: 'Confirmation',
             closable: true,
             closeOnEscape: true,

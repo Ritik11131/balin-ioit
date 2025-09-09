@@ -14,11 +14,12 @@ import { Subject, takeUntil } from 'rxjs';
 import { logout } from '../../store/core/action';
 import { Store } from '@ngrx/store';
 import { SidebarService } from '../../pages/service/sidebar.service';
+import { TagModule } from 'primeng/tag';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, AvatarModule, ButtonModule, TieredMenuModule],
+  imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, AvatarModule, ButtonModule, TieredMenuModule, TagModule],
   template: `
     <div class="fixed top-0 h-[60px] bg-white z-40 transition-all duration-300 ease-in-out" 
          [ngClass]="isSidebarExpanded ? 'left-[280px]' : 'left-[88px]'" 
@@ -49,7 +50,7 @@ import { SidebarService } from '../../pages/service/sidebar.service';
             <p-button icon="pi pi-user" [rounded]="true" [outlined]="true" class="mr-2"></p-button>
             <div class="flex flex-col mr-2">
               <span class="font-medium text-gray-800">{{ userName }}</span>
-              <span class="text-xs text-gray-500">{{ userType }}</span>
+              <span class="text-xs font-semibold text-[var(--primary-color)]">{{ userType }}</span>
             </div>
             <p-tieredMenu #menu [model]="items" [popup]="true" appendTo="body"></p-tieredMenu>
           </div>

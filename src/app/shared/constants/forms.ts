@@ -490,7 +490,7 @@ export const CREATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       gridCol: 1
     },
     {
-      key: 'personName',
+      key: 'name',
       label: 'Full Name',
       type: 'text',
       required: true,
@@ -566,7 +566,7 @@ export const UPDATE_WHITELABEL_FORM_FIELDS: FormConfig = {
       gridCol: 1
     },
     {
-      key: 'personName',
+      key: 'name',
       label: 'Full Name',
       type: 'text',
       required: true,
