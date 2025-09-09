@@ -113,45 +113,97 @@ export const availableReports = [
             vehicle: { show: true, multiSelection: { enabled: true, maxSelection: 7 } },
             date: { show: true, disableFutureDate: true },
         },
-        api: { endpoint: 'v1/history', multiRequest: false },
-        tableColumns: [
-            { field: 'serverTime', header: 'Server Time' },
-            { field: 'timestamp', header: 'Device Time' },
-            { field: 'latitude', header: 'Latitude' },
-            { field: 'longitude', header: 'Longitude' },
-        ],
-        globalFilterFields: [],
+        api: { endpoints: ['reports/StopReport'], multiRequest: true },
+        type: 'pointMarkers',
+        selectedView: 'map',
+        table: {
+            columns: [
+                { field: 'serverTime', header: 'Server Time' },
+                { field: 'timestamp', header: 'Device Time' },
+                { field: 'latitude', header: 'Latitude' },
+                { field: 'longitude', header: 'Longitude' }
+            ],
+            title: 'Posiitons',
+            globalFilterFields: [],
+            dataKey: 'id'
+        },
+        formFields: {
+            formTitle: '',
+            columns: 1,
+            isEditMode: true,
+            saveButtonText: 'Query',
+            showCancelButton: false,
+            fields: [
+                {
+                    key: 'vehicle',
+                    label: 'Select Vehicle',
+                    type: 'select',
+                    placeholder: 'Select a vehicle',
+                    gridCol: 2,
+                    required: true,
+                    options: [], // dynamic from API
+                    dataSource: 'vehicles'
+                },
+                {
+                    key: 'date',
+                    label: 'Select Date',
+                    type: 'date',
+                    required: true,
+                    placeholder: 'Select date',
+                    gridCol: 2,
+                    selectionMode: 'range'
+                },
+            ]
+        }
     },
     {
-        id: "idleReport",
-        reportName: "Idle",
+        id: "geofenceReport",
+        reportName: "Geofence",
         filters: {
             vehicle: { show: true, multiSelection: { enabled: true, maxSelection: 7 } },
             date: { show: true, disableFutureDate: true },
         },
-        api: { endpoint: 'v1/history', multiRequest: false },
-        tableColumns: [
-            { field: 'serverTime', header: 'Server Time' },
-            { field: 'timestamp', header: 'Device Time' },
-            { field: 'latitude', header: 'Latitude' },
-            { field: 'longitude', header: 'Longitude' },
-        ],
-        globalFilterFields: [],
-    },
-    {
-        id: "distanceReport",
-        reportName: "Distance",
-        filters: {
-            vehicle: { show: true, multiSelection: { enabled: true, maxSelection: 7 } },
-            date: { show: true, disableFutureDate: true },
+        api: { endpoints: ['reports/Geofence'], multiRequest: true },
+        type: 'pointMarkers',
+        selectedView: 'table',
+        table: {
+            columns: [
+                { field: 'geofenceInName', header: 'In Name' },
+                { field: 'geofenceOutName', header: 'Out Name' },
+                { field: 'geofenceInTime', header: 'In Time', date: true },
+                { field: 'geofenceOutTime', header: 'Out Time', date: true }
+            ],
+            title: 'Posiitons',
+            globalFilterFields: [],
+            dataKey: 'id'
         },
-        api: { endpoint: 'reports/DistanceReport', multiRequest: true },
-        tableColumns: [
-            { field: 'serverTime', header: 'Server Time' },
-            { field: 'timestamp', header: 'Device Time' },
-            { field: 'latitude', header: 'Latitude' },
-            { field: 'longitude', header: 'Longitude' },
-        ],
-        globalFilterFields: [],
+        formFields: {
+            formTitle: '',
+            columns: 1,
+            isEditMode: true,
+            saveButtonText: 'Query',
+            showCancelButton: false,
+            fields: [
+                {
+                    key: 'vehicle',
+                    label: 'Select Vehicle',
+                    type: 'select',
+                    placeholder: 'Select a vehicle',
+                    gridCol: 2,
+                    required: true,
+                    options: [], // dynamic from API
+                    dataSource: 'vehicles'
+                },
+                {
+                    key: 'date',
+                    label: 'Select Date',
+                    type: 'date',
+                    required: true,
+                    placeholder: 'Select date',
+                    gridCol: 2,
+                    selectionMode: 'range'
+                },
+            ]
+        }
     },
 ]

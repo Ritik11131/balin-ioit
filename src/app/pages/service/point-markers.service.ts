@@ -4,6 +4,7 @@ import { ReportsService } from './reports.service';
 import { TrackMapService } from './track-map.service';
 import { Marker, marker, divIcon } from 'leaflet';
 import { buildHistoryRequests } from '../../shared/utils/helper_functions';
+import { UiService } from '../../layout/service/ui.service';
 
 @Injectable({ providedIn: 'root' })
 export class PointMarkerService {
@@ -12,7 +13,8 @@ export class PointMarkerService {
 
   constructor(
     private reportsService: ReportsService,
-    private trackMapService: TrackMapService
+    private trackMapService: TrackMapService,
+    private uiService: UiService
   ) {}
 
   /** Start point marker mode (similar to startPathReplay) */
@@ -28,10 +30,9 @@ export class PointMarkerService {
 
   /** Main initializer (like _initPathReplayFunc) */
   async _initPointMarkersFunc(reportConfig: any, historyPayload: any, map: any) {
-    console.log(reportConfig,historyPayload);
-
-
-     const { formValue } = historyPayload;
+    this.uiService.toggleLoader(true);
+    try {
+      const { formValue } = historyPayload;
     
         const requests = buildHistoryRequests(
           formValue?.vehicle,
@@ -41,10 +42,8 @@ export class PointMarkerService {
     
     
         const response = await this.reportsService.fetchReport(reportConfig, requests);
-        console.log(response,'results');
             
        const result = response[reportConfig.api.endpoints[0]];
-       console.log(result,'result');
        const reportData = result.filter((r: any) => r.status === "fulfilled").flatMap((r: any) => r.value?.data || []);
 
     // Only update table if context is 'reports'
@@ -64,9 +63,12 @@ export class PointMarkerService {
       const bounds = L.latLngBounds(markers.map((m: any) => m.getLatLng()));
       this.trackMapService.getMapInstance().fitBounds(bounds, { padding: [20, 20] });
     }
-
-       
-    
+    } catch (error) {
+      console.log(error);
+      
+    } finally {
+      this.uiService.toggleLoader(false);
+    }
   }
 
   /** Utility to create Leaflet Marker */
@@ -76,14 +78,14 @@ export class PointMarkerService {
     const icon = divIcon({
       className: 'point-marker',
       html: `
-      <div class="stop-marker-container" title="Point ${index + 1}>
+      <div class="stop-marker-container" title="Point ${index + 1}">
       <div class="relative flex items-center justify-center">
         <!-- Outer pulsing ring -->
         <div class="absolute w-8 h-8 rounded-full border-2 border-white shadow-lg animate-ping opacity-30" 
              style="background-color: ${primaryColor}"></div>
         
         <!-- Main marker -->
-        <div class="relative w-5 h-5 rounded-full shadow-lg animate-pulse z-10" 
+        <div class="relative w-3 h-3 rounded-full shadow-lg animate-pulse z-10" 
              style="background-color: ${primaryColor}">
           <!-- Inner ping animation -->
           <div class="absolute inset-0 rounded-full animate-ping opacity-25" 
@@ -96,6 +98,6 @@ export class PointMarkerService {
       iconAnchor: [20, 20],
     });
 
-    return marker([point.startLat, point.startLng], { icon });
+    return marker([point.startLat || point.latitude, point.startLng || point.longitude], { icon });
   }
 }
