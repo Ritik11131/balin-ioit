@@ -672,23 +672,27 @@ export class PathReplayService {
         .trim();
       console.log(primaryColor, 'primary');
 
+
+      const navigationIcon = L.divIcon({
+        className: "",
+        html: `
+    <div class="relative flex items-center justify-center">
+      <!-- Outer pulsing ring -->
+      <div class="absolute w-14 h-14 rounded-full border-2 shadow-lg animate-ping opacity-70"
+           style="background-color: #003AFF"></div>
+
+      <!-- Navigation Icon -->
+      <img src="images/home/path_replay_navigation.svg" class="relative z-10" />
+    </div>
+  `,
+        iconSize: [27, 54],
+        iconAnchor: [13.5, 27],
+      });
+
       this.trackPlayer = new (L as any).TrackPlayer(trackPathData, {
         speed: 500,
         weight: 4,
-        markerIcon: L.icon({
-          iconUrl: 'images/home/car.png',
-          iconSize: [27, 54],
-          iconAnchor: [13.5, 27],
-          shadowUrl:
-            'data:image/svg+xml;base64,' +
-            btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="90" viewBox="0 0 32 60">
-              <ellipse cx="16" cy="50" rx="12" ry="8" fill="rgba(0,0,0,0.3)"/>
-            </svg>
-          `),
-          shadowSize: [32, 60],
-          shadowAnchor: [16, 30]
-        }),
+        markerIcon: navigationIcon,
         passedLineColor: primaryColor,
         notPassedLineColor: '#2196F3',
         polylineDecoratorOptions: {
