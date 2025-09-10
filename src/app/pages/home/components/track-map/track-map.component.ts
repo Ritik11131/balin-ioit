@@ -119,7 +119,9 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
 
   onMapReady(map: Map): void {
     this.trackMapService.initializeMap(map, this.clusteringEnabled);
-    this.setupMapEventHandlers();
+     this.trackMapService.setupMapEventHandlers((zoom) => {
+      console.log('Map zoom level:', zoom);
+    });
   }
 
   private initializeVehicleSubscriptions(): void {
@@ -158,6 +160,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
       // Clear trail when vehicle changes
       if (prev && curr && prev.id !== curr.id) {
         this.trackMapService.clearVehicleTrail();
+        this.trackMapService.disableFollow();
       }
       this.firstVehicleUpdate = true;
       return true;
@@ -182,6 +185,16 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     console.log('Current Lat/Lng:', currPos?.latitude, currPos?.longitude);
 
     this.updateSingleVehicleMarker(currentVehicle, previousVehicle);
+
+    if (currPos) {
+      this.trackMapService.handleEntityPositionUpdate(
+        currentVehicle.id.toString(),
+        currPos.latitude,
+        currPos.longitude
+      );
+    }
+
+
     this.trackMapService.updateLiveTrackingControlObj(
       {
         status: currentVehicle.status, 
@@ -349,18 +362,6 @@ private handlePointMarkersActive(active: any): void {
     this.trackMapService.fitMapToGeofences();
   }
 
-  private setupMapEventHandlers(): void {
-    this.trackMapService.setupMapEventHandlers((zoom) => {
-      console.log('Map zoom level:', zoom);
-    });
-  }
-
-  // Public methods - User Interactions
-  onSearchChange(event: any): void {
-    const searchTerm = event.target.value || '';
-    this.store.dispatch(searchVehicles({ searchTerm }));
-  }
-
   goToUserLocation(): void {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by this browser.');
@@ -494,9 +495,18 @@ private handlePointMarkersActive(active: any): void {
   exitTracking() {
     this.trackMapService.clearAllLayers();
     this.uiService.closeDrawer();
+    this.trackMapService.disableFollow();
     this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl);
     this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(selectVehicle({ vehicle: null }));
     this.store.dispatch(loadVehicles());
+  }
+
+
+  toggleFollowVehicle(): void {
+    const vehicleId = this.getCurrentTrackedVehicleId();
+    if (vehicleId) {
+      this.trackMapService.toggleFollow(vehicleId);
+    }
   }
 }

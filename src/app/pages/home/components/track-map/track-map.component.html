@@ -79,7 +79,7 @@
             <div cdkDragHandle class="drag-handle bg-gray-50 text-gray-700 px-4 py-2 rounded-t-xl flex items-center justify-between cursor-move border-b border-gray-100">
                 <div class="flex items-center gap-2">
                     <i class="pi pi-bars text-xs text-gray-400"></i>
-                    <span class="font-medium text-sm text-gray-600">Controls</span>
+                    <span class="font-medium text-sm text-gray-600">Tracking Controls</span>
                 </div>
             </div>
 
@@ -109,10 +109,13 @@
                 </div>                
 
                 <!-- Row 3: Actions -->
-                <div class="flex items- gap-2">
-                    <p-button severity="secondary" label="Follow Map" [icon]="'pi pi-directions'" rounded (onClick)="toggleTrailVisibility()" size="small"> </p-button>
-                    <p-button severity="secondary" label="Toggle Path" [icon]="'pi pi-eye-slash'" rounded (onClick)="toggleTrailVisibility()" size="small"> </p-button>
-                    <p-button label="Exit Tracking" icon="pi pi-times" severity="danger" (onClick)="exitTracking()" rounded size="small"></p-button>
+                <div class="flex items-center gap-2">
+                    <p-button [severity]="trackMapService.isFollowEnabled() ? 'danger' : 'secondary'" [label]="trackMapService.isFollowEnabled() ? 'Stop Following' : 'Follow Vehicle'"
+                      [icon]="trackMapService.isFollowEnabled() ? 'pi pi-times' : 'pi pi-directions'" size="small"
+                      (onClick)="toggleFollowVehicle()">
+                    </p-button>
+                    <p-button severity="contrast" label="Toggle Trail" [icon]="'pi pi-eye-slash'" (onClick)="toggleTrailVisibility()" size="small"> </p-button>
+                    <p-button label="Exit Tracking" icon="pi pi-times" severity="danger" (onClick)="exitTracking()" size="small"></p-button>
                 </div>
             </div>
         </div>

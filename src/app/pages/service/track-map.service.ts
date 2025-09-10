@@ -45,6 +45,10 @@ export class TrackMapService {
     visible: false
   };
 
+   // Follow state
+  private followEnabled = false;
+  private followTargetId: string | null = null;
+
   updateLiveTrackingControlObj(updatedObj : LiveTrackingControl) {
     this.liveTrackingControlObj = updatedObj;
   }
@@ -55,6 +59,44 @@ export class TrackMapService {
     this.initializeLayers();
     this.setupMapControls();
     this.addActiveLayerToMap();
+  }
+
+  /** Public API for follow mode */
+  enableFollow(targetId: string, lat?: number, lng?: number): void {
+    this.followEnabled = true;
+    this.followTargetId = targetId;
+  }
+
+
+  disableFollow(): void {
+    this.followEnabled = false;
+    this.followTargetId = null;
+  }
+
+  toggleFollow(targetId: string): void {
+    if (this.followEnabled && this.followTargetId === targetId) {
+      this.disableFollow();
+    } else {
+      this.enableFollow(targetId);
+    }
+  }
+
+  isFollowEnabled(): boolean {
+    return this.followEnabled;
+  }
+
+  getFollowTarget(): string | null {
+    return this.followTargetId;
+  }
+
+  /** Call this whenever an entity position updates */
+  handleEntityPositionUpdate(entityId: string, lat: number, lng: number): void {
+    if (this.followEnabled && this.followTargetId === entityId) {
+      this.map.flyTo([lat, lng], this.map.getZoom() || 16, {
+        animate: true,
+        duration: 1.5,
+      });
+    }
   }
 
   private setupMapControls(): void {
