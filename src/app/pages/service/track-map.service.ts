@@ -89,6 +89,12 @@ export class TrackMapService {
     return this.followTargetId;
   }
 
+  exitFromLiveTracking() {
+    this.clearAllLayers();
+    this.disableFollow();
+    this.updateLiveTrackingControlObj({} as LiveTrackingControl);
+  }
+
   /** Call this whenever an entity position updates */
   handleEntityPositionUpdate(entityId: string, lat: number, lng: number): void {
     if (this.followEnabled && this.followTargetId === entityId) {

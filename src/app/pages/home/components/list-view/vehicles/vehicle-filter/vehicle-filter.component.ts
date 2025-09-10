@@ -66,16 +66,15 @@ import { VehicleStatusLabelPipe } from './../../../../../../shared/pipes/vehicle
 })
 export class VehicleFilterComponent {
     filters = listViewFilters;
-    activeFilterKey = 'all'; // default selected filter
 
     @Input() isLoading: any = false;
+    @Input() activeFilterKey: string = 'all'
 
     @Output() filterSelected = new EventEmitter<any>();
     @Output() refreshVehicles = new EventEmitter<any>();
     @Output() searchTerm = new EventEmitter<any>();
 
     handleListMapFilter(selectedFilter: any) {
-        this.activeFilterKey = selectedFilter.key;
         this.filterSelected.emit(selectedFilter);
     }
 

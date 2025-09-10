@@ -26,6 +26,8 @@ import {
   stopSingleVehiclePolling,
 } from '../../../../../store/vehicle/vehicle.actions';
 import { UiService } from '../../../../../layout/service/ui.service';
+import { TrackMapService } from '../../../../service/track-map.service';
+import { VehicleService } from '../../../../service/vehicle.service';
 
 @Component({
     selector: 'app-vehicles',
@@ -34,6 +36,7 @@ import { UiService } from '../../../../../layout/service/ui.service';
     <div class="p-2">
       <app-vehicle-filter 
         [isLoading]="isLoading$ | async" 
+        [activeFilterKey]="vehicleService.activeFilterKey"
         (filterSelected)="onFilterSelected($event)" 
         (searchTerm)="onVehicleSearch($event)" 
         (refreshVehicles)="onVehicleRefresh($event)" />
@@ -48,6 +51,8 @@ export class VehiclesComponent {
   
   private store = inject(Store);
   private uiService = inject(UiService);
+  public vehicleService = inject(VehicleService)
+  private trackMapService = inject(TrackMapService);
   private destroy$ = new Subject<void>();
 
   // Observable streams from store
@@ -92,7 +97,9 @@ export class VehiclesComponent {
 
   onFilterSelected(filter: any): void {
     console.log('Filter selected:', filter);
+    this.vehicleService.activeFilterKey = filter.key;
     this.uiService.closeDrawer();
+    this.trackMapService.exitFromLiveTracking();
     this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(filterVehicles({ key: filter.key, status: filter.status }));
     this.store.dispatch(selectVehicle({ vehicle: null }));
@@ -108,6 +115,8 @@ export class VehiclesComponent {
   onVehicleRefresh(event: any): void {
     console.log('Refreshing vehicles...');
     this.uiService.closeDrawer();
+    this.trackMapService.exitFromLiveTracking();
+    this.store.dispatch(selectVehicle({ vehicle: null }));
     this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(loadVehicles());
   }

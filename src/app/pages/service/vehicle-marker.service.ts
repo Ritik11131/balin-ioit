@@ -10,6 +10,7 @@ export interface VehicleIconConfig {
   status: string;
   heading: number;
   size?: [number, number];
+  anchor?: [number, number];
   className?: string;
 }
 
@@ -30,7 +31,7 @@ export class VehicleMarkerService {
   public singleVehicleMarker:any;
   // Default icon configurations
   private readonly defaultIconSize: [number, number] = [32, 32];
-  private readonly defaultIconAnchor: [number, number] = [16, 16];
+  private readonly defaultIconAnchor: [number, number] = [12, 12];
 
   constructor() {
     // Only subscribe once
@@ -66,6 +67,7 @@ export class VehicleMarkerService {
       status,
       heading,
       size = this.defaultIconSize,
+      anchor = this.defaultIconAnchor,
       className = 'vehicle-marker'
     } = config;
     if (!this.loaded) {
@@ -80,7 +82,7 @@ export class VehicleMarkerService {
       className: `${className} vehicle-${vehicleTypeId} status-${status}`,
       html: `<img src="${iconFile}" alt="${vehicleName}" class="w-12 h-12"  style="transform: rotate(${heading}deg); transform-origin: center center;" />`,
       iconSize: size,
-      iconAnchor: [size[0] / 2, size[1] / 2]
+      iconAnchor: anchor
     });
   }
 

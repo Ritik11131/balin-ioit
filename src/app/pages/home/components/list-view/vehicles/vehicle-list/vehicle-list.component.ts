@@ -3,15 +3,16 @@ import { VehicleCardComponent } from './vehicle-card/vehicle-card.component';
 import { VehicleSkeletonCardComponent } from './vehicle-skeleton-card/vehicle-skeleton-card.component';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
 import { Store } from '@ngrx/store';
-import { selectVehicle, startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
-import { selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
+import { filterVehicles, selectVehicle, startSingleVehiclePolling, stopSingleVehiclePolling } from '../../../../../../store/vehicle/vehicle.actions';
+import { selectCurrentFilter, selectSelectedVehicle } from '../../../../../../store/vehicle/vehicle.selectors';
 import { CommonModule } from '@angular/common';
 import { UiService } from '../../../../../../layout/service/ui.service';
 import { VehicleActionEvent, VehicleDetailsComponent } from "../vehicle-details/vehicle-details.component";
 import { PathReplayService } from '../../../../../service/path-replay.service';
-import { firstValueFrom, Subject, takeUntil } from 'rxjs';
+import { combineLatest, debounceTime, distinctUntilChanged, firstValueFrom, Observable, Subject, takeUntil } from 'rxjs';
 import { LiveTrackingControl, TrackMapService } from '../../../../../service/track-map.service';
 import { VehicleDetailsMenuBuilderService } from '../../../../../service/vehicle-details-menu-builder.service';
+import { VehicleService } from '../../../../../service/vehicle.service';
 
 @Component({
   selector: 'app-vehicle-list',
@@ -52,26 +53,57 @@ export class VehicleListComponent {
   @Input() fetchedVehicles: any = [];
   @Input() isLoading: any = false;
 
+  private pendingScrollId: string | null = null;
   private destroy$ = new Subject<void>();
   private store = inject(Store);
   private uiService = inject(UiService);
   private pathReplayService = inject(PathReplayService);
   public trackMapService = inject(TrackMapService);
+  private vehicleService = inject(VehicleService);
   private vehcileDetailMenuService = inject(VehicleDetailsMenuBuilderService);
 
+  currentFilter$: Observable<any> = this.store.select(selectCurrentFilter);
   selectedVehicle$ = this.store.select(selectSelectedVehicle);
 
 
 
   ngAfterViewInit() {
-    this.selectedVehicle$.pipe(takeUntil(this.destroy$)).subscribe(selected => {
-      if (selected && this.viewport) {
-        const index = this.fetchedVehicles.findIndex((v: any) => v.id === selected.id);
-        if (index > -1) {
-          this.viewport.scrollToIndex(index, 'smooth');
+    combineLatest([this.selectedVehicle$, this.currentFilter$]).pipe(takeUntil(this.destroy$),
+        distinctUntilChanged(
+          ([prevSel, prevFilter], [currSel, currFilter]) => {
+            if (!prevSel || !currSel) return false;
+            // Skip if same vehicle + same status + same filter
+            return (
+              prevSel.id === currSel.id &&
+              prevSel.status === currSel.status &&
+              prevFilter.status === currFilter.status &&
+              prevFilter.key === currFilter.key
+            );
+          }
+        ),
+        debounceTime(50)
+      )
+      .subscribe(([selected, currentFilter]) => {
+
+        if (!selected || !this.viewport) return;
+
+        if(currentFilter.key !== 'all') {
+          this.vehicleService.activeFilterKey = selected.status;
+          this.store.dispatch(filterVehicles({ key: selected.status, status: selected.status }));
         }
-      }
-    });
+
+        if (this.pendingScrollId === selected.id || this.pendingScrollId === null) {
+          this.scrollToVehicle(selected.id);
+          this.pendingScrollId = null;
+        }
+      });
+  }
+
+  private scrollToVehicle(vehicleId: string) {
+    const index = this.fetchedVehicles.findIndex((v: any) => v.id === vehicleId);
+    if (index > -1 && this.viewport) {
+      this.viewport.scrollToIndex(index, 'smooth');
+    }
   }
 
   trackByVehicleId = (index: number, vehicle: any) => vehicle?.id ?? index;

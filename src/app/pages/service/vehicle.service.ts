@@ -10,6 +10,8 @@ export class VehicleService {
 
   constructor(private http:HttpService) { }
 
+  activeFilterKey = 'all'; // default selected filter
+
   fetchVehicleList(): Observable<any[]> {
     return this.http.get$<any>('VehicleList').pipe(
       map((response) => {

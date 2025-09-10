@@ -83,11 +83,9 @@ export class MapTrakingControlsComponent {
     }
   }
 
-    exitTracking() {
-    this.trackMapService.clearAllLayers();
+  exitTracking() {
     this.uiService.closeDrawer();
-    this.trackMapService.disableFollow();
-    this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl);
+    this.trackMapService.exitFromLiveTracking();
     this.store.dispatch(stopSingleVehiclePolling());
     this.store.dispatch(selectVehicle({ vehicle: null }));
     this.store.dispatch(loadVehicles());
