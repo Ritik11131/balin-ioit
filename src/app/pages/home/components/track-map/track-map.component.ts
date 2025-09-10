@@ -24,33 +24,31 @@ import {
   selectSelectedVehicle,
   selectVehicleLoading
 } from '../../../../store/vehicle/vehicle.selectors';
-import { filterVehicles, loadVehicles, searchVehicles, selectVehicle, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
+import { selectVehicle, stopSingleVehiclePolling } from '../../../../store/vehicle/vehicle.actions';
 import { Store } from '@ngrx/store';
 import { selectGeofences, selectSelectedGeofence } from '../../../../store/geofence/geofence.selectors';
 import { PathReplayService } from '../../../service/path-replay.service';
 import { VehicleMarkerService } from '../../../service/vehicle-marker.service';
 import { LiveTrackingControl, TrackMapService } from '../../../service/track-map.service';
 import { VehicleData } from '../../../../shared/interfaces/vehicle';
-import { VehicleStatusLabelPipe } from '../../../../shared/pipes/vehicle-status-label.pipe';
-import { VehicleStatusPipe } from '../../../../shared/pipes/vehicle-status.pipe';
-import { CdkDrag, CdkDragHandle } from "@angular/cdk/drag-drop";
-import { UiService } from '../../../../layout/service/ui.service';
 import { TRIAL_PATH_COLORS } from '../../../../shared/utils/helper_functions';
 import { Router } from '@angular/router';
 import { PointMarkerService } from '../../../service/point-markers.service';
+import { MapTrakingControlsComponent } from "./map-traking-controls/map-traking-controls.component";
+import { SkeletonModule } from "primeng/skeleton";
 
 @Component({
   selector: 'app-track-map',
   standalone: true,
-  imports: [ButtonModule, LeafletModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule, VehicleStatusPipe, CdkDrag, CdkDragHandle],
+  imports: [ButtonModule, LeafletModule, CommonModule, FormsModule, InputTextModule, IconFieldModule, InputIconModule, MapTrakingControlsComponent, SkeletonModule],
   templateUrl: './track-map.component.html',
   styleUrl: './track-map.component.scss'
 })
 export class TrackMapComponent implements OnDestroy, OnChanges {
   @Input() activeTab: 'vehicles' | 'geofences' | 'historyReplay' | 'pointMarkers' = 'vehicles';
+  @Input() isLoading: any;
   
   public userLocationMarker?: Marker;
-  private uiService = inject(UiService);
   private store = inject(Store);
   private router = inject(Router);
   private pathReplayService = inject(PathReplayService);
@@ -80,7 +78,6 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
   // Store selectors
   private readonly filteredVehicles$ = this.store.select(selectFilteredVehicles);
   private readonly polling$ = this.store.select(selectVehiclePolling);
-  public readonly loading$: Observable<boolean> = this.store.select(selectVehicleLoading);
 
   private readonly selectedVehicle$ = this.store.select(selectSelectedVehicle);
   private readonly geofences$ = this.store.select(selectGeofences);
@@ -470,43 +467,5 @@ private handlePointMarkersActive(active: any): void {
       .subscribe(vehicles => {
         this.trackMapService.centerOnVehicle(vehicleId, vehicles);
       });
-  }
-
-  // Trail Management Methods
-  clearVehicleTrail(): void {
-    this.trackMapService.clearVehicleTrail();
-  }
-
-  toggleTrailVisibility(): void {
-    const trailLayer = this.trackMapService.getVehicleTrailLayer();
-    const mapInstance = this.trackMapService.getMapInstance();
-    
-    if(mapInstance.hasLayer(trailLayer)) {
-      mapInstance.removeLayer(trailLayer)
-    } else {
-      trailLayer.addTo(mapInstance);
-    }
-  }
-
-  getCurrentTrackedVehicleId(): string | null {
-    return this.trackMapService.getCurrentTrailVehicleId();
-  }
-
-  exitTracking() {
-    this.trackMapService.clearAllLayers();
-    this.uiService.closeDrawer();
-    this.trackMapService.disableFollow();
-    this.trackMapService.updateLiveTrackingControlObj({} as LiveTrackingControl);
-    this.store.dispatch(stopSingleVehiclePolling());
-    this.store.dispatch(selectVehicle({ vehicle: null }));
-    this.store.dispatch(loadVehicles());
-  }
-
-
-  toggleFollowVehicle(): void {
-    const vehicleId = this.getCurrentTrackedVehicleId();
-    if (vehicleId) {
-      this.trackMapService.toggleFollow(vehicleId);
-    }
   }
 }

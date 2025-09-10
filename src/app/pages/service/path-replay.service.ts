@@ -550,6 +550,7 @@ export class PathReplayService {
 
   async _initPathReplayFunc(historyPayload: any, map: any): Promise<any> {
   this.updateLoadingState({ initializing: true });
+  this.reportsService.isReportLoading = true;
   this.clearErrors();
 
   try {
@@ -659,6 +660,8 @@ export class PathReplayService {
     this.updateErrorState({ generalError: "Failed to initialize path replay" });
     this.updateLoadingState({ initializing: false });
     this.uiService.toggleLoader(false);
+  } finally {
+      this.reportsService.isReportLoading = false;
   }
 }
 

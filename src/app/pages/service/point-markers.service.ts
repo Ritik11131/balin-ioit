@@ -30,7 +30,7 @@ export class PointMarkerService {
 
   /** Main initializer (like _initPathReplayFunc) */
   async _initPointMarkersFunc(reportConfig: any, historyPayload: any, map: any) {
-    this.uiService.toggleLoader(true);
+    this.reportsService.isReportLoading = true;
     try {
       const { formValue } = historyPayload;
     
@@ -67,7 +67,7 @@ export class PointMarkerService {
       console.log(error);
       
     } finally {
-      this.uiService.toggleLoader(false);
+      this.reportsService.isReportLoading = false;
     }
   }
 

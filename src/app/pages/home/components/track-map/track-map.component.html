@@ -1,11 +1,19 @@
 <div class="relative">
     <!-- Loading overlay -->
-    <div *ngIf="loading$ | async" class="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-200">
-        <div class="flex items-center space-x-2">
-            <div class="w-4 h-4 border-2 border-[var(--primary-color)] border-t-transparent rounded-full animate-spin"></div>
-            <span class="text-sm text-gray-700 font-medium">Loading vehicles...</span>
+    @if (isLoading) {
+    <div class="absolute z-[1000] h-[calc(100vh-60px)] w-[calc(100vw-430px)] 
+               lg:w-[calc(100vw-430px)] lg:h-[calc(100vh-60px)] 
+               bg-gray/95 backdrop-blur-sm p-3 shadow-lg
+               flex items-center justify-center">
+      <div class="relative flex items-center justify-center">
+        <!-- Map-pin icon in center -->
+        <div class="absolute text-[var(--primary-color)] animate-pulse">
+          <i class="pi pi-map" style="font-size: 4rem"></i>
         </div>
+      </div>
     </div>
+    }
+
 
     <!-- Search Input -->
     <!-- <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] w-80">
@@ -75,50 +83,7 @@
     </div>
 
     @if (trackMapService.liveTrackingControlObj.visible) {
-        <div cdkDrag class="fixed bottom-6 left-1/3 transform -translate-x-1/2 control-panel rounded-xl shadow-lg border border-gray-200 bg-white" style="width: 351px; z-index: 9999">
-            <div cdkDragHandle class="drag-handle bg-gray-50 text-gray-700 px-4 py-2 rounded-t-xl flex items-center justify-between cursor-move border-b border-gray-100">
-                <div class="flex items-center gap-2">
-                    <i class="pi pi-bars text-xs text-gray-400"></i>
-                    <span class="font-medium text-sm text-gray-600">Tracking Controls</span>
-                </div>
-            </div>
-
-            <div class="p-4 space-y-4">
-                <div>
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-2">
-                            <span [ngClass]="trackMapService.liveTrackingControlObj | vehicleStatus" class="relative w-2.5 h-2.5 rounded-full transition-all duration-300 group-hover:scale-110">
-                                <span [ngClass]="trackMapService.liveTrackingControlObj | vehicleStatus" class="absolute top-0 left-0 w-full h-full rounded-full opacity-75 animate-ping"></span>
-                            </span>
-                            <span class="text-sm font-semibold text-gray-800 transition-all duration-300 group-hover:text-gray-900">
-                                {{ trackMapService.liveTrackingControlObj.vehicleName }}
-                            </span>
-                        </div>
-                        <div class="flex gap-2">
-                          <i class="pi pi-share cursor-pointer w-4 h-4 transition-all duration-300 
-                                    hover:scale-110 active:scale-95 opacity-70 hover:opacity-100"></i>
-                        
-                          <i class="pi pi-history cursor-pointer w-4 h-4 transition-all duration-300 
-                                    hover:scale-110 active:scale-95 opacity-70 hover:opacity-100"></i>
-                        
-                          <i class="pi pi-refresh cursor-pointer w-4 h-4 transition-all duration-300 
-                                    hover:scale-110 active:scale-95 opacity-70 hover:opacity-100"></i>
-                        </div>
-
-                    </div>
-                </div>                
-
-                <!-- Row 3: Actions -->
-                <div class="flex items-center gap-2">
-                    <p-button [severity]="trackMapService.isFollowEnabled() ? 'danger' : 'secondary'" [label]="trackMapService.isFollowEnabled() ? 'Stop Following' : 'Follow Vehicle'"
-                      [icon]="trackMapService.isFollowEnabled() ? 'pi pi-times' : 'pi pi-directions'" size="small"
-                      (onClick)="toggleFollowVehicle()">
-                    </p-button>
-                    <p-button severity="contrast" label="Toggle Trail" [icon]="'pi pi-eye-slash'" (onClick)="toggleTrailVisibility()" size="small"> </p-button>
-                    <p-button label="Exit Tracking" icon="pi pi-times" severity="danger" (onClick)="exitTracking()" size="small"></p-button>
-                </div>
-            </div>
-        </div>
+       <app-map-traking-controls />
     }
 
     <div leaflet [leafletOptions]="options" (leafletMapReady)="onMapReady($event)" class="h-[calc(100vh-60px)] w-[calc(100vw-430px)] lg:w-[calc(100vw-430px)] lg:h-[calc(100vh-60px)]"></div>

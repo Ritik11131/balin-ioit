@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { loadVehicles, selectVehicle, stopSingleVehiclePolling } from '../../store/vehicle/vehicle.actions';
 import { loadGeofences } from '../../store/geofence/geofence.actions';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { selectSelectedVehicle, selectVehiclesLoaded } from '../../store/vehicle/vehicle.selectors';
+import { selectSelectedVehicle, selectVehicleLoading, selectVehiclesLoaded } from '../../store/vehicle/vehicle.selectors';
 import { selectGeofenceLoaded } from '../../store/geofence/geofence.selectors';
 import { UiService } from '../../layout/service/ui.service';
 import { PathReplayService } from '../service/path-replay.service';
@@ -27,7 +27,7 @@ import { GenericPathReplayComponent } from "../../shared/components/generic-path
           }
         </div>
         <div class="flex-1 min-w-0 h-full">
-          <app-track-map [activeTab]="activeTab" />
+          <app-track-map [activeTab]="activeTab" [isLoading]="(loading$ | async)" />
         </div>
       </div>
     </div>
@@ -39,6 +39,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public pathReplayService = inject(PathReplayService);
   
   private destroy$ = new Subject<void>();
+  public readonly loading$: Observable<boolean> = this.store.select(selectVehicleLoading);
 
   vehiclesLoaded$: Observable<boolean> = this.store.select(selectVehiclesLoaded);
   geofenceLoaded$: Observable<boolean> = this.store.select(selectGeofenceLoaded);

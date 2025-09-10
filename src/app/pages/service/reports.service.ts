@@ -23,6 +23,8 @@ export class ReportsService {
   private _tableUpdateContext = new BehaviorSubject<'reports' | null>(null);
   tableUpdateContext$ = this._tableUpdateContext.asObservable();
 
+  public isReportLoading: boolean = false;
+
   // Set table data
   setTableData(data: any[]) {
     this._tableData.next(data);

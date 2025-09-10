@@ -36,7 +36,7 @@
 
             <!-- Content -->
         <div [hidden]="currentReport.selectedView !== 'map'" class="w-full h-full">
-            <app-track-map [activeTab]="currentReport.type"></app-track-map>
+            <app-track-map [activeTab]="currentReport.type" [isLoading]="reportService.isReportLoading"></app-track-map>
         </div>
         
         <!-- Table -->
