@@ -24,7 +24,7 @@ export interface SelectionAction {
     cdkDrag 
     cdkDragHandle 
     [ngClass]="selectedCount ? 'animate-slide-up' : 'animate-slide-down'"
-    class="bg-[var(--primary-color)] text-white rounded-xl shadow-xl flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 px-4 py-3"
+    class="bg-[#272838] text-white rounded-xl shadow-xl flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 px-4 py-3"
   >
     <!-- Left Section -->
     <div class="flex items-center space-x-2 sm:space-x-4">
@@ -46,7 +46,7 @@ export interface SelectionAction {
           [label]="action.label"
           [icon]="action.icon"
           (click)="onActionClick(action)"
-          [severity]="action.severity || 'secondary'"
+          [severity]="action.severity || 'primary'"
           [text]="true"
           size="small"
           class="text-sm whitespace-nowrap">

@@ -13,8 +13,8 @@ import { Store } from '@ngrx/store';
   selector: 'app-map-traking-controls',
   imports: [CommonModule, FormsModule, ButtonModule, VehicleStatusPipe, DragDropModule],
   template: `
-     <div cdkDrag class="fixed bottom-6 left-1/3 transform -translate-x-1/2 control-panel rounded-xl shadow-lg border border-gray-200 bg-white" style="width: 351px; z-index: 9999">
-            <div cdkDragHandle class="drag-handle bg-gray-50 text-gray-700 px-4 py-2 rounded-t-xl flex items-center justify-between cursor-move border-b border-gray-100">
+     <div cdkDrag cdkDragHandle class="fixed bottom-6 left-1/3 transform -translate-x-1/2 control-panel rounded-xl shadow-lg border border-gray-200 bg-white" style="width: 351px; z-index: 9999">
+            <div class="drag-handle bg-gray-50 text-gray-700 px-4 py-2 rounded-t-xl flex items-center justify-between cursor-move border-b border-gray-100">
                 <div class="flex items-center gap-2">
                     <i class="pi pi-bars text-xs text-gray-400"></i>
                     <span class="font-medium text-sm text-gray-600">Tracking Controls</span>
