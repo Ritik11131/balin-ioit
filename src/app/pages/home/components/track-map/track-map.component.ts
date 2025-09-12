@@ -8,17 +8,17 @@ import { LeafletModule } from '@bluehalo/ngx-leaflet';
 import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { 
-  latLng, 
-  Map, 
-  tileLayer, 
-  Marker, 
+import {
+  latLng,
+  Map,
+  tileLayer,
+  Marker,
   divIcon,
   marker
 } from 'leaflet';
 import 'leaflet.markercluster';
 import { Observable, Subject, takeUntil, withLatestFrom, filter, combineLatest, map, pairwise } from 'rxjs';
-import { 
+import {
   selectFilteredVehicles,
   selectVehiclePolling,
   selectSelectedVehicle,
@@ -47,7 +47,7 @@ import { SkeletonModule } from "primeng/skeleton";
 export class TrackMapComponent implements OnDestroy, OnChanges {
   @Input() activeTab: 'vehicles' | 'geofences' | 'historyReplay' | 'pointMarkers' = 'vehicles';
   @Input() isLoading: any;
-  
+
   public userLocationMarker?: Marker;
   private store = inject(Store);
   private router = inject(Router);
@@ -116,7 +116,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
 
   onMapReady(map: Map): void {
     this.trackMapService.initializeMap(map, this.clusteringEnabled);
-     this.trackMapService.setupMapEventHandlers((zoom) => {
+    this.trackMapService.setupMapEventHandlers((zoom) => {
       console.log('Map zoom level:', zoom);
     });
   }
@@ -169,9 +169,9 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     const currPos = curr.apiObject?.position;
 
     return prevPos?.latitude !== currPos?.latitude ||
-           prevPos?.longitude !== currPos?.longitude ||
-           prev.status !== curr.status ||
-           prev.lastUpdated !== curr.lastUpdated;
+      prevPos?.longitude !== currPos?.longitude ||
+      prev.status !== curr.status ||
+      prev.lastUpdated !== curr.lastUpdated;
   }
 
   private handleSingleVehicleUpdate(previousVehicle: VehicleData, currentVehicle: VehicleData): void {
@@ -194,11 +194,11 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
 
     this.trackMapService.updateLiveTrackingControlObj(
       {
-        status: currentVehicle.status, 
+        status: currentVehicle.status,
         vehicleName: currentVehicle?.name,
         vehicleSpeed: currentVehicle?.apiObject?.position?.speed + ' Km/hr',
-        vehicleTimestamp: currentVehicle.lastUpdated, 
-        visible: true 
+        vehicleTimestamp: currentVehicle.lastUpdated,
+        visible: true
       } as LiveTrackingControl);
     if (this.firstVehicleUpdate && currPos) {
       this.trackMapService.flyToPosition(currPos.latitude, currPos.longitude, 16, 3);
@@ -234,53 +234,47 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     }
 
     if (active.value && active.formObj) {
-      setTimeout(()=> {
+      setTimeout(() => {
         this.pathReplayService._initPathReplayFunc(active.formObj, this.trackMapService.getMapInstance());
-      },100)
-      
+      }, 100)
+
     }
   }
 
   private handleReplayClosed(vehicles: VehicleData[]): void {
     console.log(vehicles, 'replay closed, restoring vehicles');
     this.store.dispatch(selectVehicle({ vehicle: null }));
-    if(this.activeTab !== 'historyReplay') {
-      this.updateVehicleMarkers(vehicles);
-    } else {
-      this.router.navigate(['/pages/reports'])
-    }
+    (this.activeTab !== 'historyReplay') ? this.updateVehicleMarkers(vehicles) : this.router.navigate(['/pages/reports'])
   }
 
   private setupPointMarkerSubscriptions(): void {
-  this.pointMarkerService.pointMarkersActive$
-    .pipe(takeUntil(this.destroy$))
-    .subscribe(active => this.handlePointMarkersActive(active));
-}
-
-private handlePointMarkersActive(active: any): void {
-  console.log(active,'active');
-  
-  if (!active?.value) {
-    this.router.navigate(['/pages/reports'])
-    console.log('Point markers disabled ❌');
-    return;
+    this.pointMarkerService.pointMarkersActive$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(active => this.handlePointMarkersActive(active));
   }
 
-  if (active.value && !active.formObj) {
-    this.trackMapService.clearAllLayers();
-    console.log("Point markers mode enabled 🚀");
-  }
+  private handlePointMarkersActive(active: any): void {
+    if (!active?.value) {
+      this.router.navigate(['/pages/reports'])
+      console.log('Point markers disabled ❌');
+      return;
+    }
 
-  if (active.value && active.formObj && active.reportConfig) {
-    setTimeout(() => {
-      this.pointMarkerService._initPointMarkersFunc(
-        active.reportConfig,
-        active.formObj,
-        this.trackMapService.getMapInstance(),
-      );
-    }, 100);
+    if (active.value && !active.formObj) {
+      this.trackMapService.clearAllLayers();
+      console.log("Point markers mode enabled 🚀");
+    }
+
+    if (active.value && active.formObj && active.reportConfig) {
+      setTimeout(() => {
+        this.pointMarkerService._initPointMarkersFunc(
+          active.reportConfig,
+          active.formObj,
+          this.trackMapService.getMapInstance(),
+        );
+      }, 100);
+    }
   }
-}
 
   private initializeGeofenceSubscriptions(): void {
     this.geofences$
@@ -314,7 +308,7 @@ private handlePointMarkersActive(active: any): void {
 
     const markers = this.vehicleMarkerService.createVehicleMarkers(validVehicles);
     this.trackMapService.addMarkersToLayer(markers);
-    
+
     if (validVehicles.length > 0) {
       setTimeout(() => this.trackMapService.fitMapToMarkers(validVehicles), 100);
     }
@@ -328,15 +322,15 @@ private handlePointMarkersActive(active: any): void {
     const currentPos = currentVehicle.apiObject?.position;
     if (currentPos) {
       this.trackMapService.addToVehicleTrail(
-        currentVehicle.id.toString(), 
-        currentPos.latitude, 
+        currentVehicle.id.toString(),
+        currentPos.latitude,
         currentPos.longitude,
         TRIAL_PATH_COLORS[currentPos?.status?.status]
       );
     }
 
     const vehicleMarker = this.vehicleMarkerService.createAnimatedVehicleMarker(currentVehicle, previousVehicle);
-    
+
     if (vehicleMarker) {
       this.trackMapService.addSingleMarkerToLayer(vehicleMarker);
     }
@@ -380,7 +374,7 @@ private handlePointMarkersActive(active: any): void {
 
   private handleLocationSuccess(position: GeolocationPosition): void {
     const { latitude: lat, longitude: lng } = position.coords;
-    
+
     this.removeExistingUserMarker();
     this.createUserLocationMarker(lat, lng);
     this.trackMapService.flyToPosition(lat, lng, 18, 2);
@@ -417,7 +411,7 @@ private handlePointMarkersActive(active: any): void {
     this.userLocationMarker.bindPopup('Your Location', {
       className: 'user-location-popup'
     });
-    
+
     this.userLocationMarker.addTo(this.trackMapService.getMapInstance());
   }
 
@@ -430,7 +424,7 @@ private handlePointMarkersActive(active: any): void {
     const mapInstance = this.trackMapService.getMapInstance();
     mapInstance.removeLayer(this.mapLayers[this.currentMapLayer as keyof typeof this.mapLayers]);
     mapInstance.addLayer(this.mapLayers[nextLayer as keyof typeof this.mapLayers]);
-    
+
     this.currentMapLayer = nextLayer;
     console.log('Switched to map layer:', nextLayer);
   }
@@ -449,7 +443,7 @@ private handlePointMarkersActive(active: any): void {
   toggleClustering(): void {
     this.clusteringEnabled = !this.clusteringEnabled;
     this.trackMapService.toggleClustering(this.clusteringEnabled);
-    
+
     this.filteredVehicles$
       .pipe(takeUntil(this.destroy$))
       .subscribe(vehicles => {
