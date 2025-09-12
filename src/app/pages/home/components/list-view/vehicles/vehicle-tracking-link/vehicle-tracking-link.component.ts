@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, OnDestroy, inject } from '@angular/core';
 import { GenericFormGeneratorComponent } from '../../../../../../shared/components/generic-form-generator/generic-form-generator.component';
 import { VehicleTrackingLinkService } from '../../../../../service/vehicle-tracking-link.service';
 import { UiService } from '../../../../../../layout/service/ui.service';
@@ -25,20 +25,18 @@ import { ButtonModule } from 'primeng/button';
                     </div>
                 </div>
             </div>
-
-            <!-- Hours Input -->
+            
             @if (!generatedLink) {
-                <div class="space-y-2">
-                    <app-generic-form-generator [config]="trackingLinkService.formFields" [initialData]="editData" (formSubmit)="onFormSubmit($event)" (formCancel)="onFormCancel()" />
-                    @if (isGenerating) {
-                        <div class="flex items-center justify-center py-4">
-                            <div class="text-center">
-                                <i class="pi pi-spin pi-spinner text-2xl text-gray-400 mb-2"></i>
-                                <p class="text-sm text-gray-500">Generating...</p>
-                            </div>
-                        </div>
-                    }
+              @if(isGenerating) {
+                <div class="flex items-center justify-center py-4">
+                    <div class="text-center">
+                        <i class="pi pi-spin pi-spinner text-2xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500">Generating...</p>
+                    </div>
                 </div>
+              } @else {
+                <app-generic-form-generator [config]="trackingLinkService.formFields" [initialData]="editData" (formSubmit)="onFormSubmit($event)" (formCancel)="onFormCancel()" />
+              }
             } @else {
                 <!-- Generated Link Section -->
                 <div class="space-y-3 animate-fadein">
@@ -46,10 +44,8 @@ import { ButtonModule } from 'primeng/button';
                     <div class="relative bg-gradient-to-r from-primary-50 to-primary-50 border-2 border-dashed border-primary-300 rounded-lg p-4">
                         <div class="flex items-center space-x-3">
                             <div class="flex-shrink-0">
-                                <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center animate-pulse">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                    </svg>
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center animate-pulse">
+                                  <i class="pi pi-verified" style="color: var(--primary-color); font-size: 2rem"></i>
                                 </div>
                             </div>
                             <div class="flex-end min-w-0">
@@ -62,21 +58,17 @@ import { ButtonModule } from 'primeng/button';
                     </div>
 
                     <!-- Action Buttons for Generated Link -->
-                    <div class="flex space-x-3">
-                      <p-button label="Copy Link" (onClick)="copyLink()" icon="pi pi-copy" styleClass="flex-1" />
-                      <p-button label="Share Link" (onClick)="shareLink()" icon='pi pi-share-alt' styleClass="flex-1" /> 
+                    <div class="flex justify-between space-x-3">
+                      <p-button label="Copy Link" (onClick)="copyLink()" icon="pi pi-copy" />
+                      <p-button label="Share Link" (onClick)="shareLink()" icon='pi pi-share-alt' class="flex-1" /> 
+                      <p-button label="Another Link?" severity="secondary" (onClick)="resetForm()" icon='pi pi-sync' class="flex-1" /> 
                     </div>
                 </div>
             }
-
-            <!-- Reset Button when link is generated -->
-            <div *ngIf="generatedLink" class="pt-2">
-                <button (click)="resetForm()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors duration-200">Generate Another Link</button>
-            </div>
         </div>
     `
 })
-export class VehicleTrackingLinkComponent {
+export class VehicleTrackingLinkComponent implements OnDestroy {
     @Input() vehicle: any;
 
     private uiService = inject(UiService);
@@ -139,5 +131,11 @@ export class VehicleTrackingLinkComponent {
     onHoursChange(): void {
         if (this.trackingHours < 1) this.trackingHours = 1;
         else if (this.trackingHours > 168) this.trackingHours = 168;
+    }
+
+    ngOnDestroy(): void {
+      //Called once, before the instance is destroyed.
+      //Add 'implements OnDestroy' to the class.
+      this.onFormCancel()
     }
 }

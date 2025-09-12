@@ -35,6 +35,7 @@ export class WhitelabelThemeService {
         : {};
 
       const theme: ThemeData = {
+        url: res?.data?.url,
         logo: attributes.logo,
         favicon: attributes.favicon,
         title: attributes.title,
@@ -64,7 +65,7 @@ export class WhitelabelThemeService {
   private applyFavicon(url: string | undefined) {
     if (!url) return;
     const link: HTMLLinkElement =
-      document.querySelector("link[rel*='icon']") || document.createElement('link');
+    document.querySelector("link[rel*='icon']") || document.createElement('link');
     link.type = 'image/x-icon';
     link.rel = 'icon';
     link.href = url;

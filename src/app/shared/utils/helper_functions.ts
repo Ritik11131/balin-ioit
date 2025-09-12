@@ -237,3 +237,10 @@ export const formatStopTime = (timestamp: any): string => {
   }
 }
 
+/**
+   * Delay helper.
+   */
+  export const DELAY_CODE = (ms: number): Promise<void> => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
