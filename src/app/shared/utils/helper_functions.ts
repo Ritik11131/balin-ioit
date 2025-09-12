@@ -62,7 +62,7 @@ export const constructVehicleData = (vehicles: any[]): any[] => {
       id: device?.id,
       name: device?.vehicleNo ,
       lastUpdated: position?.deviceTime,
-      location: position?.address || 'Unknown Location',
+      location: position?.address || 'Tap to view location info',
       status: position?.status?.status.toLowerCase(),
       apiObject: {device,parking,position,validity}
     }));

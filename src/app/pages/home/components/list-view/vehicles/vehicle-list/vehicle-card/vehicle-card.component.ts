@@ -68,7 +68,7 @@ import { EV_VEHICLES, STREAM_PROTOCOLS } from '../../../../../../../shared/utils
 
             <!-- Expandable Animated Panel (pushes siblings down) -->
             @if (isSelected) {
-                <div class="flex flex-1 items-center justify-center bg-primary/10 rounded-b-lg transition-all duration-500">
+                <div class="flex flex-1 items-center justify-center bg-primary/10 transition-all duration-500">
                     <i class="pi pi-gauge text-primary text-xl mr-2"></i>
                     <span class="text-primary font-bold text-md">{{ vehicle?.apiObject?.position?.speed || 0}} km/h</span>
                 </div>

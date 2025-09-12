@@ -51,7 +51,7 @@ pollSelectedVehicle$ = createEffect(() =>
               return from(this.addressService.getAddress(vehicle?.position?.latitude, vehicle?.position?.longitude)).pipe(
                 map(address => VehicleActions.updateSelectedVehicleLocation({ location: address })),
                 catchError(() =>
-                  of(VehicleActions.updateSelectedVehicleLocation({ location: 'Unknown Location' }))
+                  of(VehicleActions.updateSelectedVehicleLocation({ location: 'Tap to view location info' }))
                 ),
                 startWith(updateVehicleAction) // emit API vehicle first, location will follow
               );

@@ -45,7 +45,7 @@ import { WhitelabelThemeService } from '../../pages/service/whitelabel-theme.ser
           <i [ngClass]="item.icon" class="text-lg ml-2 transition-transform duration-200 group-hover:scale-110"></i>
 
           <span
-            class="ml-3 text-md font-semibold truncate transition-all duration-200"
+            class="ml-3 text-md truncate transition-all duration-200"
             [ngClass]="{
               'opacity-0 w-0 overflow-hidden': !isExpanded,
               'opacity-100 w-auto': isExpanded,
