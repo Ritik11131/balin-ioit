@@ -1,5 +1,6 @@
 import { Injectable, signal, TemplateRef } from '@angular/core';
 import { MessageService } from 'primeng/api';
+import { DialogConfig } from '../../shared/interfaces/generic-components';
 
 export type ToastSeverity = 'success' | 'info' | 'warn' | 'error';
 
@@ -26,6 +27,11 @@ export class UiService {
   drawerStyleClass = this.drawerStyleClassSignal.asReadonly();
   drawerHeader = this.drawerHeaderSignal.asReadonly();
   isLoading = this.isLoadingSignal.asReadonly();
+
+  //Dialog signals
+  private dialogConfigSignal = signal<DialogConfig | null>(null);
+  dialogConfig = this.dialogConfigSignal.asReadonly();
+
 
   // Public access to default values (readonly)
   get defaultDrawerHeader(): string {
@@ -66,12 +72,18 @@ export class UiService {
     this.drawerStyleClassSignal.set(this.DEFAULT_DRAWER_STYLE_CLASS);
   }
 
+  openDialog(config: DialogConfig) {
+    this.dialogConfigSignal.set(config);
+  }
+
+  closeDialog() {
+    this.dialogConfigSignal.set(null);
+  }
+
   // Useful for testing and resetting the service state
   resetAllState(): void {
-    this.isDrawerOpenSignal.set(false);
-    this.drawerContentSignal.set(null);
-    this.drawerHeaderSignal.set(this.DEFAULT_DRAWER_HEADER);
-    this.drawerStyleClassSignal.set(this.DEFAULT_DRAWER_STYLE_CLASS);
+    this.closeDrawer();
+    this.closeDialog();
     this.isLoadingSignal.set(false);
   }
 }

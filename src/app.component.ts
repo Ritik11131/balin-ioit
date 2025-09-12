@@ -8,42 +8,41 @@ import { GenericDrawerComponent } from './app/shared/components/generic-drawer/g
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { StoreService } from './app/pages/service/store.service';
 import { NetworkService } from './app/pages/service/network.service';
-import { OfflineComponent } from "./app/shared/components/offline/offline.component";
+import { OfflineComponent } from './app/shared/components/offline/offline.component';
 import { Store } from '@ngrx/store';
 import { logout } from './app/store/core/action';
+import { GenericDialogComponent } from './app/shared/components/generic-dialog/generic-dialog.component';
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterModule, ConfirmDialogModule, ToastModule, GenericLoaderComponent, GenericDrawerComponent, OfflineComponent],
+    imports: [RouterModule, ConfirmDialogModule, ToastModule, GenericLoaderComponent, GenericDrawerComponent, OfflineComponent, GenericDialogComponent],
     template: `
+        @if (network.isOnline()) {
+            <router-outlet></router-outlet>
+            @if (uiService.isLoading()) { <app-generic-loader /> } 
 
-    @if(network.isOnline()) {
-        <router-outlet></router-outlet>
-        @if (uiService.isLoading()) {
-            <app-generic-loader />
+            <app-generic-drawer [modal]="uiService.isDrawerModal()" [isOpen]="uiService.isDrawerOpen()" [contentTemplate]="uiService.drawerContent()" [headerName]="uiService.drawerHeader()" [styleClass]="uiService.drawerStyleClass()" />
+            <app-generic-dialog  />
+
+            <p-toast
+                [life]="2000"
+                [breakpoints]="{
+                    '920px': { width: '50%' },
+                    '768px': { width: '60%' },
+                    '640px': { width: '70%' },
+                    '568px': { width: '80%' },
+                    '480px': { width: '90%' },
+                    '414px': { width: '80%' },
+                    '375px': { width: '80%' },
+                    '320px': { width: '80%' }
+                }"
+            />
+
+            <p-confirmdialog />
+        } @else {
+            <app-offline></app-offline>
         }
-
-        <app-generic-drawer [modal]="uiService.isDrawerModal()" [isOpen]="uiService.isDrawerOpen()" [contentTemplate]="uiService.drawerContent()" [headerName]="uiService.drawerHeader()" [styleClass]="uiService.drawerStyleClass()" />
-
-        <p-toast
-            [life]="2000"
-            [breakpoints]="{
-                '920px': { width: '50%' },
-                '768px': { width: '60%' },
-                '640px': { width: '70%' },
-                '568px': { width: '80%' },
-                '480px': { width: '90%' },
-                '414px': { width: '80%' },
-                '375px': { width: '80%' },
-                '320px': { width: '80%' }
-            }"
-        />
-
-        <p-confirmdialog />
-    } @else {
-        <app-offline></app-offline>
-    }
     `
 })
 export class AppComponent {
@@ -51,7 +50,10 @@ export class AppComponent {
     private storeService = inject(StoreService);
     private store = inject(Store);
 
-    constructor(public uiService: UiService, private titleService: TitleService) {
+    constructor(
+        public uiService: UiService,
+        private titleService: TitleService
+    ) {
         effect(() => {
             if (this.network.isOnline()) {
                 this.store.dispatch(logout());
@@ -60,7 +62,7 @@ export class AppComponent {
                 this.storeService.stopAutoRefresh();
             }
         });
-     }
+    }
 
     ngOnInit(): void {
         this.titleService.init();

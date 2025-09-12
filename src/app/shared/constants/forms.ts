@@ -693,6 +693,23 @@ export const UPDATE_GEOFENCE_FORM_FIELDS: FormConfig = {
       dataSource: 'vehicles'
     },
   ]
+};
+
+export const TRACKIN_LINK_FORM_FIELDS: FormConfig = {
+  formTitle: ' ',
+  columns: 1,
+  isEditMode: true,
+  saveButtonText: 'Generate Link',
+  fields: [
+      {
+      key: 'trackingDuration',
+      label: 'Tracking Duration (Hours)',
+      type: 'text',
+      required: true,
+      placeholder: 'Enter hours (1-10)',
+      gridCol: 1
+    }
+  ]
 }
 
 
