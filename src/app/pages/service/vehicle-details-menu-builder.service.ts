@@ -127,13 +127,13 @@ export class VehicleDetailsMenuBuilderService {
 
     // Navigation actions
     trackingLink: {
-      label: 'Live Tracking',
-      icon: 'pi pi-map-marker',
+      label: 'Share',
+      icon: 'pi pi-share-alt',
       actionType: 'navigation'
     },
     navigateToGoogle: {
-      label: 'Google Maps',
-      icon: 'pi pi-map',
+      label: 'View on Map',
+      icon: 'pi pi-map-marker',
       actionType: 'navigation'
     }
   };
