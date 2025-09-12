@@ -704,7 +704,13 @@ export const TRACKIN_LINK_FORM_FIELDS: FormConfig = {
       {
       key: 'trackingDuration',
       label: 'Tracking Duration (Hours)',
-      type: 'text',
+      type: 'number',
+      inputId:'expiry',
+      prefix: 'Expires in ',
+      suffix: ' hours',
+      useGrouping: false,
+      min: 1,
+      max: 10,
       required: true,
       placeholder: 'Enter hours (1-10)',
       gridCol: 1

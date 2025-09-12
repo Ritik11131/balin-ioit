@@ -24,7 +24,7 @@ export class VehicleTrackingLinkService {
 
     this.isGenerating = true;
     try {
-      await this.delay(2000); // Simulate network delay
+      await this.delay(2000);
       const timestamp = new Date().getTime();
       const token = this.generateRandomToken();
       this.generatedLink = `https://track.yourapp.com/live/${vehicleId}/${token}?duration=${hours}h&expires=${timestamp}`;

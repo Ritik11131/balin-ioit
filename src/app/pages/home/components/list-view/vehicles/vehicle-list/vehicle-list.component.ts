@@ -14,12 +14,11 @@ import { LiveTrackingControl, TrackMapService } from '../../../../../service/tra
 import { VehicleDetailsMenuBuilderService } from '../../../../../service/vehicle-details-menu-builder.service';
 import { VehicleService } from '../../../../../service/vehicle.service';
 import { FormsModule } from '@angular/forms';
-import { GenericFormGeneratorComponent } from "../../../../../../shared/components/generic-form-generator/generic-form-generator.component";
 import { VehicleTrackingLinkComponent } from "../vehicle-tracking-link/vehicle-tracking-link.component";
 
 @Component({
     selector: 'app-vehicle-list',
-    imports: [CommonModule, VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule, VehicleDetailsComponent, FormsModule, GenericFormGeneratorComponent, VehicleTrackingLinkComponent],
+    imports: [CommonModule, VehicleCardComponent, VehicleSkeletonCardComponent, ScrollingModule, VehicleDetailsComponent, FormsModule, VehicleTrackingLinkComponent],
     template: `
         <!-- Cards Wrapper Container -->
         <div class="max-h-[calc(100vh-280px)] overflow-y-scroll scrollbar-hide mt-4">

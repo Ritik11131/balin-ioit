@@ -68,6 +68,8 @@ export interface FormField {
   dataSource?: 'users' | 'deviceTypes' | 'vehicleTypes' | 'plans' | 'vehicles'; // NEW
   disabled?: any;
   rows?: number; // for textarea
+  prefix?: any;
+  suffix?: any;
   min?: number;
   max?: number;
   minLength?: number;
@@ -172,7 +174,7 @@ export interface FormConfig {
                                 @case ('number') {
                                     <ng-container *ngTemplateOutlet="fieldWrapper; context: { field: field, input: numberInput }"></ng-container>
                                     <ng-template #numberInput>
-                                        <p-inputNumber [id]="field.key" [inputId]="field.inputId" [formControlName]="field.key" [useGrouping]="field.useGrouping" [min]="field.min" [max]="field.max" styleClass="w-full"></p-inputNumber>
+                                        <p-inputNumber [id]="field.key" [inputId]="field.inputId" [formControlName]="field.key" [useGrouping]="field.useGrouping" [min]="field.min" [max]="field.max" styleClass="w-full" [suffix]="field.suffix" [prefix]="field.prefix"></p-inputNumber>
                                     </ng-template>
                                 }
 
