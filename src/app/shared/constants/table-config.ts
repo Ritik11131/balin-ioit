@@ -35,6 +35,20 @@ export const USER_TABLE_CONFIG = {
     dataKey: 'id'
 };
 
+export const BULK_CREATE_USER_TABLE_CONFIG = {
+    title: 'Bulk Users',
+    columns: [
+        { field: 'userName', header: 'User Name', minWidth: '10rem' },
+        { field: 'loginId', header: 'Login ID', minWidth: '10rem' },
+        { field: 'email', header: 'Email', minWidth: '10rem' },
+        { field: 'mobileNo', header: 'Mobile No.', minWidth: '10rem' },
+        { field: 'deviceCount', header: 'Device Count', minWidth: '4rem' },
+
+    ],
+    globalFilterFields: [],
+    dataKey: 'id'
+};
+
 
 export const DEVICE_TABLE_CONFIG = {
     title: 'Devices',

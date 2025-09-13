@@ -133,6 +133,8 @@ export class VehicleListComponent {
                 this.uiService.openDialog({
                     content: this.vehicleShareTrackingLinkTemplate,
                     header: 'Generate Link to Share',
+                    subheader: 'Write Some Subheader',
+                    headerIcon: 'pi pi-map-marker',
                     position: 'bottom',
                     closable: true,
                     draggable: true,

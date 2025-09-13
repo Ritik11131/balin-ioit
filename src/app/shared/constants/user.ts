@@ -1,3 +1,7 @@
+import { read, utils } from "xlsx";
+import { BULK_CREATE_USER_TABLE_CONFIG } from "./table-config";
+
+
 export const USER_DETAILS_TABS = [
     {
         label: 'Details',
@@ -117,4 +121,18 @@ export const USER_DETAILS_TABS = [
 export const USER_TYPES = [
     { label: 'Admin', value: 1 },
     { label: 'Customer', value: 2 },
-]
+];
+
+
+export const USER_BULK_UPLOAD_CONFIG = {
+  dialogHeader: 'Bulk Create Users',
+  formTitle: 'Upload User Excel File',
+  tableConfig: BULK_CREATE_USER_TABLE_CONFIG,
+  sampleUrl: '/assets/user_sample.xlsx', // Sample downloadable file
+  parseUploadFn: async (file: File) => {
+    const data = await file.arrayBuffer();
+    const workbook = read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    return utils.sheet_to_json(sheet); // Returns array of objects
+  }
+};

@@ -19,7 +19,7 @@ import { TabsModule } from 'primeng/tabs';
 import { BadgeModule } from 'primeng/badge';
 import { TableModule } from 'primeng/table';
 import { ChipModule } from 'primeng/chip';
-import { USER_DETAILS_TABS } from '../../shared/constants/user';
+import { USER_BULK_UPLOAD_CONFIG, USER_DETAILS_TABS } from '../../shared/constants/user';
 import { UserService } from '../service/user.service';
 import { DeviceService } from '../service/device.service';
 import { AuthService } from '../service/auth.service';
@@ -28,15 +28,17 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { FormsModule } from '@angular/forms';
 import { PlatformConfig, UserConfiguration, UserConfigurationAttributes } from '../../store/user-configuration/state';
 import { UserConfigurationService } from '../service/user-configuration.service';
+import { GenericBulkUploadComponent } from "../../shared/components/generic-bulk-upload/generic-bulk-upload.component";
 
 @Component({
   selector: 'app-users',
-  imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent, ButtonModule, SkeletonModule,DividerModule, AvatarModule, TabsModule, BadgeModule, TableModule, ChipModule, CheckboxModule, FormsModule],
+  imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent, ButtonModule, SkeletonModule, DividerModule, AvatarModule, TabsModule, BadgeModule, TableModule, ChipModule, CheckboxModule, FormsModule, GenericBulkUploadComponent],
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
 export class UsersComponent implements OnInit, OnDestroy {
   @ViewChild('createUpdateUser') createUpdateUser: any;
+  @ViewChild('bulkUserUploadTemplate') bulkUserUploadTemplate: any;
   @ViewChild('viewMoreDetails') viewMoreDetails: any;
   private store = inject(Store);
   private authService = inject(AuthService);
@@ -47,10 +49,11 @@ export class UsersComponent implements OnInit, OnDestroy {
   private userConfigurationService = inject(UserConfigurationService);
   private confirmationService = inject(ConfirmationService);
   private destroy$ = new Subject<void>();
-  
+
   toolbarItems = USER_TABLE_TOOLBAR;
   tableConfig = USER_TABLE_CONFIG;
   formFields = CREATE_USER_FORM_FIELDS;
+  userBulkUploadConfig = USER_BULK_UPLOAD_CONFIG;
   tabsConfig: any = [];
 
   users$: Observable<any[]> = this.store.select(selectUsers);
@@ -59,23 +62,23 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   editData!: any
   selectedRowItems: any[] = [];
-  user!:any;
+  user!: any;
   userConfiguration!: UserConfiguration | null | any;
   childUserConfigurationObject!: any;
   activeTab = 'details';
 
-// Maps for generic handling
-loadingMap: Record<string, boolean> = {
-  details: false,
-  subUsers: true,
-  linkedDevices: true,
-  config: false
-};
+  // Maps for generic handling
+  loadingMap: Record<string, boolean> = {
+    details: false,
+    subUsers: true,
+    linkedDevices: true,
+    config: false
+  };
 
-dataMap: Record<string, any[]> = {
-  subUsers: [],
-  linkedDevices: []
-};
+  dataMap: Record<string, any[]> = {
+    subUsers: [],
+    linkedDevices: []
+  };
 
   private actionHandlers: Record<string, (row: any) => void> = {
     'Update': (row) => this.editHandler(row),
@@ -105,22 +108,26 @@ dataMap: Record<string, any[]> = {
 
 
   async handleToolBarActions(event: any): Promise<void> {
-        if (event.key === 'create') {
-          this.formFields = CREATE_USER_FORM_FIELDS;
-          this.uiService.openDrawer(this.createUpdateUser,this.formFields.formTitle,'',true)
-        }
+    if (event.key === 'create') {
+      this.formFields = CREATE_USER_FORM_FIELDS;
+      this.uiService.openDrawer(this.createUpdateUser, this.formFields.formTitle, '', true)
+    } else if (event.key === 'bulk_create') {
+      this.uiService.openDialog({
+        content: this.bulkUserUploadTemplate, header: 'Bulk Create Users', subheader:'Upload your Excel or CSV files seamlessly', headerIcon:'pi pi-users', position: 'top', closable: true, draggable: false, modal: true, styleClass: 'w-[80vw]'
+      });
+    }
   }
 
   async onUserFormSubmit(event: any): Promise<void> {
     console.log('User form submitted:', event);
-    const {isEditMode, formValue} = event;
-    if(isEditMode) {
-      const mergedObj = {...this.editData, ...formValue}
+    const { isEditMode, formValue } = event;
+    if (isEditMode) {
+      const mergedObj = { ...this.editData, ...formValue }
       console.log(mergedObj);
       await this.updateUser(mergedObj?.id, mergedObj);
     } else {
       console.log('create');
-      const mergedObj = {...formValue}
+      const mergedObj = { ...formValue }
       await this.createUser(mergedObj);
     }
   }
@@ -136,80 +143,80 @@ dataMap: Record<string, any[]> = {
 
   async editHandler(row: any): Promise<void> {
     this.formFields = UPDATE_USER_FORM_FIELDS;
-    this.uiService.openDrawer(this.createUpdateUser,this.formFields.formTitle,'',true)
+    this.uiService.openDrawer(this.createUpdateUser, this.formFields.formTitle, '', true)
     await Promise.all([
       this.loadUserObject(row?.id)
     ])
   }
 
   async deleteHandler(row: any): Promise<void> {
-     this.confirmationService.confirm({
-            target: row,
-            message: `Are you sure that you want to delete ${row?.userName}?`,
-            header: 'Confirmation',
-            closable: true,
-            closeOnEscape: true,
-            icon: 'pi pi-exclamation-triangle',
-            rejectButtonProps: {
-                label: 'Cancel',
-                severity: 'secondary',
-                outlined: true,
-            },
-            acceptButtonProps: {
-                label: 'Save',
-                severity:'danger'
-            },
-            accept: async () => {
-              await this.deleteUser(row);
-                // this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted' });
-            },
-            reject: () => {
-                // this.messageService.add({
-                //     severity: 'error',
-                //     summary: 'Rejected',
-                //     detail: 'You have rejected',
-                //     life: 3000,
-                // });
-            },
-        });
+    this.confirmationService.confirm({
+      target: row,
+      message: `Are you sure that you want to delete ${row?.userName}?`,
+      header: 'Confirmation',
+      closable: true,
+      closeOnEscape: true,
+      icon: 'pi pi-exclamation-triangle',
+      rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Save',
+        severity: 'danger'
+      },
+      accept: async () => {
+        await this.deleteUser(row);
+        // this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'You have accepted' });
+      },
+      reject: () => {
+        // this.messageService.add({
+        //     severity: 'error',
+        //     summary: 'Rejected',
+        //     detail: 'You have rejected',
+        //     life: 3000,
+        // });
+      },
+    });
   }
 
-async viewMoreDetailsHandler(row: any): Promise<void> {
-  if (!row?.id) {
-    console.warn('Invalid user row:', row);
-    return;
-  }
+  async viewMoreDetailsHandler(row: any): Promise<void> {
+    if (!row?.id) {
+      console.warn('Invalid user row:', row);
+      return;
+    }
 
-  try {
-    this.uiService.toggleLoader(true);
-    this.user = row;
+    try {
+      this.uiService.toggleLoader(true);
+      this.user = row;
 
-    // Fetch user configuration safely
-    const response = await this.userService.fetchUserConfigurationById(row.id);
-    
-    if (!response?.result || !response?.data) {
-      console.warn('No configuration found for user:', row.id);
-      this.userConfiguration = {} as PlatformConfig;
-      this.childUserConfigurationObject = null;
-    } else {
-      // Safely parse attributes
-      let parsedAttributes: UserConfigurationAttributes = { webConfig: {} as PlatformConfig, androidConfig: {} as PlatformConfig };
-      try {
-        parsedAttributes = response.data.attributes
-        ? (typeof response.data.attributes === 'string'
-          ? JSON.parse(response.data.attributes)
-          : response.data.attributes)
-          : parsedAttributes;
+      // Fetch user configuration safely
+      const response = await this.userService.fetchUserConfigurationById(row.id);
+
+      if (!response?.result || !response?.data) {
+        console.warn('No configuration found for user:', row.id);
+        this.userConfiguration = {} as PlatformConfig;
+        this.childUserConfigurationObject = null;
+      } else {
+        // Safely parse attributes
+        let parsedAttributes: UserConfigurationAttributes = { webConfig: {} as PlatformConfig, androidConfig: {} as PlatformConfig };
+        try {
+          parsedAttributes = response.data.attributes
+            ? (typeof response.data.attributes === 'string'
+              ? JSON.parse(response.data.attributes)
+              : response.data.attributes)
+            : parsedAttributes;
         } catch (parseError) {
           console.error('Failed to parse user configuration attributes:', parseError);
         }
-        
+
         this.childUserConfigurationObject = response.data;
         this.userConfiguration = parsedAttributes.webConfig ?? ({} as PlatformConfig);
-        
+
         console.log('Fetched user configuration:', parsedAttributes);
       }
-      
+
       // Load related data in parallel with proper error handling
       await Promise.allSettled([
         this.loadSubUsers(row.id).catch(err => console.error('Failed to load sub-users:', err)),
@@ -223,7 +230,7 @@ async viewMoreDetailsHandler(row: any): Promise<void> {
       this.uiService.toggleLoader(false);
     }
 
-     this.tabsConfig = USER_DETAILS_TABS.map((tab: any) => {
+    this.tabsConfig = USER_DETAILS_TABS.map((tab: any) => {
       if (tab.type !== 'config') return tab;
 
       return {
@@ -238,29 +245,29 @@ async viewMoreDetailsHandler(row: any): Promise<void> {
           .filter((section: any) => section.fields.length > 0) // remove empty sections
       };
     });
-    
+
     // Open drawer early to show UI immediately
-    this.uiService.openDrawer(this.viewMoreDetails,' ','!w-[80vw] md:!w-[80vw] lg:!w-[80vw]',true);
-}
+    this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
+  }
 
 
-  private async updateUser(id:any, data:any): Promise<void> {
+  private async updateUser(id: any, data: any): Promise<void> {
     const res = await this.userService.updateUser(id, data);
     this.uiService.closeDrawer();
-    this.uiService.showToast('success','Success', res?.data);
+    this.uiService.showToast('success', 'Success', res?.data);
     this.store.dispatch(loadUsers());
   }
 
   private async createUser(data: any): Promise<void> {
     const res = await this.userService.createUser(data);
     this.uiService.closeDrawer();
-    this.uiService.showToast('success','Success', res?.data);
+    this.uiService.showToast('success', 'Success', res?.data);
     this.store.dispatch(loadUsers());
   }
 
   private async deleteUser(data: any): Promise<void> {
     const res = await this.userService.deleteUser(data);
-    this.uiService.showToast('success','Success', res?.data);
+    this.uiService.showToast('success', 'Success', res?.data);
     this.store.dispatch(loadUsers());
   }
 
@@ -295,34 +302,40 @@ async viewMoreDetailsHandler(row: any): Promise<void> {
     }
   }
 
-async handleChildLogins(row: any): Promise<void> {
-  try {
-    this.uiService.toggleLoader(true);
-    const res = await this.userService.getUserDetailsById(row?.id);
-    const { loginId, password, id, userName } = res?.data;
+  async handleChildLogins(row: any): Promise<void> {
+    try {
+      this.uiService.toggleLoader(true);
+      const res = await this.userService.getUserDetailsById(row?.id);
+      const { loginId, password, id, userName } = res?.data;
 
-    if (!loginId || !password) {
-      console.error('Child credentials not found');
-      return;
+      if (!loginId || !password) {
+        console.error('Child credentials not found');
+        return;
+      }
+
+      await this.authService.loginChild(loginId, password, id, userName);
+      this.storeService.startAutoRefresh();
+      console.log(`Switched to child: ${userName}`);
+    } catch (error) {
+      console.error('Error logging in as child:', error);
+    } finally {
+      this.uiService.toggleLoader(false);
     }
-
-    await this.authService.loginChild(loginId, password, id, userName);
-    this.storeService.startAutoRefresh();
-    console.log(`Switched to child: ${userName}`);
-  } catch (error) {
-    console.error('Error logging in as child:', error);
-  } finally {
-    this.uiService.toggleLoader(false);
   }
-}
 
-async handleChildLoginFromDetails(): Promise<void> {
-  this.uiService.closeDrawer();
-  await this.handleChildLogins(this.user);
-}
+  async handleChildLoginFromDetails(): Promise<void> {
+    this.uiService.closeDrawer();
+    await this.handleChildLogins(this.user);
+  }
 
- onFieldChange(fieldKey: string, value: boolean, sectionKey: string) {
+  onFieldChange(fieldKey: string, value: boolean, sectionKey: string) {
     this.userConfigurationService.updateField(fieldKey, value, sectionKey as any, 'web', this.childUserConfigurationObject, this.user);
+  }
+
+  onUpload(data: any[]) {
+    console.log(data);
+
+    // Call respective API, e.g. userService.bulkCreate(data)
   }
 
 

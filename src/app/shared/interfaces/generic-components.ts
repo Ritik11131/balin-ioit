@@ -3,6 +3,8 @@ import { TemplateRef } from "@angular/core";
 export interface DialogConfig {
     content?: TemplateRef<any>;
     header?: string;
+    subheader?:string;
+    headerIcon?: string;
     styleClass?: string;
     modal?: boolean;
     closable?: boolean;
