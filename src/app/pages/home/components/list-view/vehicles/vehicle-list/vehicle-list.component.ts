@@ -109,7 +109,7 @@ export class VehicleListComponent {
         this.store.dispatch(selectVehicle({ vehicle }));
         this.store.dispatch(stopSingleVehiclePolling());
         this.store.dispatch(startSingleVehiclePolling({ vehicleId: vehicle.id }));
-        this.uiService.openDrawer(this.vehicleDetailsTemplate);
+        this.uiService.openDrawer(this.vehicleDetailsTemplate, vehicle?.name, vehicle?.apiObject?.device?.deviceId, 'pi pi-microchip');
     }
 
     async onActionExecuted(event: VehicleActionEvent): Promise<any> {

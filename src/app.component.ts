@@ -22,7 +22,7 @@ import { GenericDialogComponent } from './app/shared/components/generic-dialog/g
             <router-outlet></router-outlet>
             @if (uiService.isLoading()) { <app-generic-loader /> } 
 
-            <app-generic-drawer [modal]="uiService.isDrawerModal()" [isOpen]="uiService.isDrawerOpen()" [contentTemplate]="uiService.drawerContent()" [headerName]="uiService.drawerHeader()" [styleClass]="uiService.drawerStyleClass()" />
+            <app-generic-drawer [modal]="uiService.isDrawerModal()" [isOpen]="uiService.isDrawerOpen()" [contentTemplate]="uiService.drawerContent()" [headerName]="uiService.drawerHeader()" [subHeaderName]="uiService.drawerSubHeader()" [headerIcon]="uiService.drawerHeaderIcon()" [styleClass]="uiService.drawerStyleClass()" />
             <app-generic-dialog  />
 
             <p-toast

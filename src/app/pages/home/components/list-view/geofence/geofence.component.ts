@@ -40,7 +40,7 @@ export class GeofenceComponent implements OnDestroy {
     if(event.actionType === 'create') {
       this.store.dispatch(selectGeofence({ geofence: null }));
     }
-    this.uiService.openDrawer(this.createUpdateGeofence,' ','!w-[100vw] md:!w-[100vw] lg:!w-[100vw]',true)
+    this.uiService.openDrawer(this.createUpdateGeofence,'Create','Geofence','pi pi-map','!w-[100vw] md:!w-[100vw] lg:!w-[100vw]',true)
   }
 
 

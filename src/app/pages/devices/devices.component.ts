@@ -14,28 +14,27 @@ import { UserService } from '../service/user.service';
 import { DeviceService } from '../service/device.service';
 import { CREATE_DEVICE_FORM_FIELDS, UPDATE_DEVICE_FORM_FIELDS } from '../../shared/constants/forms';
 import { GenericFormGeneratorComponent } from "../../shared/components/generic-form-generator/generic-form-generator.component";
-import { selectDeviceTypes } from '../../store/device-type/selectors';
-import { selectVehicleTypes } from '../../store/vehicle-type/selectors';
 import moment from 'moment';
 import { DividerModule } from 'primeng/divider';
 import { TabsModule } from 'primeng/tabs';
 import { DEVICE_DETAILS_TABS } from '../../shared/constants/device';
 import { AvatarModule } from 'primeng/avatar';
 import { ChipModule } from 'primeng/chip';
-import { selectUsers } from '../../store/users/users.selectors';
 import { FormEnricherService } from '../service/form-enricher.service';
 import { SelectionAction } from '../../shared/components/generic-table/multiselect-action-panel/multiselect-action-panel.component';
 import { ConfirmationService } from 'primeng/api';
+import { GenericBulkUploadComponent } from "../../shared/components/generic-bulk-upload/generic-bulk-upload.component";
 
 
 @Component({
     selector: 'app-devices',
-    imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent, DividerModule,TabsModule,AvatarModule,ChipModule],
+    imports: [GenericTableComponent, CommonModule, GenericFormGeneratorComponent, DividerModule, TabsModule, AvatarModule, ChipModule, GenericBulkUploadComponent],
     templateUrl: './devices.component.html',
     styleUrl: './devices.component.scss'
 })
 export class DevicesComponent implements OnDestroy, OnInit {
     @ViewChild('createUpdateDevice') createUpdateDevice: any;
+    @ViewChild('bulkDeviceUploadTemplate') bulkDeviceUploadTemplate: any;
     @ViewChild('viewMoreDetails') viewMoreDetails: any;
     private store = inject(Store);
     private uiService = inject(UiService);
@@ -53,6 +52,7 @@ export class DevicesComponent implements OnDestroy, OnInit {
     toolbarItems = DEVICE_TABLE_TOOLBAR;
     tableConfig = DEVICE_TABLE_CONFIG;
     tabsConfig: any = DEVICE_DETAILS_TABS;
+    deviceBulkUploadConfig: any = [];
 
     selectedRowItems: any[] = [];
     editData!: any
@@ -89,7 +89,11 @@ export class DevicesComponent implements OnDestroy, OnInit {
             this.formConfigEnricher.enrichForms([CREATE_DEVICE_FORM_FIELDS]).subscribe(res => {
                 this.formFields = res[0];
             });
-            this.uiService.openDrawer(this.createUpdateDevice, this.formFields.formTitle, '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
+            this.uiService.openDrawer(this.createUpdateDevice, this.formFields.formTitle,'Device','pi pi-microchip', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
+        } else if (event.key === 'bulk_create') {
+            this.uiService.openDialog({
+                content: this.bulkDeviceUploadTemplate, header: 'Bulk Create Device', subheader: 'Upload your Excel or CSV files seamlessly', headerIcon: 'pi pi-microchip', position: 'top', closable: true, draggable: false, modal: true, styleClass: 'w-[80vw]'
+            });
         }
     }
 
@@ -125,7 +129,8 @@ export class DevicesComponent implements OnDestroy, OnInit {
         // Open drawer
         this.uiService.openDrawer(
             this.viewMoreDetails,
-            ' ',
+            'View',
+            'Device','pi pi-microchip',
             '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]',
             true
         );
@@ -162,7 +167,7 @@ export class DevicesComponent implements OnDestroy, OnInit {
         this.formConfigEnricher.enrichForms([UPDATE_DEVICE_FORM_FIELDS]).subscribe(res => {
             this.formFields = res[0];
         });
-        this.uiService.openDrawer(this.createUpdateDevice, this.formFields.formTitle, '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
+        this.uiService.openDrawer(this.createUpdateDevice, this.formFields.formTitle,'Update','pi pi-microchip', '!w-[35vw] md:!w-[35vw] lg:!w-[35vw]', true)
         await Promise.all([
             this.loadDeviceObject(row?.id)
         ])
@@ -292,5 +297,11 @@ export class DevicesComponent implements OnDestroy, OnInit {
         this.selectedRowItems = event.event || event.items;
         
     }
+
+    onUpload(data: any[]) {
+    console.log(data);
+
+    // Call respective API, e.g. userService.bulkCreate(data)
+  }
 
 }

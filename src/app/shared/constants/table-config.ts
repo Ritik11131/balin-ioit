@@ -49,6 +49,21 @@ export const BULK_CREATE_USER_TABLE_CONFIG = {
     dataKey: 'id'
 };
 
+export const BULK_CREATE_DEVICE_TABLE_CONFIG = {
+     title: 'Devices',
+    columns: [
+        { field: 'vehicleNo', header: 'Vehicle No', minWidth: '10rem' },
+        { field: 'deviceImei', header: 'Unique ID', minWidth: '10rem' },
+        { field: 'simPhoneNumber', header: 'Primary Ph. No', minWidth: '10rem' },
+        { field: 'installationOn', header: 'Installation Date', minWidth: '10rem', date:true },
+        { field: 'validity', subfield: 'nextRechargeDate', header: 'Validity', minWidth: '4rem', date:true },
+        { field: 'lastUpdateOn', header: 'Last Updated', minWidth: '4rem', date:true },
+
+    ],
+    globalFilterFields: [],
+    dataKey: 'id'
+}
+
 
 export const DEVICE_TABLE_CONFIG = {
     title: 'Devices',

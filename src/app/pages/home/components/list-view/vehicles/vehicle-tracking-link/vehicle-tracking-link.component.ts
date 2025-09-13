@@ -20,7 +20,7 @@ import { ButtonModule } from 'primeng/button';
                         </svg>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-800">Selected Vehicle</p>
+                        <span>Selected Vehicle</span>
                         <p class="text-lg font-bold text-primary">{{ vehicle?.name }}</p>
                     </div>
                 </div>

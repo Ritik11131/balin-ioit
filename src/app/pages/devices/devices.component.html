@@ -13,6 +13,10 @@
         (formValueChanges)="onFormValueChange($event)"></app-generic-form-generator>
 </ng-template>
 
+<ng-template #bulkDeviceUploadTemplate>
+  <app-generic-bulk-upload [config]="deviceBulkUploadConfig" (upload)="onUpload($event)"></app-generic-bulk-upload>
+</ng-template>
+
 
 <ng-template #viewMoreDetails>
     <div class="w-full mx-auto">

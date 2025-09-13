@@ -17,6 +17,8 @@ export class UiService {
   private isDrawerOpenSignal = signal(false);
   private drawerContentSignal = signal<TemplateRef<any> | null>(null);
   private drawerHeaderSignal = signal<string>(this.DEFAULT_DRAWER_HEADER);
+  private drawerSubheaderSignal = signal<string>(' ');
+  private drawerHeaderIconSignal = signal<string>(' ');
   private drawerStyleClassSignal = signal(this.DEFAULT_DRAWER_STYLE_CLASS);
   private isLoadingSignal = signal(false);
 
@@ -26,6 +28,8 @@ export class UiService {
   drawerContent = this.drawerContentSignal.asReadonly();
   drawerStyleClass = this.drawerStyleClassSignal.asReadonly();
   drawerHeader = this.drawerHeaderSignal.asReadonly();
+  drawerSubHeader = this.drawerSubheaderSignal.asReadonly();
+  drawerHeaderIcon = this.drawerHeaderIconSignal.asReadonly();
   isLoading = this.isLoadingSignal.asReadonly();
 
   //Dialog signals
@@ -52,9 +56,11 @@ export class UiService {
     this.messageService.add({ severity, summary, detail });
   }
 
-  openDrawer(content: TemplateRef<any>, header = this.DEFAULT_DRAWER_HEADER, styleClass?: string, modal: boolean = false): void {
+  openDrawer(content: TemplateRef<any>, header = this.DEFAULT_DRAWER_HEADER, subheader = '', headerIcon = '', styleClass?: string, modal: boolean = false): void {
     this.drawerContentSignal.set(content);
     this.drawerHeaderSignal.set(header);
+    this.drawerSubheaderSignal.set(subheader);
+    this.drawerHeaderIconSignal.set(headerIcon);
     this.isDrawerOpenSignal.set(true);
     this.isDrawerModalSignal.set(modal);
     if (styleClass) {

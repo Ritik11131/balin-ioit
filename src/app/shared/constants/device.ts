@@ -1,3 +1,6 @@
+import { read, utils } from "xlsx";
+import { BULK_CREATE_DEVICE_TABLE_CONFIG } from "./table-config";
+
 export const DEVICE_DETAILS_TABS = [
     {
         label: 'Details',
@@ -100,3 +103,16 @@ export const DEVICE_DETAILS_TABS = [
         ]
     }
 ];
+
+export const DEVICE_BULK_UPLOAD_CONFIG = {
+  dialogHeader: 'Bulk Create Device',
+  formTitle: 'Upload Device Excel File',
+  tableConfig: BULK_CREATE_DEVICE_TABLE_CONFIG,
+  sampleUrl: '/assets/user_sample.xlsx', // Sample downloadable file
+  parseUploadFn: async (file: File) => {
+    const data = await file.arrayBuffer();
+    const workbook = read(data, { type: 'array' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    return utils.sheet_to_json(sheet); // Returns array of objects
+  }
+};

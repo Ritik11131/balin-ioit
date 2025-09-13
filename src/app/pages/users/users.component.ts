@@ -110,7 +110,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   async handleToolBarActions(event: any): Promise<void> {
     if (event.key === 'create') {
       this.formFields = CREATE_USER_FORM_FIELDS;
-      this.uiService.openDrawer(this.createUpdateUser, this.formFields.formTitle, '', true)
+      this.uiService.openDrawer(this.createUpdateUser, this.formFields.formTitle,'User','pi pi-user', '', true)
     } else if (event.key === 'bulk_create') {
       this.uiService.openDialog({
         content: this.bulkUserUploadTemplate, header: 'Bulk Create Users', subheader:'Upload your Excel or CSV files seamlessly', headerIcon:'pi pi-users', position: 'top', closable: true, draggable: false, modal: true, styleClass: 'w-[80vw]'
@@ -143,7 +143,7 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   async editHandler(row: any): Promise<void> {
     this.formFields = UPDATE_USER_FORM_FIELDS;
-    this.uiService.openDrawer(this.createUpdateUser, this.formFields.formTitle, '', true)
+    this.uiService.openDrawer(this.createUpdateUser, this.formFields.formTitle,'User','pi pi-user', '', true)
     await Promise.all([
       this.loadUserObject(row?.id)
     ])
@@ -247,7 +247,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     });
 
     // Open drawer early to show UI immediately
-    this.uiService.openDrawer(this.viewMoreDetails, ' ', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
+    this.uiService.openDrawer(this.viewMoreDetails, 'View','User','pi pi-user', '!w-[80vw] md:!w-[80vw] lg:!w-[80vw]', true);
   }
 
 

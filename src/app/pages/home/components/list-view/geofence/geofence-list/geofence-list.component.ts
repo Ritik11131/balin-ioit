@@ -66,7 +66,7 @@ export class GeofenceListComponent {
                 this.store.dispatch(selectGeofence({ geofence: response }));
             } catch (error) {
             }
-            this.uiService.openDrawer(this.geofenceDetailsTemplate);
+            this.uiService.openDrawer(this.geofenceDetailsTemplate, geofence?.geofence?.geometryName, ' ');
         } catch (error) {
             console.error('Error fetching geofence linked vehicles:', error);
         }

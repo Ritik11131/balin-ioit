@@ -174,7 +174,7 @@ private async createWhiteLabel(data: any): Promise<void> {
   handleToolBarActions(event: any) {
     if (event.key === 'create') {
       this.formFields = CREATE_WHITELABEL_FORM_FIELDS;
-      this.uiService.openDrawer(this.createUpdateWhiteLabel, ' ', '!w-[45vw] md:!w-[45vw] lg:!w-[45vw]', true)
+      this.uiService.openDrawer(this.createUpdateWhiteLabel, 'Create','WhiteLabel','pi pi-sitemap', '!w-[45vw] md:!w-[45vw] lg:!w-[45vw]', true)
     }
   }
 
@@ -219,7 +219,7 @@ private async createWhiteLabel(data: any): Promise<void> {
 
     async editHandler(row: any): Promise<void> {
       this.formFields = UPDATE_WHITELABEL_FORM_FIELDS;
-      this.uiService.openDrawer(this.createUpdateWhiteLabel,' ','!w-[45vw] md:!w-[45vw] lg:!w-[45vw]',true)
+      this.uiService.openDrawer(this.createUpdateWhiteLabel,'Update','WhiteLabel','pi pi-sitemap','!w-[45vw] md:!w-[45vw] lg:!w-[45vw]',true)
       await Promise.all([
         this.loadWhiteLabelObject(row?.id)
       ])
