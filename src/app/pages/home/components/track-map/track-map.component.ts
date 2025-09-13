@@ -192,8 +192,7 @@ export class TrackMapComponent implements OnDestroy, OnChanges {
     }
 
 
-    this.trackMapService.updateLiveTrackingControlObj(
-      {
+    this.trackMapService.updateLiveTrackingControlObj({
         status: currentVehicle.status,
         vehicleName: currentVehicle?.name,
         vehicleSpeed: currentVehicle?.apiObject?.position?.speed + ' Km/hr',

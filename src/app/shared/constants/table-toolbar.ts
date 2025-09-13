@@ -7,6 +7,14 @@ export const USER_TABLE_TOOLBAR = [
         outlined: false,
         dependentOnRow: false
     },
+    {
+        key: 'bulk_create',
+        label: 'Bulk Create',
+        icon: 'pi pi-file',
+        severity: 'secondary',
+        outlined: false,
+        dependentOnRow: false
+    },
 ];
 
 export const DEVICE_TABLE_TOOLBAR = [

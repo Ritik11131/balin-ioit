@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
     selector: 'app-vehicle-tracking-link',
     imports: [CommonModule,ButtonModule, GenericFormGeneratorComponent],
     template: `
-        <div class="p-6 space-y-6">
+        <div class="space-y-6">
             <!-- Vehicle Info Card -->
             <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <div class="flex items-center space-x-3">

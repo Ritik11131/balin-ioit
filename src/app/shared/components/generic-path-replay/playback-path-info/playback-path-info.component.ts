@@ -203,7 +203,7 @@ import { TooltipModule } from 'primeng/tooltip';
                                     </div>
                                 } @else if (serviceState?.data?.hasStopsData && pathReplayService.vehicleStartEndInfo?.stopsData?.data?.length > 0) {
                                     <!-- Stops List -->
-                                    @for (stop of pathReplayService.vehicleStartEndInfo?.stopsData?.data; track stop) {
+                                    @for (stop of pathReplayService.vehicleStartEndInfo?.stopsData?.data; track $index) {
                                         <div class="flex items-center">
                                             <div class="stop-marker-container mr-4">
                                                 <div class="relative flex items-center justify-center">
